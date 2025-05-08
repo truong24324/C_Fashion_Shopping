@@ -1,0 +1,90 @@
+package Backend.Controller;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.*;
+
+import Backend.Model.Account;
+import Backend.Model.Wishlist;
+import Backend.Repository.AccountRepository;
+import Backend.Request.WishlistRequest;
+import Backend.Response.ApiResponse;
+import Backend.Response.WishlistProductResponse;
+import Backend.Response.WishlistResponse;
+import Backend.Service.WishlistService;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping("/api/wishlists")
+public class WishlistController {
+
+    private final WishlistService wishlistService;
+    private final AccountRepository accountRepository;
+
+    public WishlistController(WishlistService wishlistService, AccountRepository accountRepository) {
+        this.wishlistService = wishlistService;
+        this.accountRepository = accountRepository;
+    }
+
+    @PatchMapping("/toggle")
+    public ResponseEntity<ApiResponse<WishlistResponse>> toggleWishlist(@RequestBody @Valid WishlistRequest request) {
+        Wishlist wishlist = wishlistService.toggleWishlist(request);
+        String message = wishlist.getIsDeleted() ? "Đã bỏ yêu thích sản phẩm!" : "Đã thêm vào danh sách yêu thích!";
+        return ResponseEntity.ok(new ApiResponse<>(true, message, new WishlistResponse(wishlist)));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<WishlistResponse>> getWishlists(@RequestParam Long accountId) {
+        List<WishlistResponse> wishlists = wishlistService.getWishlistedProducts(accountId);
+        return ResponseEntity.ok(wishlists);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<List<WishlistProductResponse>> getWishlistProducts(@AuthenticationPrincipal UserDetails userDetails) {
+        // Giả sử bạn lưu accountId trong username của JWT
+    	String email = userDetails.getUsername();
+        Account account = accountRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản!"));
+
+        List<WishlistProductResponse> wishlist = wishlistService.getWishlistProducts(account.getAccountId());
+        return ResponseEntity.ok(wishlist);
+    }
+
+    @PostMapping("/add-to-cart/{productId}")
+    public ResponseEntity<ApiResponse<String>> addToCartFromWishlist(
+            @PathVariable Integer productId,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        String email = userDetails.getUsername();
+        Account account = accountRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản!"));
+
+        wishlistService.addToCartWithLowestVariant(account.getAccountId(), productId);
+
+        return ResponseEntity.ok(new ApiResponse<>(true, "Đã thêm vào giỏ hàng!", null));
+    }
+
+    // ✅ Xử lý lỗi validation
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        String errorMessage = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        return ResponseEntity.badRequest().body(new ApiResponse<>(false, errorMessage, null));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiResponse<String>> handleConstraintViolationException(ConstraintViolationException ex) {
+        String errorMessage = ex.getConstraintViolations().stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.joining(", "));
+        return ResponseEntity.badRequest().body(new ApiResponse<>(false, errorMessage, null));
+    }
+}

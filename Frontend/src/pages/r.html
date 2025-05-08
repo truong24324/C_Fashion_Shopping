@@ -1,0 +1,282 @@
+import { useState, useEffect } from "react"; 
+import { Table, Input, Pagination, Spin, message, Switch } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+import toast from "react-hot-toast";
+import axios from "axios";
+
+const API_URLS = {
+    product: "/api/products/all",
+    brand: "/api/brands/all",
+    category: "/api/categories/all",
+    discount: "/api/discounts/all",
+};
+
+const ListDisplay = () => {
+    const [data, setData] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [category, setCategory] = useState<"product" | "brand" | "category" | "discount">("product");
+    const [updateApi, setUpdateApi] = useState<string>("");
+    const [editingKey, setEditingKey] = useState<string | null>(null);
+    const [editingValue, setEditingValue] = useState<string>("");
+
+    const [pageSize, setPageSize] = useState(8);  // Default page size is 8
+
+    useEffect(() => {
+        const map: Record<typeof category, string> = {
+            product: "products",
+            brand: "brands",
+            category: "categories",
+            discount: "discounts"
+        };
+        setUpdateApi(map[category]);
+    }, [category]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [category]);
+
+    useEffect(() => {
+        fetchData();
+    }, [currentPage, category]);
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`${API_URLS[category]}?page=${currentPage - 1}&size=${pageSize}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                }
+            });
+            const { content, totalElements } = response.data;
+            if (totalElements === 0 && currentPage > 1) {
+                setCurrentPage(1);
+            } else {
+                setData(content);
+                setTotalItems(totalElements);
+            }
+        } catch (error) {
+            message.error("Lỗi khi tải dữ liệu!");
+            toast.error("Lỗi khi tải dữ liệu!");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleToggleActive = async (discountId: number, newStatus: boolean) => {
+        try {
+            const response = await axios.patch(
+                `/api/discounts/${discountId}/status?isActive=${newStatus}`,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("token")}`
+                    }
+                }
+            );
+            if (response.data.success) {
+                toast.success("Cập nhật trạng thái thành công!");
+                setData((prevData) =>
+                    prevData.map((item) =>
+                        item.discountId === discountId ? { ...item, isActive: newStatus } : item
+                    )
+                );
+            } else {
+                toast.error("Lỗi khi cập nhật trạng thái!");
+            }
+        } catch (error) {
+            toast.error("Lỗi kết nối server!");
+        }
+    };
+
+    const handleEdit = (record: any, dataIndex: string) => {
+        setEditingKey(`${record[`${category}Id`]}-${dataIndex}`);
+        setEditingValue(record[dataIndex]);
+    };
+
+    const saveEdit = async (record: any, dataIndex: string) => {
+        const idKey = `${category}Id`;
+        const updateUrl = `/api/${updateApi}/${record[idKey]}`;
+
+        try {
+            const updatedItem = {
+                ...record,
+                [dataIndex]: editingValue,
+            };
+
+            await axios.put(updateUrl, updatedItem, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                }
+            });
+
+            const newData = [...data];
+            const index = newData.findIndex((item) => item[idKey] === record[idKey]);
+            if (index > -1) {
+                newData[index] = updatedItem;
+                setData(newData);
+                toast.success("Cập nhật thành công!");
+            }
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || "⚠️ Lỗi khi cập nhật dữ liệu!");
+        } finally {
+            setEditingKey(null);
+            setEditingValue("");
+        }
+    };
+
+    const renderCell = (text: any, record: any, dataIndex: string) => {
+        const isEditing = editingKey === `${record[`${category}Id`]}-${dataIndex}`;
+        if (isEditing) {
+            return (
+                <Input
+                    value={editingValue}
+                    onChange={(e) => setEditingValue(e.target.value)}
+                    onPressEnter={() => saveEdit(record, dataIndex)}
+                    onBlur={() => saveEdit(record, dataIndex)}
+                    autoFocus
+                />
+            );
+        }
+        return (
+            <div onDoubleClick={() => handleEdit(record, dataIndex)}>
+                {text || <i className="text-gray-400">Chưa có</i>}
+            </div>
+        );
+    };
+
+    const categories = [
+        { value: "product", label: "Sản phẩm" },
+        { value: "brand", label: "Thương hiệu" },
+        { value: "category", label: "Loại sản phẩm" },
+        { value: "discount", label: "Mã giảm giá" },
+    ];
+
+    const columnsConfig: Record<string, any[]> = {
+        product: [
+            { title: "ID", dataIndex: "productId", key: "productId", ellipsis: true },
+            { title: "Tên sản phẩm", dataIndex: "productName", key: "productName", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "productName") },
+            { title: "Mô tả", dataIndex: "description", key: "description", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "description") },
+            { title: "Mã vạch", dataIndex: "barcode", key: "barcode", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "barcode") },
+            { title: "Thương hiệu", dataIndex: "brandName", key: "brandName", ellipsis: true },
+            { title: "Loại sản phẩm", dataIndex: "categoryName", key: "categoryName", ellipsis: true },
+            { title: "Nhà cung cấp", dataIndex: "supplierName", key: "supplierName", ellipsis: true },
+            { title: "Model", dataIndex: "model", key: "model", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "model") },
+            { title: "Thời gian bảo hành", dataIndex: "warrantyPeriod", key: "warrantyPeriod", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "warrantyPeriod") },
+        ],          
+        brand: [
+            { title: "ID", dataIndex: "brandId", key: "brandId", ellipsis: true },
+            {
+                title: "Tên thương hiệu",
+                dataIndex: "brandName",
+                key: "brandName",
+                ellipsis: true,
+                render: (text: any, record: any) => renderCell(text, record, "brandName")
+            },
+            {
+                title: "Logo",
+                dataIndex: "logo",
+                key: "logo",
+                render: (path: string) => {
+                    setPageSize(5);  // If images are present, set page size to 5
+                    return path ? (
+                        <img
+                            src={`/${path}`}
+                            alt="Logo"
+                            className="h-12 w-12 object-contain rounded-lg shadow"
+                        />
+                    ) : (
+                        "Không có ảnh"
+                    );
+                },
+            },
+        ],
+        category: [
+            { title: "ID", dataIndex: "categoryId", key: "categoryId", ellipsis: true },
+            { title: "Tên loại sản phẩm", dataIndex: "categoryName", key: "categoryName", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "categoryName") },
+            { title: "Mô tả", dataIndex: "description", key: "description", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "description") },
+        ],
+        discount: [
+            { title: "ID", dataIndex: "discountId", key: "discountId", ellipsis: true },
+            { title: "Mã giảm giá", dataIndex: "discountCode", key: "discountCode", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "discountCode") },
+            { title: "Giá trị giảm", dataIndex: "discountValueFormatted", key: "discountValueFormatted", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "discountValueFormatted") },
+            {
+                title: "Kích hoạt",
+                dataIndex: "isActive",
+                key: "isActive",
+                render: (isActive: boolean, record: any) => (
+                    <Switch
+                        checked={isActive}
+                        onChange={() => handleToggleActive(record.discountId, !isActive)}
+                    />
+                )
+            },
+            { title: "Số lượng", dataIndex: "quantity", key: "quantity", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "quantity") },
+            {
+                title: "Ngày bắt đầu",
+                dataIndex: "startDateFormatted",
+                key: "startDateFormatted",
+                ellipsis: true
+            },
+            {
+                title: "Ngày kết thúc",
+                dataIndex: "endDateFormatted",
+                key: "endDateFormatted",
+                render: (date: string | null) => date || "Không có",
+                ellipsis: true
+            },
+            { title: "Mô tả", dataIndex: "description", key: "description", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "description") },
+        ],
+    };
+
+    return (
+        <div className="p-4 rounded-lg shadow-xl">
+            <div className="flex justify-between items-center mb-4">
+                <div className="flex space-x-3">
+                    {categories.map((cat) => (
+                        <button
+                            key={cat.value}
+                            onClick={() => setCategory(cat.value as any)}
+                            className={`${
+                                category === cat.value ? "bg-blue-500 text-white" : "bg-white text-black"
+                            } px-4 py-2 rounded-md`}
+                        >
+                            {cat.label}
+                        </button>
+                    ))}
+                </div>
+                <Input
+                    placeholder="Tìm kiếm..."
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    value={searchTerm}
+                    suffix={<SearchOutlined />}
+                    allowClear
+                    className="max-w-xs"
+                />
+            </div>
+
+            <Spin spinning={loading} size="large">
+                <Table
+                    columns={columnsConfig[category]}
+                    dataSource={data}
+                    rowKey={(record) => record[`${category}Id`]}
+                    pagination={false}
+                    size="middle"
+                />
+
+                <Pagination
+                    current={currentPage}
+                    pageSize={pageSize}
+                    total={totalItems}
+                    onChange={setCurrentPage}
+                    showSizeChanger={false}
+                    showQuickJumper
+                />
+            </Spin>
+        </div>
+    );
+};
+
+export default ListDisplay;
