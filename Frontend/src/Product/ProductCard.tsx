@@ -110,14 +110,45 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
             setIsAdding(false);
         }
     };
+
+    const CACHE_DURATION = 20 * 60 * 1000; // 5 phút
+
+    const getCacheKey = (productId: number, color: string, size: string, material: string) =>
+        `variant_${productId}_${color}_${size}_${material}`;
+
+    const getCachedVariant = (key: string) => {
+        const cached = localStorage.getItem(key);
+        if (!cached) return null;
+
+        const parsed = JSON.parse(cached);
+        const isExpired = Date.now() - parsed.timestamp > CACHE_DURATION;
+
+        return isExpired ? null : parsed.data;
+    };
+
+    const setCachedVariant = (key: string, data: any) => {
+        localStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }));
+    };
+
     useEffect(() => {
-        // Kiểm tra xem người dùng đã chọn đầy đủ các thuộc tính chưa
-        if (!selectedColor || !selectedSize || !selectedMaterial) {
-            // Nếu thiếu thông tin, không thực hiện gọi API
-            return;
-        }
+        if (!selectedColor || !selectedSize || !selectedMaterial) return;
 
         const delayDebounce = setTimeout(() => {
+            const key = getCacheKey(product.productId, selectedColor, selectedSize, selectedMaterial);
+            const cachedVariant = getCachedVariant(key);
+
+            if (cachedVariant) {
+                if (cachedVariant.stock > 0) {
+                    setVariantAvailable(true);
+                    setVariantPrice(cachedVariant.price);
+                    setVariantStock(cachedVariant.stock);
+                } else {
+                    setVariantAvailable(false);
+                    toast.error("Không tìm thấy biến thể hoặc đã hết hàng.");
+                }
+                return;
+            }
+
             const checkVariant = async () => {
                 try {
                     const res = await axios.get("/api/cart/find", {
@@ -133,10 +164,12 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
                     });
 
                     const variant = res.data;
+                    setCachedVariant(key, variant); // Lưu cache
+
                     if (variant && variant.stock > 0) {
                         setVariantAvailable(true);
                         setVariantPrice(variant.price);
-                        setVariantStock(variant.stock); // Set stock value
+                        setVariantStock(variant.stock);
                     } else {
                         setVariantAvailable(false);
                         toast.error("Không tìm thấy biến thể hoặc đã hết hàng.");
@@ -146,11 +179,31 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
                     toast.error("Không tìm thấy biến thể hoặc đã hết hàng.");
                 }
             };
-            checkVariant();
-        }, 300); // Chờ 300ms trước khi gọi
 
-        return () => clearTimeout(delayDebounce); // Xóa timeout nếu người dùng đổi lựa chọn trước khi timeout chạy
-    }, [selectedColor, selectedSize, selectedMaterial]); // Theo dõi khi người dùng thay đổi lựa chọn
+            checkVariant();
+        }, 300);
+
+        return () => clearTimeout(delayDebounce);
+    }, [selectedColor, selectedSize, selectedMaterial]);
+
+    const WISHLIST_CACHE_KEY = "wishlist_cache";
+    const WISHLIST_CACHE_DURATION = 50 * 60 * 1000; // 5 phút
+
+    const getCachedWishlist = () => {
+        const cached = localStorage.getItem(WISHLIST_CACHE_KEY);
+        if (!cached) return null;
+
+        const parsed = JSON.parse(cached);
+        const isExpired = Date.now() - parsed.timestamp > WISHLIST_CACHE_DURATION;
+        return isExpired ? null : parsed.data;
+    };
+
+    const setCachedWishlist = (data: number[]) => {
+        localStorage.setItem(WISHLIST_CACHE_KEY, JSON.stringify({
+            data,
+            timestamp: Date.now()
+        }));
+    };
 
     const handleWishlist = async (productId: number) => {
         const accountId = getAccountIdFromToken();
@@ -171,43 +224,52 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
             });
 
             toast.success(res.data.message);
-
-            // Toggle local state
-            setWishlistProducts((prev) =>
-                prev.includes(productId)
-                    ? prev.filter((id) => id !== productId)
-                    : [...prev, productId]
-            );
+            setWishlistProducts((prev) => {
+                const updated = prev.includes(productId)
+                  ? prev.filter((id) => id !== productId)
+                  : [...prev, productId];
+              
+                setCachedWishlist(updated); // Cập nhật cache
+                return updated;
+              });
+              
         } catch (err) {
-            toast.error("Thao tác thất bại!");
+            toast.error( "Thao tác thất bại!");
         }
     };
 
     useEffect(() => {
         const fetchWishlist = async () => {
-            const accountId = getAccountIdFromToken();
-            if (!accountId) return;
-
-            try {
-                const res = await axios.get(`/api/wishlists`, {
-                    params: { accountId },
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("token")}`,
-                    },
-                });
-
-                const wishlistProductIds = res.data
-                    .filter((item: any) => !item.isDeleted)
-                    .map((item: any) => item.productId);
-
-                setWishlistProducts(wishlistProductIds);
-            } catch (err) {
-                console.error("Lỗi khi tải wishlist:", err);
-            }
+          const accountId = getAccountIdFromToken();
+          if (!accountId) return;
+      
+          const cached = getCachedWishlist();
+          if (cached) {
+            setWishlistProducts(cached);
+            return;
+          }
+      
+          try {
+            const res = await axios.get(`/api/wishlists`, {
+              params: { accountId },
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            });
+      
+            const wishlistProductIds = res.data
+              .filter((item: any) => !item.isDeleted)
+              .map((item: any) => item.productId);
+      
+            setWishlistProducts(wishlistProductIds);
+            setCachedWishlist(wishlistProductIds); // Lưu vào cache
+          } catch (err) {
+            console.error("Lỗi khi tải wishlist:", err);
+          }
         };
-
+      
         fetchWishlist();
-    }, []);
+      }, []);      
 
     return (
         <>

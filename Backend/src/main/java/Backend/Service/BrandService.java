@@ -15,15 +15,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 import Backend.Model.Brand;
 import Backend.Repository.BrandRepository;
+import Backend.Repository.ProductRepository;
 import jakarta.annotation.PostConstruct;
 
 @Service
 public class BrandService {
     private final BrandRepository brandRepository;
+    private final ProductRepository productRepository;
     private final Path brandUploadPath = Paths.get("uploads/brands");
 
-    public BrandService(BrandRepository brandRepository) {
+    public BrandService(BrandRepository brandRepository, ProductRepository productRepository) {
         this.brandRepository = brandRepository;
+        this.productRepository = productRepository;
     }
 
     @PostConstruct
@@ -93,6 +96,13 @@ public class BrandService {
 
     // Xóa thương hiệu
     public void deleteBrand(Integer brandId) {
+        // Kiểm tra xem thương hiệu có đang được sử dụng trong sản phẩm không
+        if (productRepository.existsByBrand_BrandId(brandId)) {
+            // Trả về thông báo lỗi nếu thương hiệu đang được sử dụng
+            throw new IllegalStateException("Thương hiệu này đang được sử dụng trong các sản phẩm khác, không thể xóa.");
+        }
+        
+        // Nếu không sử dụng, tiếp tục xóa
         Brand brand = getBrandById(brandId);
         brandRepository.delete(brand);
     }

@@ -1,4 +1,5 @@
-import { Switch, Button, Popconfirm } from "antd";
+import ImageTypeCell from "../components/ImageTypeCell";
+import { Switch, Button, Popconfirm, Select } from "antd";
 import React from "react";
 
 type RenderCellFn = (text: any, record: any, dataIndex: string) => React.ReactElement;
@@ -7,13 +8,15 @@ type HandleImageChangeFn = (e: React.ChangeEvent<HTMLInputElement>, record: any)
 type HandleIdDoubleClickFn = (id: number) => void;
 type HandleDeleteFn = (id: number) => void;
 
+const { Option } = Select;
+
 export const getColumnsConfig = (
     category: string,
     renderCell: RenderCellFn,
     handleToggleActive: HandleToggleActiveFn,
     handleImageChange: HandleImageChangeFn,
     handleIdDoubleClick: HandleIdDoubleClickFn,
-    handleDelete: HandleDeleteFn
+    handleDelete: HandleDeleteFn,
 ) => {
     return {
         product: [
@@ -128,8 +131,8 @@ export const getColumnsConfig = (
             },
             {
                 title: "Sản phẩm",
-                dataIndex: "product",
-                key: "product",
+                dataIndex: "productName",
+                key: "productName",
                 ellipsis: true,
                 render: (text: any) => text?.productName || "N/A",
             },
@@ -138,8 +141,10 @@ export const getColumnsConfig = (
                 dataIndex: "imageType",
                 key: "imageType",
                 ellipsis: true,
-                render: (text: any) => text || "N/A",
-            },
+                render: (text: any, record: any) => (
+                  <ImageTypeCell value={text} imageId={record.imageId} />
+                )
+              },              
             {
                 title: "Ảnh",
                 dataIndex: "imageUrl",

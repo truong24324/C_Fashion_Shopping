@@ -15,15 +15,18 @@ public class SupplierRequest {
 	         message = "Tên nhà cung cấp không được bắt đầu bằng số, chỉ được chứa chữ cái, số, khoảng trắng, dấu '-', '.', ',' và không chỉ gồm khoảng trắng!")
 	private String supplierName;
 
-	@Size(max = 100, message = "Tên liên hệ không được vượt quá 100 ký tự!")
+	@NotBlank(message = "Tên người liên hệ không được để trống!")
+	@Size(max = 100, message = "Tên người liên hệ không được vượt quá 100 ký tự!")
 	@Pattern(regexp = "^(?![0-9])(?!\\s+$)[a-zA-Z0-9À-ỹ\\s\\-\\.\\'\\,]+$",
-	         message = "Tên liên hệ không được bắt đầu bằng số, chỉ được chứa chữ cái, số, khoảng trắng, dấu '-', '.', ',' và không chỉ gồm khoảng trắng!")
+	         message = "Tên người liên hệ không được bắt đầu bằng số, chỉ được chứa chữ cái, số, khoảng trắng, dấu '-', '.', ',' và không chỉ gồm khoảng trắng!")
 	private String contactName;
 
+	@NotBlank(message = "Số điện thoại không được bỏ trống!")
     @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Số điện thoại chỉ được chứa số, từ 8 đến 15 ký tự, có thể bắt đầu bằng dấu '+'!")
     @Size(min = 10, max = 15, message = "Số điện thoại phải có từ 8 đến 15 ký tự!")
     private String phone;
 
+	@NotBlank(message = "Email không được bỏ trống!")
     @Email(message = "Email không hợp lệ!")
     @Size(max = 100, message = "Email không được vượt quá 100 ký tự!")
     private String email;

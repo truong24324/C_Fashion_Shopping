@@ -3,8 +3,6 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate,
-  useLocation,
   useNavigate,
 } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
@@ -20,9 +18,9 @@ import ProfilePage from '../pages/UserPage/ProfilePage';
 import AdminDashboard from '../pages/AdminPage/AdminDashboard';
 import AboutPage from '../pages/UserPage/AboutPage';
 import ReturnPolicyPage from '../pages/UserPage/ReturnPolixyPage';
-import toast from 'react-hot-toast';
 import NotFoundPage from 'src/NotFoundPage/NotFoundPage';
 import CheckoutPage from 'src/pages/UserPage/CheckoutPage';
+import FashionPage from 'src/pages/UserPage/FashionPage';
 
 const isTokenValid = (token: string | null): boolean => {
   if (!token) return false;
@@ -39,28 +37,27 @@ const PrivateRoute: React.FC<{ children: ReactNode; requiredRole?: string }> = (
   children,
   requiredRole,
 }) => {
-  const token = localStorage.getItem('jwt_token');
-  const location = useLocation();
+  // const token = localStorage.getItem('jwt_token');
+  // const location = useLocation();
 
-  if (!isTokenValid(token)) {
-    localStorage.removeItem('jwt_token');
-    toast.error('Token không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.');
-    return <Navigate to="/" state={{ from: location }} replace />;
-  }
+  // if (!token) {
+  //   toast.error('Không tìm thấy token. Vui lòng đăng nhập.');
+  //   return <Navigate to="/" state={{ from: location }} replace />;
+  // }
 
-  if (requiredRole) {
-    try {
-      const decoded: { roles: { authority: string }[] } = jwtDecode(token!);
-      const hasRole = decoded.roles.some(role => role.authority === requiredRole);
-      if (!hasRole) {
-        toast.error('Bạn không có quyền truy cập vào trang này.');
-        return <Navigate to="/" replace />;
-      }
-    } catch (err) {
-      toast.error('Có lỗi xảy ra khi xác thực quyền truy cập.');
-      return <Navigate to="/" replace />;
-    }
-  }
+  // if (requiredRole) {
+  //   try {
+  //     const decoded: { roles: { authority: string }[] } = jwtDecode(token);
+  //     const hasRole = decoded.roles.some(role => role.authority === requiredRole);
+  //     if (!hasRole) {
+  //       toast.error('Bạn không có quyền truy cập vào trang này.');
+  //       return <Navigate to="/" replace />;
+  //     }
+  //   } catch (err) {
+  //     toast.error('Token không hợp lệ.');
+  //     return <Navigate to="/" replace />;
+  //   }
+  // }
 
   return <>{children}</>;
 };
@@ -70,23 +67,19 @@ const AppRouterWrapper: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('jwt_token');
-    if (isTokenValid(token)) {
-      setIsAuthenticated(true);
-      try {
-        const decoded: { roles: { authority: string }[] } = jwtDecode(token!);
-        const isAdmin = decoded.roles.some(role => role.authority === 'ROLE_Admin');
-        if (isAdmin && window.location.pathname === '/') {
-          navigate('/admin');
-        }
-      } catch (err) {
-        console.error('Lỗi giải mã token:', err);
-      }
-    } else {
-      localStorage.removeItem('jwt_token');
-      setIsAuthenticated(false);
-    }
-  }, [navigate]);
+    // const token = localStorage.getItem('jwt_token');
+    // if (token) {
+    //   try {
+    //     const decoded: { roles: { authority: string }[] } = jwtDecode(token);
+    //     const isAdmin = decoded.roles.some(role => role.authority === 'ROLE_Admin');
+    //     if (isAdmin && window.location.pathname === '/') {
+    //       navigate('/admin');
+    //     }
+    //   } catch (err: any) {
+    //     toast.error('Lỗi giải mã token:', err);
+    //   }
+    // }
+  }, [navigate]);  
 
   return (
     <Routes>
@@ -95,6 +88,7 @@ const AppRouterWrapper: React.FC = () => {
       <Route path="/cart" element={<CartPage />} />
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/store" element={<StoreListPage />} />
+      <Route path="/fashion" element={<FashionPage />} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/product/:productId" element={<ProductDetailPage />} />
       <Route path="/wishlist" element={<WishlistPage />} />

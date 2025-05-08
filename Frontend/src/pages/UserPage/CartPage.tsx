@@ -255,11 +255,6 @@ const CartPage: React.FC = () => {
   };
 
   const handleCalculateShippingFee = async () => {
-    if (!province || !district || !ward) {
-      toast.error("Vui lòng chọn đầy đủ Tỉnh / Quận / Phường để tính phí vận chuyển.");
-      return;
-    }
-  
     try {
       // Tính tổng trọng lượng của các sản phẩm đã chọn
       const totalWeight = cartItems

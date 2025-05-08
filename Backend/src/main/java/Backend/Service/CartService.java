@@ -50,18 +50,25 @@ public class CartService {
 	    }
 
 	    CartDetail cartDetail = cartDetailRepository.findByCartAndVariant(cart, variant)
-	        .map(detail -> {
-	            detail.setQuantity(detail.getQuantity() + request.getQuantity());
-	            return detail;
-	        })
-	        .orElseGet(() -> {
-	            CartDetail detail = new CartDetail();
-	            detail.setCart(cart);
-	            detail.setVariant(variant);
-	            detail.setQuantity(request.getQuantity());
-	            detail.setPrice(request.getPrice());
-	            return detail;
-	        });
+	    	    .map(detail -> {
+	    	        int newQuantity = detail.getQuantity() + request.getQuantity();
+	    	        if (variant.getStock() < newQuantity) {
+	    	            throw new RuntimeException("Sản phẩm không đủ hàng");
+	    	        }
+	    	        detail.setQuantity(newQuantity);
+	    	        return detail;
+	    	    })
+	    	    .orElseGet(() -> {
+	    	        if (variant.getStock() < request.getQuantity()) {
+	    	            throw new RuntimeException("Sản phẩm không đủ hàng");
+	    	        }
+	    	        CartDetail detail = new CartDetail();
+	    	        detail.setCart(cart);
+	    	        detail.setVariant(variant);
+	    	        detail.setQuantity(request.getQuantity());
+	    	        detail.setPrice(request.getPrice());
+	    	        return detail;
+	    	    });
 
 	    cartDetailRepository.save(cartDetail);
 

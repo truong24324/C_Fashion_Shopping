@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -145,8 +146,13 @@ public class BrandController {
     @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
     @DeleteMapping("/{brandId}")
     public ResponseEntity<ApiResponse<String>> deleteBrand(@PathVariable Integer brandId) {
-        brandService.deleteBrand(brandId);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Đã xóa thương hiệu thành công", null));
+        try {
+            brandService.deleteBrand(brandId);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Đã xóa thương hiệu thành công", null));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body(new ApiResponse<>(false, e.getMessage(), null));
+        }
     }
 
     // ✅ Bắt lỗi validate từ @Valid và trả về phản hồi chuẩn JSON

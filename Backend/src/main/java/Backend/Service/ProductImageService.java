@@ -37,20 +37,12 @@ public class ProductImageService {
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
-    public ProductImage update(Integer id, Integer newProductId, ImageType newType, MultipartFile newImage) {
+    public ProductImage update(Integer id, Integer ProductId, ImageType imageType, MultipartFile newImage) {
         ProductImage image = imageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy ảnh!"));
 
-        // Cập nhật product nếu có
-        if (newProductId != null && !image.getProduct().getProductId().equals(newProductId)) {
-            Product newProduct = productRepository.findById(newProductId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm!"));
-            image.setProduct(newProduct);
-        }
-
-        // Cập nhật type nếu có
-        if (newType != null) {
-            image.setImageType(newType);
+        if (imageType != null) {
+        	image.setImageType(imageType); // <-- Đảm bảo có dòng này
         }
 
         // Cập nhật image nếu có file mới

@@ -2,65 +2,139 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import axios from "axios";
-import { FaUser, FaShoppingCart, FaMapMarkerAlt, FaSearch, FaTimes, FaHeart, FaShoppingBag, FaStar, FaSignOutAlt } from "react-icons/fa";
+import {
+  FaUser, FaShoppingCart, FaMapMarkerAlt, FaSearch, FaTimes,
+  FaHeart, FaShoppingBag, FaStar, FaSignOutAlt, FaMicrophone
+} from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+import { jwtDecode } from "jwt-decode";
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [user, setUser] = useState<{ avatar: string; fullName: string } | null>(null);
+  const [isListening, setIsListening] = useState(false); // NEW
+
+  const { transcript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleSearch = () => {
     setIsSearchOpen(!isSearchOpen);
-    setIsMenuOpen(false); // Đóng menu khi tìm kiếm mở
+    setIsMenuOpen(false);
   };
 
   const handleLogout = async () => {
     try {
-      await axios.post(
-        "/api/logout",
-        {},
-        {
-          withCredentials: true,
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      localStorage.removeItem("token"); // Xóa token khỏi localStorage
-      setUser(null); // Đặt lại trạng thái user thành null
+      await axios.post("/api/logout", {}, {
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       toast.success("Đăng xuất thành công!");
     } catch (error) {
       toast.error("Lỗi khi đăng xuất!");
+    } finally {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user_cache");
+      setUser(null);
     }
+  };
+  
+  interface DecodedToken {
+    accountId: string;
+    exp: number; // thời điểm hết hạn (unix timestamp)
+    iat: number;
+    email: string;
+    roles: { authority: string }[];
+  }
+  
+  const fetchProfile = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+  
+    // Decode token để lấy thời gian hết hạn
+    let decoded: DecodedToken;
+    try {
+      decoded = jwtDecode(token);
+    } catch (err) {
+      console.error("Không thể decode token:", err);
+      return;
+    }
+  
+    const now = Date.now() / 1000; // convert to seconds
+    if (decoded.exp <= now) {
+      console.warn("Token đã hết hạn.");
+      localStorage.removeItem("user_cache");
+      return;
+    }
+  
+    // Kiểm tra cache
+    const cached = localStorage.getItem("user_cache");
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      setUser(parsed);
+      return;
+    }
+  
+    // Nếu không có cache thì gọi API
+    try {
+      const response = await fetch("/api/information/me", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+  
+      const data = await response.json();
+      if (data.success) {
+        setUser(data.data);
+        localStorage.setItem("user_cache", JSON.stringify(data.data));
+      } else {
+        toast.error(data.message || "Không thể lấy thông tin cá nhân");
+      }
+    } catch (error) {
+      toast.error("Lỗi khi lấy thông tin cá nhân");
+    }
+  };
+  
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const handleSearchByVoice = () => {
+    if (!browserSupportsSpeechRecognition) {
+      toast.error("Trình duyệt của bạn không hỗ trợ tìm kiếm bằng giọng nói!");
+      return;
+    }
+
+    if (!isListening) {
+      SpeechRecognition.startListening({ continuous: true, language: "vi-VN" });
+      toast.success("🎙️ Bắt đầu nghe...");
+    } else {
+      SpeechRecognition.stopListening();
+      toast("🛑 Đã dừng nghe");
+    }
+
+    setIsListening(!isListening);
   };
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await fetch("/api/information/me", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        });
+    if (transcript) {
+      setSearchQuery(transcript);
+    }
+  }, [transcript]);
 
-        const data = await response.json();
-        if (data.success) {
-          setUser(data.data);
-        } else {
-          toast.error(data.message || "Không thể lấy thông tin cá nhân");
-        }
-      } catch (error) {
-        toast.error("Lỗi khi lấy thông tin cá nhân");
-      }
-    };
-
-    fetchProfile();
-  }, []);
+  useEffect(() => {
+    if (!isSearchOpen && isListening) {
+      SpeechRecognition.stopListening();
+      setIsListening(false);
+    }
+  }, [isSearchOpen]);
 
   return (
     <div className="fixed inset-x-0 top-0 z-50">
@@ -73,32 +147,25 @@ const Navbar: React.FC = () => {
             exit={{ y: -50, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Navbar chính */}
             <div className="flex justify-between items-center px-4 py-2 bg-gray-900 bg-opacity-90 sm:px-8 shadow-md">
-              {/* Logo */}
               <div className="flex items-center space-x-4">
                 <img
                   src="https://th.bing.com/th?id=OSK.Gx03gXuGYG4opIcw73oEeAm33KFjNvHyQaeBmIQaoBg&w=46&h=46&c=11&rs=1&qlt=80&o=6&dpr=1.3&pid=SANGAM"
                   alt="Logo"
                   className="w-10 h-10"
                 />
-                <span className="text-xl font-bold text-white hidden md:inline">
-                  Thương hiệu
-                </span>
+                <span className="text-xl font-bold text-white hidden md:inline">Thương hiệu</span>
               </div>
 
-              {/* Thông báo chạy ngang */}
               <div className="flex-grow flex justify-center items-center overflow-hidden">
                 <div className="whitespace-nowrap text-white text-sm font-medium animate-marquee">
-                  Chào mừng bạn đến với cửa hàng của chúng tôi! - Ưu đãi hấp dẫn
-                  mỗi ngày! - Mua sắm ngay!
+                  Chào mừng bạn đến với cửa hàng của chúng tôi! - Ưu đãi hấp dẫn mỗi ngày! - Mua sắm ngay!
                 </div>
               </div>
 
               <div className="flex items-center space-x-4">
                 {user ? (
                   <div className="flex items-center space-x-2 text-white">
-
                     <Link to="/profile" className="flex items-center space-x-2 text-white">
                       <img
                         src={user?.avatar || "https://via.placeholder.com/150"}
@@ -107,10 +174,7 @@ const Navbar: React.FC = () => {
                       />
                       <span>{user?.fullName}</span>
                     </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="text-white flex items-center text-sm hover:text-yellow-400"
-                    >
+                    <button onClick={handleLogout} className="text-white flex items-center text-sm hover:text-yellow-400">
                       <FaSignOutAlt className="mr-2" />
                       Đăng xuất
                     </button>
@@ -137,18 +201,16 @@ const Navbar: React.FC = () => {
               </div>
             </div>
 
-            {/* Menu trên desktop */}
             <nav className="hidden md:flex justify-center space-x-6 py-2 text-base bg-gray-900 bg-opacity-80 shadow-md">
               <Link to="/" className="hover:text-yellow-400 text-white">Trang chủ</Link>
               <Link to="/about" className="hover:text-yellow-400 text-white">Giới thiệu</Link>
-              <Link to="/thoi-trang" className="hover:text-yellow-400 text-white">Thời trang</Link>
+              <Link to="/fashion" className="hover:text-yellow-400 text-white">Thời trang</Link>
               <Link to="/acc-game" className="hover:text-yellow-400 text-white">Tài khoản game</Link>
               <Link to="/khuyen-mai" className="hover:text-yellow-400 text-white">Khuyến mãi</Link>
               <Link to="/dich-vu" className="hover:text-yellow-400 text-white">Dịch vụ</Link>
               <Link to="/contact" className="hover:text-yellow-400 text-white">Liên hệ</Link>
             </nav>
 
-            {/* Menu mobile */}
             <div className="md:hidden flex justify-end px-4">
               <button onClick={toggleMenu} className="text-2xl text-white">
                 {isMenuOpen ? "×" : "☰"}
@@ -167,7 +229,7 @@ const Navbar: React.FC = () => {
                 >
                   <Link to="/" className="hover:text-yellow-400 text-white">Trang chủ</Link>
                   <Link to="/about" className="hover:text-yellow-400 text-white">Giới thiệu</Link>
-                  <Link to="/thoi-trang" className="hover:text-yellow-400 text-white">Thời trang</Link>
+                  <Link to="/fashion" className="hover:text-yellow-400 text-white">Thời trang</Link>
                   <Link to="/acc-game" className="hover:text-yellow-400 text-white">Tài khoản game</Link>
                   <Link to="/khuyen-mai" className="hover:text-yellow-400 text-white">Khuyến mãi</Link>
                   <Link to="/dich-vu" className="hover:text-yellow-400 text-white">Dịch vụ</Link>
@@ -185,7 +247,6 @@ const Navbar: React.FC = () => {
             transition={{ duration: 0.3 }}
             className="bg-gray-900 p-3 text-white flex items-center"
           >
-            {/* Logo */}
             <div className="flex items-center">
               <img
                 src="https://th.bing.com/th?id=OSK.Gx03gXuGYG4opIcw73oEeAm33KFjNvHyQaeBmIQaoBg&w=46&h=46&c=11&rs=1&qlt=80&o=6&dpr=1.3&pid=SANGAM"
@@ -194,7 +255,6 @@ const Navbar: React.FC = () => {
               />
             </div>
 
-            {/* Thanh tìm kiếm */}
             <div className="flex-1 flex flex-col items-center px-4">
               <div className="flex w-full max-w-md bg-gray-800 rounded-full px-4 py-2 shadow-md items-center">
                 <FaSearch className="text-gray-400" />
@@ -205,16 +265,32 @@ const Navbar: React.FC = () => {
                   placeholder="Tìm kiếm sản phẩm..."
                   className="flex-grow bg-transparent text-white px-2 focus:outline-none"
                 />
+
+                {searchQuery && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery("");
+                      resetTranscript();
+                    }}
+                    className="text-gray-400 hover:text-white ml-1"
+                  >
+                    <FaTimes />
+                  </button>
+                )}
+
+                <button
+                  onClick={handleSearchByVoice}
+                  className={`text-white flex items-center text-sm ${isListening ? "text-yellow-400 animate-pulse" : "hover:text-yellow-400"}`}
+                >
+                  <FaMicrophone />
+                </button>
                 <button onClick={toggleSearch} className="text-gray-400 hover:text-white transition">
                   <FaTimes />
                 </button>
               </div>
 
-              {/* Top tìm kiếm */}
               <div className="mt-1 w-full">
-                <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">
-                  Top tìm kiếm
-                </h3>
+                <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Top tìm kiếm</h3>
                 <div className="grid grid-cols-3 gap-1">
                   {["Áo thun nam", "Giày sneaker", "Túi xách nữ", "Laptop gaming", "Đồng hồ", "Balo thời trang"].map((item, index) => (
                     <div
@@ -228,7 +304,6 @@ const Navbar: React.FC = () => {
               </div>
             </div>
 
-            {/* Biểu tượng yêu thích */}
             <div className="flex items-center gap-x-2">
               <Link to="/wishlist" className="hover:text-yellow-400 text-white flex items-center text-sm">
                 <FaHeart className="mr-1" />

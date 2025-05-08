@@ -16,25 +16,26 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProductListController {
 
-    private final ProductService productService;
+	private final ProductService productService;
 
-    @GetMapping("/{productId}")
-    public ResponseEntity<ProductDetailResponse> getProductDetail(@PathVariable Integer productId) {
-        ProductDetailResponse response = productService.getProductDetail(productId);
-        return ResponseEntity.ok(response);
-    }
+	@GetMapping("/{productId}")
+	public ResponseEntity<ProductDetailResponse> getProductDetail(@PathVariable Integer productId) {
+		ProductDetailResponse response = productService.getProductDetail(productId);
+		return ResponseEntity.ok(response);
+	}
 
-    //Hiển thị danh sách 50 sản phẩm mới nhất
-    @GetMapping("/latest")
-    public ResponseEntity<List<ProductCardResponse>> getLatestProducts() {
-        List<ProductCardResponse> products = productService.getLatestProducts();
-        return ResponseEntity.ok(products);
-    }
+	// Hiển thị danh sách 50 sản phẩm mới nhất
+	@GetMapping("/latest")
+	public ResponseEntity<List<ProductCardResponse>> getLatestProducts() {
+		List<ProductCardResponse> products = productService.getLatestProducts();
+		return ResponseEntity.ok(products);
+	}
 
-    //Hiển thị gợi ý sản phẩm để mua
-    @GetMapping("/suggest")
-    public ResponseEntity<List<ProductSuggestResponse>> getProductsSuggest() {
-        List<ProductSuggestResponse> products = productService.getProductsSuggest();
-        return ResponseEntity.ok(products);
-    }
+	// Hiển thị gợi ý sản phẩm để mua
+	@GetMapping("/suggest")
+	public ResponseEntity<List<ProductSuggestResponse>> getProductsSuggest() {
+		List<ProductSuggestResponse> products = productService.getProductsSuggest();
+		return ResponseEntity.ok(products);
+	}
+
 }

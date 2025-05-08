@@ -1,6 +1,7 @@
 package Backend.Controller;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.*;
@@ -42,7 +43,8 @@ public class ProductImageController {
                         image.getProduct().getProductId(),
                         image.getImageUrl(),
                         image.getImageType(),
-                        image.getProduct().getProductName()
+                        image.getProduct().getProductName(),
+                        image.getCreatedAt()
                 ))
                 .collect(Collectors.toList());
 
@@ -65,37 +67,47 @@ public class ProductImageController {
 
     @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
     @PutMapping("/{imageId}")
-    public ResponseEntity<ApiResponse<ProductImage>> updateImage(
+    public ResponseEntity<ApiResponse<ProductImageResponse>> updateImage(
             @PathVariable Integer imageId,
-            @RequestPart("imageId") Integer imageIdFromForm,
-            @RequestPart("productId") Integer productId,
-            @ModelAttribute  ProductImageRequest request) {
+            @ModelAttribute ProductImageRequest request) {
 
-        // Lấy ảnh hiện tại
         ProductImage existingImage = productImageService.getById(imageId);
-
-        // Kiểm tra và validate tên mới (nếu có)
-        String newImageUrl = request.getImageFile() != null ? request.getImageFile().getOriginalFilename() : null; // Nếu có file ảnh mới, lấy tên file
-        if (newImageUrl != null && !newImageUrl.trim().isEmpty() &&
-                !existingImage.getImageUrl().equals(newImageUrl) &&
-                productImageService.isImageUrlExists(newImageUrl)) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>(false, "URL ảnh đã tồn tại!", null));
+        if (existingImage == null) {
+            return ResponseEntity.notFound().build();
         }
 
-        // Cập nhật thông tin ảnh
-        ProductImage updatedImage = productImageService.update(imageId, request.getProductId(),
-                                                                request.getImageType(), request.getImageFile());
-        return ResponseEntity.ok(new ApiResponse<>(true, "Cập nhật ảnh thành công!", updatedImage));
+        String newImageUrl = Optional.ofNullable(request.getImageFile())
+                .map(MultipartFile::getOriginalFilename)
+                .orElse(null);
+
+        if (newImageUrl != null && !newImageUrl.trim().isEmpty()
+                && !existingImage.getImageUrl().equals(newImageUrl)
+                && productImageService.isImageUrlExists(newImageUrl)) {
+            return ResponseEntity.badRequest().body(
+                    new ApiResponse<>(false, "URL ảnh đã tồn tại!", null)
+            );
+        }
+
+        ProductImage updatedImage = productImageService.update(
+                imageId,
+                request.getProductId(),
+                request.getImageType(),
+                request.getImageFile()
+        );
+
+        ProductImageResponse responseDto = new ProductImageResponse(updatedImage);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Cập nhật ảnh thành công!", responseDto)
+        );
     }
 
     @PutMapping("/{imageId}/upload")
     @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
     public ResponseEntity<ApiResponse<ProductImage>> updateImage(
             @PathVariable Integer imageId,
-            @ModelAttribute("productId")  Integer productId,
-            @ModelAttribute("imageType") ImageType imageType,
+            @RequestParam("productId") Integer productId,
+            @RequestParam("imageType") ImageType imageType,
             @RequestParam("imageUrl") MultipartFile imageFile) {
-
         // Validate file
         if (imageFile != null && !imageFile.isEmpty()) {
             String validationMessage = validateImageFile(imageFile);

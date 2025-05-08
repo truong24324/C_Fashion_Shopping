@@ -26,7 +26,8 @@ public class ProductImage {
 
     @ManyToOne
     @JoinColumn(name = "PRODUCT_ID", nullable = false)
-    private Product product;  // Liên kết với sản phẩm
+    @com.fasterxml.jackson.annotation.JsonBackReference
+    private Product product;
 
     @Column(name = "IMAGE_URL", nullable = false, length = 500)
     private String imageUrl;  // Đường dẫn ảnh

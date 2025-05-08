@@ -1,36 +1,29 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "lib": [
-      "dom",
-      "esnext"
-    ],
+    "lib": ["dom", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "isolatedModules": true,
+    "isolatedModules": false,
     "jsx": "react-jsx",
-    "moduleResolution": "node",
+     "moduleResolution": "node",
     "baseUrl": "./",
-    "outDir": "./build",
-    "allowSyntheticDefaultImports": true,
-    "module": "esnext",
-    "resolveJsonModule": true,
-    "noEmit": true
+    "paths": {
+      "@components/*": ["src/components/*"]
+    },
+    "outDir": "./build"  // Add this line to specify the output directory
   },
-  "include": [
-    "src/**/*"
-  ],
+  "include": ["src/**/*"],
   "exclude": [
-    "node_modules",
-    "src/**/*.js"
+    "node_modules",  // Exclude node_modules directory
+    "src/**/*.js"    // Exclude existing JS files from being overwritten
   ],
   "paths": {
-    "@/*": [
-      "src/*"
-    ]
-  }
+  "@/*": ["src/*"]
+}
+
 }
