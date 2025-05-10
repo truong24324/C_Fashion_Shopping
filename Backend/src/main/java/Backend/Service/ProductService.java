@@ -2,16 +2,9 @@ package Backend.Service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -30,8 +23,10 @@ import Backend.Response.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.Tuple;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
 
 	private final ProductRepository productRepository;
@@ -40,22 +35,9 @@ public class ProductService {
 	private final SupplierRepository supplierRepository;
 	private final ProductStatusRepository productStatusRepository;
 	private final ProductImageRepository productImageRepository;
-	private VariantRepository variantRepository;
+	private final VariantRepository variantRepository;
 
 	private final Path productUploadPath = Paths.get("uploads/products");
-
-	public ProductService(ProductRepository productRepository, BrandRepository brandRepository,
-			CategoryRepository categoryRepository, SupplierRepository supplierRepository,
-			ProductStatusRepository productStatusRepository, ProductImageRepository productImageRepository,
-			VariantRepository variantRepository) {
-		this.productRepository = productRepository;
-		this.brandRepository = brandRepository;
-		this.categoryRepository = categoryRepository;
-		this.supplierRepository = supplierRepository;
-		this.productStatusRepository = productStatusRepository;
-		this.productImageRepository = productImageRepository;
-		this.variantRepository = variantRepository;
-	}
 
 	public List<ProductCardResponse> getLatestProducts() {
 	    List<Product> products = productRepository.findTop50ByOrderByCreatedAtDesc();
@@ -122,6 +104,65 @@ public class ProductService {
 	    }
 
 	    return productDTOs;
+	}
+
+	public List<ProductOverviewResponse> getAllProductOverviews() {
+	    List<Product> products = productRepository.findAll();
+
+	    return products.stream().map(product -> {
+	        ProductOverviewResponse dto = new ProductOverviewResponse();
+	        dto.setProductId(product.getProductId());
+	        dto.setProductName(product.getProductName());
+	        dto.setWarrantyPeriod(product.getWarrantyPeriod());
+	        dto.setSupplierName(product.getSupplier().getSupplierName());
+	        dto.setBrandName(product.getBrand().getBrandName());
+
+	        // Lấy ảnh MAIN và SECONDARY
+	        List<ProductImage> filteredImages = product.getImages().stream()
+	            .filter(img -> img.getImageType() == ImageType.MAIN || img.getImageType() == ImageType.SECONDARY)
+	            .collect(Collectors.toList());
+
+	        dto.setImage(filteredImages.stream()
+	            .map(ProductImage::getImageUrl)
+	            .collect(Collectors.toList()));
+
+	        dto.setImageTypes(filteredImages.stream()
+	            .map(img -> img.getImageType().name())
+	            .collect(Collectors.toList()));
+
+	        // Tổng hợp thông tin variant
+	        dto.setColorNames(product.getVariants().stream()
+	            .map(Variant::getColor)
+	            .filter(Objects::nonNull)
+	            .map(color -> color.getColorCode() + "|" + color.getColorName())
+	            .collect(Collectors.toSet())
+	            .stream().toList());
+
+	        dto.setColorCodes(product.getVariants().stream()
+		            .map(Variant::getColor)
+		            .filter(Objects::nonNull)
+		            .map(Color::getColorCode)
+		            .collect(Collectors.toSet()).stream().toList());
+	        
+	        dto.setSizeNames(product.getVariants().stream()
+	            .map(Variant::getSize)
+	            .filter(Objects::nonNull)
+	            .map(Size::getSizeName)
+	            .collect(Collectors.toSet()).stream().toList());
+
+	        dto.setMaterialNames(product.getVariants().stream()
+	            .map(Variant::getMaterial)
+	            .filter(Objects::nonNull)
+	            .map(Material::getMaterialName)
+	            .collect(Collectors.toSet()).stream().toList());
+
+	        dto.setPrice(product.getVariants().stream()
+	            .map(Variant::getPrice)
+	            .filter(Objects::nonNull)
+	            .findFirst().orElse(null)); // hoặc .min() nếu muốn lấy giá nhỏ nhất
+
+	        return dto;
+	    }).collect(Collectors.toList());
 	}
 
 	public List<ProductSuggestResponse> getProductsSuggest() {

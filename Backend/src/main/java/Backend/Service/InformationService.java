@@ -18,17 +18,14 @@ import Backend.Repository.AccountRepository;
 import Backend.Repository.InformationRepository;
 import Backend.Request.InformationRequest;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class InformationService {
     private final InformationRepository informationRepository;
     private final AccountRepository accountRepository;
     private final Path uploadPath = Paths.get("uploads/avatars");
-
-    public InformationService(InformationRepository informationRepository, AccountRepository accountRepository) {
-        this.informationRepository = informationRepository;
-        this.accountRepository = accountRepository; // ✅ Đã truyền đúng
-    }
 
     @PostConstruct
     public void init() throws IOException {

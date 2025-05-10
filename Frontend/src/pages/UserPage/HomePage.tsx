@@ -24,19 +24,20 @@ const HomePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [retryVisible, setRetryVisible] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");  // Tìm kiếm
+  const [sortOrder, setSortOrder] = useState<string>("asc");   // Sắp xếp
 
   const fetchProducts = async () => {
     setLoading(true);
     const cacheKey = "cached_products_latest";
     const expiryKey = "cached_products_latest_expiry";
-    const cacheExpiry = 20 * 60 * 1000; // 10 phút
+    const cacheExpiry = 20 * 60 * 1000; // 20 phút
   
     try {
       const now = Date.now();
       const cached = localStorage.getItem(cacheKey);
       const expiry = localStorage.getItem(expiryKey);
   
-      // Nếu có cache và chưa hết hạn
       if (cached && expiry && now < parseInt(expiry)) {
         const data = JSON.parse(cached);
         setProducts(data);
@@ -45,13 +46,11 @@ const HomePage: React.FC = () => {
         return;
       }
   
-      // Nếu không có cache hoặc cache đã hết hạn → gọi API
       const res = await axios.get("/api/views/latest");
       const data = res.data;
       setProducts(data);
       setRetryVisible(data.length === 0);
   
-      // Lưu vào cache
       localStorage.setItem(cacheKey, JSON.stringify(data));
       localStorage.setItem(expiryKey, (now + cacheExpiry).toString());
     } catch (error: any) {
@@ -67,6 +66,22 @@ const HomePage: React.FC = () => {
     fetchProducts(); // Chỉ gọi 1 lần khi mount
   }, []);
 
+  // ** Tìm kiếm và Sắp xếp sản phẩm ** //
+  const filteredProducts = products
+    .filter((product) => {
+      if (searchQuery) {
+        return product.productName.toLowerCase().includes(searchQuery.toLowerCase());
+      }
+      return true; // Nếu không có tìm kiếm thì không lọc
+    })
+    .sort((a, b) => {
+      if (sortOrder === "asc") {
+        return a.productName.localeCompare(b.productName);
+      } else {
+        return b.productName.localeCompare(a.productName);
+      }
+    });
+
   return (
     <div>
       <header>
@@ -74,11 +89,14 @@ const HomePage: React.FC = () => {
         <Slider />
       </header>
       <BrandsIntroduction />
+      
       <ProductPanel
-        products={products}
+        products={filteredProducts}
         loading={loading}
         retryVisible={retryVisible}
         onRetry={fetchProducts}
+        onSearch={setSearchQuery}
+        onSort={setSortOrder}
       />
       <News />
       <Footer />

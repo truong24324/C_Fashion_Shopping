@@ -6,14 +6,12 @@ import org.springframework.stereotype.Service;
 
 import Backend.Model.Size;
 import Backend.Repository.SizeRepository;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class SizeService {
     private final SizeRepository sizeRepository;
-
-    public SizeService(SizeRepository sizeRepository) {
-        this.sizeRepository = sizeRepository;
-    }
 
     // Lấy danh sách kích thước có phân trang
     public Page<Size> getAllSizes(Pageable pageable) {

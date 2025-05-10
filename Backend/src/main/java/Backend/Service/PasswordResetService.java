@@ -14,19 +14,16 @@ import Backend.Model.Account;
 import Backend.Model.PasswordResetRequest;
 import Backend.Repository.AccountRepository;
 import Backend.Repository.PasswordResetRepository;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class PasswordResetService {
 	private static final int MAX_ATTEMPTS = 5; // Số lần nhập OTP tối đa
 
-	@Autowired
-	private AccountRepository accountRepository;
-
-	@Autowired
-	private PasswordResetRepository resetRepository;
-
-	@Autowired
-	private EmailService emailService;
+	private final AccountRepository accountRepository;
+	private final PasswordResetRepository resetRepository;
+	private final EmailService emailService;
 
 	// Kiểm tra xem OTP có phải là chuỗi số đơn giản như "000000" hay "123456"
 	private boolean isSimpleOtp(String otp) {

@@ -14,18 +14,18 @@ import Backend.Request.VariantRequest;
 import Backend.Response.ApiResponse;
 import Backend.Response.PaginationResponse;
 import Backend.Response.VariantResponse;
+import Backend.Service.BrandService;
+import Backend.Service.ProductService;
 import Backend.Service.VariantService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/variants")
 public class VariantController {
     private final VariantService variantService;
-
-    public VariantController(VariantService variantService) {
-        this.variantService = variantService;
-    }
-
+    
     @GetMapping("/all")
     public ResponseEntity<PaginationResponse<VariantResponse>> getAllVariants(
             @RequestParam(defaultValue = "0") int page,

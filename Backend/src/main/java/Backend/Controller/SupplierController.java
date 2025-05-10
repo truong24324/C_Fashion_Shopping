@@ -17,15 +17,13 @@ import Backend.Response.PaginationResponse;
 import Backend.Service.SupplierService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/suppliers")
 public class SupplierController {
     private final SupplierService supplierService;
-
-    public SupplierController(SupplierService supplierService) {
-        this.supplierService = supplierService;
-    }
 
     // ✅ API lấy danh sách nhà cung cấp có phân trang
     @GetMapping("/all")

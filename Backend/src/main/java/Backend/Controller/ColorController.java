@@ -10,16 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import Backend.Model.Color;
 import Backend.Request.ColorRequest;
@@ -27,15 +18,13 @@ import Backend.Request.ColorUpdateRequest;
 import Backend.Response.ApiResponse;
 import Backend.Service.ColorService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/colors")
+@RequiredArgsConstructor
 public class ColorController {
     private final ColorService colorService;
-
-    public ColorController(ColorService colorService) {
-        this.colorService = colorService;
-    }
 
     // ✅ API lấy danh sách màu có phân trang
     @GetMapping("/all")

@@ -18,8 +18,10 @@ import org.springframework.web.client.RestTemplate;
 
 import Backend.Request.CalculateFeeRequest;
 import Backend.Request.EstimateTimeRequest;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class GHNService {
 
 	@Value("${ghn.api.token}")
@@ -29,10 +31,6 @@ public class GHNService {
 	private String apiUrl;
 
 	private final RestTemplate restTemplate;
-
-	public GHNService(AccountService accountService) {
-		this.restTemplate = new RestTemplate();
-	}
 
 	// Lấy danh sách tỉnh
 	public Map<String, Object> getProvinces() {

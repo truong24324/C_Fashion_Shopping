@@ -20,6 +20,8 @@ interface ProductPanelProps {
   loading?: boolean;
   retryVisible?: boolean;
   onRetry?: () => void;
+  onSearch?: (query: string) => void;
+  onSort?: (sortOrder: string) => void;
 }
 
 const ProductPanel: React.FC<ProductPanelProps> = ({
@@ -27,6 +29,8 @@ const ProductPanel: React.FC<ProductPanelProps> = ({
   loading = false,
   retryVisible = false,
   onRetry,
+  onSearch,
+  onSort,
 }) => {
   return (
     <div className="w-full bg-gray-50">
@@ -48,7 +52,10 @@ const ProductPanel: React.FC<ProductPanelProps> = ({
       {/* Filter/Search */}
       <div className="flex flex-col sm:flex-row justify-between items-center p-6 space-y-4 sm:space-y-0 sm:space-x-4 bg-white shadow-md rounded-md my-6">
         <div className="flex space-x-4">
-          <select className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <select
+            className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => onSort?.(e.target.value)}
+          >
             <option value="asc">Sort by Name (A-Z)</option>
             <option value="desc">Sort by Name (Z-A)</option>
           </select>
@@ -58,6 +65,7 @@ const ProductPanel: React.FC<ProductPanelProps> = ({
               type="text"
               className="ml-2 outline-none w-full"
               placeholder="Search products"
+              onChange={(e) => onSearch?.(e.target.value)}
             />
           </div>
         </div>

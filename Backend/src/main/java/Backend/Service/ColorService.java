@@ -7,14 +7,12 @@ import org.springframework.stereotype.Service;
 import Backend.Model.Color;
 import Backend.Repository.ColorRepository;
 import Backend.Request.ColorUpdateRequest;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class ColorService {
     private final ColorRepository colorRepository;
-
-    public ColorService(ColorRepository colorRepository) {
-        this.colorRepository = colorRepository;
-    }
 
     // Lấy danh sách màu có phân trang
     public Page<Color> getAllColors(Pageable pageable) {

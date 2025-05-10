@@ -137,9 +137,10 @@ const CheckoutPage: React.FC = () => {
 
                 {/* Nút hoàn tất */}
                 <div className="flex justify-between mt-8">
-                    <button className="bg-blue-600 text-white px-6 py-2 rounded-lg text-lg">
-                        <Link to="/cart">Giỏ hàng</Link>
-                    </button>
+                    <Link
+                        to="/cart"
+                        className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg text-lg text-center"> Giỏ hàng
+                    </Link>
                     <button className="bg-blue-600 text-white px-6 py-2 rounded-lg text-lg">Hoàn tất đơn hàng</button>
                 </div>
             </div>

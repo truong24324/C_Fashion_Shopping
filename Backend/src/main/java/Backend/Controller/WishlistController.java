@@ -16,22 +16,21 @@ import Backend.Request.WishlistRequest;
 import Backend.Response.ApiResponse;
 import Backend.Response.WishlistProductResponse;
 import Backend.Response.WishlistResponse;
+import Backend.Service.BrandService;
+import Backend.Service.ProductService;
 import Backend.Service.WishlistService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/wishlists")
 public class WishlistController {
 
     private final WishlistService wishlistService;
     private final AccountRepository accountRepository;
-
-    public WishlistController(WishlistService wishlistService, AccountRepository accountRepository) {
-        this.wishlistService = wishlistService;
-        this.accountRepository = accountRepository;
-    }
 
     @PatchMapping("/toggle")
     public ResponseEntity<ApiResponse<WishlistResponse>> toggleWishlist(@RequestBody @Valid WishlistRequest request) {

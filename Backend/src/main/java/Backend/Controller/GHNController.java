@@ -4,28 +4,21 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import Backend.Request.CalculateFeeRequest;
 import Backend.Request.EstimateTimeRequest;
 import Backend.Response.ApiResponse;
 import Backend.Service.GHNService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/locations")
+@RequiredArgsConstructor
 public class GHNController {
 
 	private final GHNService ghnService;
-
-	public GHNController(GHNService ghnService) {
-	    this.ghnService = ghnService;
-	}
 
 	// Lấy danh sách tỉnh
 	@GetMapping("/provinces")

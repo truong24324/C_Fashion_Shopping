@@ -11,16 +11,14 @@ import Backend.Response.ApiResponse;
 import Backend.Response.PaginationResponse;
 import Backend.Service.RoleService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/roles")
 public class RoleController {
 
     private final RoleService roleService;
-
-    public RoleController(RoleService roleService) {
-        this.roleService = roleService;
-    }
 
     // ✅ Lấy danh sách phân trang
     @PreAuthorize("hasAuthority('ROLE_Admin')")

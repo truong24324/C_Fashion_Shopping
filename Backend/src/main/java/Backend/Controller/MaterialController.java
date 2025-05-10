@@ -14,15 +14,13 @@ import Backend.Request.MaterialRequest;
 import Backend.Response.ApiResponse;
 import Backend.Service.MaterialService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/materials")
 public class MaterialController {
     private final MaterialService materialService;
-
-    public MaterialController(MaterialService materialService) {
-        this.materialService = materialService;
-    }
 
     // ✅ API lấy danh sách chất liệu có phân trang
     @GetMapping("/all")

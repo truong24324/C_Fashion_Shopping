@@ -11,29 +11,16 @@ import org.springframework.transaction.annotation.Transactional;
 import Backend.Model.*;
 import Backend.Repository.*;
 import Backend.Request.VariantRequest;
-
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class VariantService {
     private final VariantRepository variantRepository;
     private final ProductRepository productRepository;
     private final ColorRepository colorRepository;
     private final SizeRepository sizeRepository;
     private final MaterialRepository materialRepository;
-
-    public VariantService(
-        VariantRepository variantRepository,
-        ProductRepository productRepository,
-        ColorRepository colorRepository,
-        SizeRepository sizeRepository,
-        MaterialRepository materialRepository
-    ) {
-        this.variantRepository = variantRepository;
-        this.productRepository = productRepository;
-        this.colorRepository = colorRepository;
-        this.sizeRepository = sizeRepository;
-        this.materialRepository = materialRepository;
-    }
 
     // ✅ Lấy danh sách variant có phân trang
     public Page<Variant> getAllVariants(Pageable pageable) {

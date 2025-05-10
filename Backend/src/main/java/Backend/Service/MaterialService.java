@@ -6,14 +6,12 @@ import org.springframework.stereotype.Service;
 
 import Backend.Model.Material;
 import Backend.Repository.MaterialRepository;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class MaterialService {
     private final MaterialRepository materialRepository;
-
-    public MaterialService(MaterialRepository materialRepository) {
-        this.materialRepository = materialRepository;
-    }
 
     // Lấy danh sách chất liệu có phân trang
     public Page<Material> getAllMaterials(Pageable pageable) {

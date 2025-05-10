@@ -9,15 +9,13 @@ import org.springframework.stereotype.Service;
 import Backend.Model.Role;
 import Backend.Repository.RoleRepository;
 import Backend.Request.RoleRequest;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class RoleService {
 
     private final RoleRepository roleRepository;
-
-    public RoleService(RoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
-    }
 
     // ✅ Lấy Role theo ID
     public Role getRoleById(Long id) {

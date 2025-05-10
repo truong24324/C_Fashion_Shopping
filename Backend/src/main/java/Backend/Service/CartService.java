@@ -16,22 +16,16 @@ import Backend.Repository.CartRepository;
 import Backend.Repository.VariantRepository;
 import Backend.Request.CartDetailRequest;
 import Backend.Response.CartItemResponse;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class CartService {
 
 	private final CartRepository cartRepository;
 	private final CartDetailRepository cartDetailRepository;
 	private final VariantRepository variantRepository;
 	private final AccountRepository accountRepository;
-
-	public CartService(CartRepository cartRepository, CartDetailRepository cartDetailRepository,
-			VariantRepository variantRepository, AccountRepository accountRepository) {
-		this.cartRepository = cartRepository;
-		this.cartDetailRepository = cartDetailRepository;
-		this.variantRepository = variantRepository;
-		this.accountRepository = accountRepository;
-	}
 
 	public String addToCart(CartDetailRequest request) {
 	    Account account = accountRepository.findById(request.getAccountId())

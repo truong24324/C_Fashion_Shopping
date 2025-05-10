@@ -2,20 +2,20 @@ package Backend.Controller;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import Backend.Response.PasswordResetResponse;
 import Backend.Service.PasswordResetService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/password")
 public class PasswordResetController {
 
-    @Autowired
-    private PasswordResetService passwordResetService;
+    private final PasswordResetService passwordResetService;
 
     @PostMapping("/request-reset")
     public ResponseEntity<PasswordResetResponse> requestReset(@RequestBody Map<String, String> request) {

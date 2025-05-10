@@ -14,8 +14,10 @@ import Backend.Request.WishlistRequest;
 import Backend.Response.WishlistProductResponse;
 import Backend.Response.WishlistResponse;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class WishlistService {
 
     private final WishlistRepository wishlistRepository;
@@ -23,18 +25,6 @@ public class WishlistService {
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
     private final CartDetailRepository cartDetailRepository;
-
-    public WishlistService(WishlistRepository wishlistRepository,
-                           AccountRepository accountRepository,
-                           ProductRepository productRepository,
-                           CartRepository cartRepository,
-                           CartDetailRepository cartDetailRepository) {
-        this.wishlistRepository = wishlistRepository;
-        this.accountRepository = accountRepository;
-        this.productRepository = productRepository;
-        this.cartRepository = cartRepository;
-        this.cartDetailRepository = cartDetailRepository;
-    }
 
     // ✅ Kiểm tra sản phẩm đã có trong wishlist chưa
     public boolean isProductInWishlist(Integer accountId, Integer productId) {

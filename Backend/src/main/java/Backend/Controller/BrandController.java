@@ -31,15 +31,13 @@ import Backend.Response.BrandResponse;
 import Backend.Response.PaginationResponse;
 import Backend.Service.BrandService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/brands")
 public class BrandController {
     private final BrandService brandService;
-
-    public BrandController(BrandService brandService) {
-        this.brandService = brandService;
-    }
 
     @GetMapping("/all")
     @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")

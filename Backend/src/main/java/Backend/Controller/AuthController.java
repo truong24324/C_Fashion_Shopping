@@ -1,6 +1,5 @@
 package Backend.Controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,20 +23,17 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api")
 @Tag(name = "Authentication", description = "APIs liên quan đến xác thực (đăng nhập, đăng ký, đăng xuất)")
 public class AuthController {
 
-	@Autowired
-	private AccountService accountService;
-
-	@Autowired
-	private JwtService jwtService;
-
-	@Autowired
-	private RoleService roleService;
+	private final AccountService accountService;
+	private final JwtService jwtService;
+	private final RoleService roleService;
 
 	@Operation(summary = "Đăng nhập", description = "Xác thực người dùng và trả về JWT token.", responses = {
 			@ApiResponse(responseCode = "200", description = "Đăng nhập thành công", content = @Content(schema = @Schema(implementation = AuthResponse.class))),

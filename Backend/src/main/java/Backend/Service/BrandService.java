@@ -17,17 +17,14 @@ import Backend.Model.Brand;
 import Backend.Repository.BrandRepository;
 import Backend.Repository.ProductRepository;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class BrandService {
     private final BrandRepository brandRepository;
     private final ProductRepository productRepository;
     private final Path brandUploadPath = Paths.get("uploads/brands");
-
-    public BrandService(BrandRepository brandRepository, ProductRepository productRepository) {
-        this.brandRepository = brandRepository;
-        this.productRepository = productRepository;
-    }
 
     @PostConstruct
     public void init() throws IOException {

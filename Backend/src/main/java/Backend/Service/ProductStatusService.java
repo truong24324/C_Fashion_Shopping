@@ -8,15 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 import Backend.Model.ProductStatus;
 import Backend.Repository.ProductStatusRepository;
 import Backend.Request.ProductStatusRequest;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class ProductStatusService {
 
     private final ProductStatusRepository productStatusRepository;
-
-    public ProductStatusService(ProductStatusRepository productStatusRepository) {
-        this.productStatusRepository = productStatusRepository;
-    }
 
     // ✅ Lấy danh sách trạng thái sản phẩm có phân trang
     public Page<ProductStatus> getAllProductStatuses(Pageable pageable) {

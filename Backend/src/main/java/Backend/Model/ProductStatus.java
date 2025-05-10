@@ -24,5 +24,4 @@ public class ProductStatus {
     @Column(name = "DESCRIPTION", length = 255)
     private String description;  // Mô tả về trạng thái
 
-
 }

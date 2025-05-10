@@ -20,17 +20,14 @@ import Backend.Response.ApiResponse;
 import Backend.Response.InformationResponse;
 import Backend.Service.InformationService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/information")
 public class InformationController {
     private final InformationService informationService;
     private final AccountRepository accountRepository;
-
-    public InformationController(InformationService informationService, AccountRepository accountRepository) {
-        this.informationService = informationService;
-        this.accountRepository = accountRepository;
-    }
 
     // ✅ Lấy thông tin cá nhân theo ID tài khoản
     @GetMapping("/me")

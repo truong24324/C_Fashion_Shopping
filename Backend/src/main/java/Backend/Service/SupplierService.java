@@ -9,16 +9,13 @@ import Backend.Repository.ProductRepository;
 import Backend.Repository.SupplierRepository;
 import Backend.Request.SupplierRequest;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class SupplierService {
     private final SupplierRepository supplierRepository;
     private final ProductRepository productRepository;
-
-    public SupplierService(SupplierRepository supplierRepository, ProductRepository productRepository) {
-        this.supplierRepository = supplierRepository;
-        this.productRepository = productRepository;
-    }
 
     // ✅ Lấy danh sách nhà cung cấp có phân trang
     public Page<Supplier> getAllSuppliers(Pageable pageable) {

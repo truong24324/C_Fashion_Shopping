@@ -130,61 +130,61 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
         localStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }));
     };
 
-    useEffect(() => {
-        if (!selectedColor || !selectedSize || !selectedMaterial) return;
+    // useEffect(() => {
+    //     if (!selectedColor || !selectedSize || !selectedMaterial) return;
 
-        const delayDebounce = setTimeout(() => {
-            const key = getCacheKey(product.productId, selectedColor, selectedSize, selectedMaterial);
-            const cachedVariant = getCachedVariant(key);
+    //     const delayDebounce = setTimeout(() => {
+    //         const key = getCacheKey(product.productId, selectedColor, selectedSize, selectedMaterial);
+    //         const cachedVariant = getCachedVariant(key);
 
-            if (cachedVariant) {
-                if (cachedVariant.stock > 0) {
-                    setVariantAvailable(true);
-                    setVariantPrice(cachedVariant.price);
-                    setVariantStock(cachedVariant.stock);
-                } else {
-                    setVariantAvailable(false);
-                    toast.error("Không tìm thấy biến thể hoặc đã hết hàng.");
-                }
-                return;
-            }
+    //         if (cachedVariant) {
+    //             if (cachedVariant.stock > 0) {
+    //                 setVariantAvailable(true);
+    //                 setVariantPrice(cachedVariant.price);
+    //                 setVariantStock(cachedVariant.stock);
+    //             } else {
+    //                 setVariantAvailable(false);
+    //                 toast.error("Không tìm thấy biến thể hoặc đã hết hàng.");
+    //             }
+    //             return;
+    //         }
 
-            const checkVariant = async () => {
-                try {
-                    const res = await axios.get("/api/cart/find", {
-                        params: {
-                            productId: product.productId,
-                            color: selectedColor,
-                            size: selectedSize,
-                            material: selectedMaterial,
-                        },
-                        headers: {
-                            Authorization: `Bearer ${localStorage.getItem("token")}`,
-                        },
-                    });
+    //         const checkVariant = async () => {
+    //             try {
+    //                 const res = await axios.get("/api/cart/find", {
+    //                     params: {
+    //                         productId: product.productId,
+    //                         color: selectedColor,
+    //                         size: selectedSize,
+    //                         material: selectedMaterial,
+    //                     },
+    //                     headers: {
+    //                         Authorization: `Bearer ${localStorage.getItem("token")}`,
+    //                     },
+    //                 });
 
-                    const variant = res.data;
-                    setCachedVariant(key, variant); // Lưu cache
+    //                 const variant = res.data;
+    //                 setCachedVariant(key, variant); // Lưu cache
 
-                    if (variant && variant.stock > 0) {
-                        setVariantAvailable(true);
-                        setVariantPrice(variant.price);
-                        setVariantStock(variant.stock);
-                    } else {
-                        setVariantAvailable(false);
-                        toast.error("Không tìm thấy biến thể hoặc đã hết hàng.");
-                    }
-                } catch (error) {
-                    setVariantAvailable(false);
-                    toast.error("Không tìm thấy biến thể hoặc đã hết hàng.");
-                }
-            };
+    //                 if (variant && variant.stock > 0) {
+    //                     setVariantAvailable(true);
+    //                     setVariantPrice(variant.price);
+    //                     setVariantStock(variant.stock);
+    //                 } else {
+    //                     setVariantAvailable(false);
+    //                     toast.error("Không tìm thấy biến thể hoặc đã hết hàng.");
+    //                 }
+    //             } catch (error) {
+    //                 setVariantAvailable(false);
+    //                 toast.error("Không tìm thấy biến thể hoặc đã hết hàng.");
+    //             }
+    //         };
 
-            checkVariant();
-        }, 300);
+    //         checkVariant();
+    //     }, 300);
 
-        return () => clearTimeout(delayDebounce);
-    }, [selectedColor, selectedSize, selectedMaterial]);
+    //     return () => clearTimeout(delayDebounce);
+    // }, [selectedColor, selectedSize, selectedMaterial]);
 
     const WISHLIST_CACHE_KEY = "wishlist_cache";
     const WISHLIST_CACHE_DURATION = 50 * 60 * 1000; // 5 phút

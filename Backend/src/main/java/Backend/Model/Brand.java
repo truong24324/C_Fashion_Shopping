@@ -24,5 +24,4 @@ public class Brand {
     @Column(name = "LOGO", length = 100)
     private String logo;
 
-
 }

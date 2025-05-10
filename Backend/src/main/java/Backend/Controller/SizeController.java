@@ -13,17 +13,17 @@ import Backend.Model.Size;
 import Backend.Request.SizeRequest;
 import Backend.Response.ApiResponse;
 import Backend.Response.PaginationResponse;
+import Backend.Service.BrandService;
+import Backend.Service.ProductService;
 import Backend.Service.SizeService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/sizes")
 public class SizeController {
     private final SizeService sizeService;
-
-    public SizeController(SizeService sizeService) {
-        this.sizeService = sizeService;
-    }
 
     // ✅ API lấy danh sách kích thước có phân trang
     @GetMapping("/all")

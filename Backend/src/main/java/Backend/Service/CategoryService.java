@@ -8,15 +8,13 @@ import org.springframework.stereotype.Service;
 
 import Backend.Model.Category;
 import Backend.Repository.CategoryRepository;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
-
-    public CategoryService(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
-    }
 
     // ✅ Lấy danh sách danh mục có phân trang
     public Page<Category> getAllCategories(Pageable pageable) {

@@ -12,10 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import Backend.Model.ImageType;
-import Backend.Model.Product;
 import Backend.Model.ProductImage;
 import Backend.Repository.ProductImageRepository;
-import Backend.Repository.ProductRepository;
 import Backend.Response.ProductImageResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 public class ProductImageService {
 
     private final ProductImageRepository imageRepository;
-    private final ProductRepository productRepository;
 	private final Path productUploadPath = Paths.get("uploads/products");
 
     public Page<ProductImage> getAllProductImages(Pageable pageable) {

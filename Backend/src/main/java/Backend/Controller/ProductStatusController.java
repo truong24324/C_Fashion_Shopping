@@ -17,16 +17,14 @@ import Backend.Service.ProductStatusService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/product-status")
 public class ProductStatusController {
 
     private final ProductStatusService productStatusService;
-
-    public ProductStatusController(ProductStatusService productStatusService) {
-        this.productStatusService = productStatusService;
-    }
 
     // ✅ Lấy danh sách trạng thái sản phẩm có phân trang
     @GetMapping("/all")

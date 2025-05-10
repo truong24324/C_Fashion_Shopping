@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import Backend.Configuration.VNPayUtil;
 import Backend.Model.Order;
+import Backend.Model.OrderStatus;
+import Backend.Repository.OrderStatusRepository;
 import Backend.Request.OrderRequest;
 import Backend.Response.PaymentResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,12 +19,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class VNPayService {
 
-    @Value("${payment.vnPay.url}") private String vnp_PayUrl;
-    @Value("${payment.vnPay.returnUrl}") private String vnp_ReturnUrl;
-    @Value("${payment.vnPay.tmnCode}") private String vnp_TmnCode;
-    @Value("${payment.vnPay.secretKey}") private String secretKey;
+    @Value("${payment.vnPay.url}") 
+    private String vnp_PayUrl;
+    @Value("${payment.vnPay.returnUrl}") 
+    private String vnp_ReturnUrl;
+    @Value("${payment.vnPay.tmnCode}") 
+    private String vnp_TmnCode;
+    @Value("${payment.vnPay.secretKey}") 
+    private String secretKey;
 
     private final OrderService orderService;
+    private final OrderStatusRepository orderStatusRepository;
 
     public PaymentResponse createPaymentUrl(long price, String bankCode,
                                             HttpServletRequest request,
@@ -53,14 +60,21 @@ public class VNPayService {
         String responseCode = request.getParameter("vnp_ResponseCode");
 
         Order order = orderService.findById(orderId);
+
         if ("00".equals(responseCode)) {
-            order.setStatus("Completed");
-            order.setPaymentStatus("Paid");
+            OrderStatus completed = orderStatusRepository.findByStatusName("Completed")
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái 'Completed'"));
+            order.setOrderStatus(completed);
+            order.setPaymentStatus(1); // Đã thanh toán
         } else {
-            order.setStatus("Failed");
-            order.setPaymentStatus("Unpaid");
+            OrderStatus failed = orderStatusRepository.findByStatusName("Failed")
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái 'Failed'"));
+            order.setOrderStatus(failed);
+            order.setPaymentStatus(0); // Chưa thanh toán
         }
+
         order.setUpdatedAt(LocalDateTime.now());
         orderService.save(order);
     }
+
 }

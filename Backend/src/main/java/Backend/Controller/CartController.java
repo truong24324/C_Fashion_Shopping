@@ -21,20 +21,19 @@ import Backend.Repository.VariantRepository;
 import Backend.Request.CartDetailRequest;
 import Backend.Response.ApiResponse;
 import Backend.Response.CartItemResponse;
+import Backend.Service.BrandService;
 import Backend.Service.CartService;
+import Backend.Service.ProductService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/cart")
 @PreAuthorize("hasAnyAuthority('ROLE_Customer')")
+@RequiredArgsConstructor
 public class CartController {
 
     private final CartService cartService;
     private final VariantRepository variantRepository;
-
-    public CartController(CartService cartService, VariantRepository variantRepository) {
-        this.cartService = cartService;
-        this.variantRepository = variantRepository;
-    }
 
     @PostMapping("/add")
     public ResponseEntity<ApiResponse<String>> addToCart(@RequestBody CartDetailRequest request) {

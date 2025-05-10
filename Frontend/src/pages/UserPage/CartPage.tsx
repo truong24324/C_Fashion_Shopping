@@ -260,7 +260,7 @@ const CartPage: React.FC = () => {
       const totalWeight = cartItems
         .filter(item => selectedItems.includes(item.variantId))  // Lọc các sản phẩm đã chọn
         .reduce((totalWeight, item) => totalWeight + (item.quantity * (item.weightPerUnit || 1500)), 0);  // Trọng lượng mỗi sản phẩm (1500 là giá trị mặc định nếu không có)
-  
+
       // Gọi API tính phí vận chuyển với trọng lượng đã tính
       const feeResponse = await axios.post("/api/locations/calculate-fee", {
         fromProvince: 217,
@@ -271,16 +271,16 @@ const CartPage: React.FC = () => {
         toWard: parseInt(ward),
         weight: totalWeight,  // Trọng lượng tổng cộng
       });
-  
+
       if (feeResponse.status !== 200) {
         toast.error("Lỗi khi tính phí vận chuyển.");
         return;
       }
-  
+
       const fee = feeResponse.data?.data?.total ?? 0;
       setShippingFee(fee);
       toast.success(`Phí vận chuyển: ${fee.toLocaleString()} vn₫`);
-  
+
       // Gọi API ước tính thời gian giao hàng
       const timeResponse = await axios.post("/api/locations/estimate-delivery-time", {
         fromProvince: 217,
@@ -291,20 +291,20 @@ const CartPage: React.FC = () => {
         toWard: parseInt(ward),
         serviceId: 2,  // Nếu có serviceId hoặc thêm tham số khác cần thiết
       });
-  
+
       if (timeResponse.status !== 200) {
         toast.error("Lỗi khi ước tính thời gian giao hàng.");
         return;
       }
-  
+
       const estimatedDelivery = timeResponse.data?.data?.estimatedDelivery ?? "Không có dữ liệu";
       setEstimatedDelivery(estimatedDelivery);  // Lưu thời gian giao hàng
-  
+
       toast.success(`Thời gian giao hàng ước tính: ${estimatedDelivery}`);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Không thể tính phí vận chuyển hoặc thời gian giao hàng.");
     }
-  };  
+  };
 
   useEffect(() => {
     if (province && district && ward) {
@@ -439,9 +439,12 @@ const CartPage: React.FC = () => {
             note={note}
             setNote={setNote}
           />
-          <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-3 mt-4 rounded-lg font-semibold">
-            <Link to="/checkout">Thanh toán</Link>
-          </button>
+          <Link
+            to="/checkout"
+            className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg text-lg text-center"
+          >
+            Thanh toán
+          </Link>
         </div>
       </div>
       <Footer />
