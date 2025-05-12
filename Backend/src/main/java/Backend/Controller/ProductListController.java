@@ -12,6 +12,7 @@ import Backend.Response.ProductCardResponse;
 import Backend.Response.ProductDetailResponse;
 import Backend.Response.ProductOverviewResponse;
 import Backend.Response.ProductSuggestResponse;
+import Backend.Response.TopSellingProductResponse;
 import Backend.Service.BrandService;
 import Backend.Service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class ProductListController {
 
 	private final ProductService productService;
 	private final BrandService brandService;
-	
+
 	@GetMapping("/{productId}")
 	public ResponseEntity<ProductDetailResponse> getProductDetail(@PathVariable Integer productId) {
 		ProductDetailResponse response = productService.getProductDetail(productId);
@@ -45,23 +46,24 @@ public class ProductListController {
 	}
 
 	@GetMapping("/overview")
-    public ResponseEntity<List<ProductOverviewResponse>> getProductOverviews() {
-        return ResponseEntity.ok(productService.getAllProductOverviews());
-    }
-	
+	public ResponseEntity<List<ProductOverviewResponse>> getProductOverviews() {
+		return ResponseEntity.ok(productService.getAllProductOverviews());
+	}
+
 	@GetMapping("/listBrand")
 	public ResponseEntity<List<BrandResponse>> getAllBrandsNoPagination() {
-	    List<Brand> brands = brandService.getAllBrands(); // Gọi phương thức trả về List<Brand>
+		List<Brand> brands = brandService.getAllBrands(); // Gọi phương thức trả về List<Brand>
 
-	    List<BrandResponse> brandResponses = brands.stream()
-	            .map(brand -> new BrandResponse(
-	                    brand.getBrandId(),
-	                    brand.getBrandName(),
-	                    brand.getLogo()
-	            ))
-	            .collect(Collectors.toList());
+		List<BrandResponse> brandResponses = brands.stream()
+				.map(brand -> new BrandResponse(brand.getBrandId(), brand.getBrandName(), brand.getLogo()))
+				.collect(Collectors.toList());
 
-	    return ResponseEntity.ok(brandResponses);
+		return ResponseEntity.ok(brandResponses);
+	}
+
+	@GetMapping("/top-selling")
+	public ResponseEntity<List<TopSellingProductResponse>> getTopSellingProducts() {
+		return ResponseEntity.ok(productService.getTop10BestSellingProducts());
 	}
 
 }

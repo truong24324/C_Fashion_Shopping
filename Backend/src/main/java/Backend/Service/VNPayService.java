@@ -65,12 +65,12 @@ public class VNPayService {
             OrderStatus completed = orderStatusRepository.findByStatusName("Completed")
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái 'Completed'"));
             order.setOrderStatus(completed);
-            order.setPaymentStatus(1); // Đã thanh toán
+            order.setPaymentStatus("Đã thanh toán"); // Đã thanh toán
         } else {
             OrderStatus failed = orderStatusRepository.findByStatusName("Failed")
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái 'Failed'"));
             order.setOrderStatus(failed);
-            order.setPaymentStatus(0); // Chưa thanh toán
+            order.setPaymentStatus("Chưa thanh toán"); // Chưa thanh toán
         }
 
         order.setUpdatedAt(LocalDateTime.now());

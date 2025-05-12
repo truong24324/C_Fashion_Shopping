@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
@@ -7,10 +7,11 @@ import Footer from "../../Layouts/Footer";
 import ProductSale from "../../Product/ProductSale";
 import { FaCartPlus } from "react-icons/fa";
 import Loading from "../../components/common/Loading";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import CartItem from "src/Cart/CartItem";
 import ShippingAddress from "src/Cart/ShippingAddress";
 import DiscountAndNote from "src/Cart/DiscountAndNote";
+import { message } from "antd";
 
 interface CartItemType {
   variantId: number;
@@ -76,6 +77,7 @@ const CartPage: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [estimatedDelivery, setEstimatedDelivery] = useState<string>(""); // Dùng để lưu thời gian giao hàng
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const navigate = useNavigate();
 
   const getAccountIdFromToken = () => {
     const token = localStorage.getItem("token");
@@ -279,7 +281,6 @@ const CartPage: React.FC = () => {
 
       const fee = feeResponse.data?.data?.total ?? 0;
       setShippingFee(fee);
-      toast.success(`Phí vận chuyển: ${fee.toLocaleString()} vn₫`);
 
       // Gọi API ước tính thời gian giao hàng
       const timeResponse = await axios.post("/api/locations/estimate-delivery-time", {
@@ -300,9 +301,9 @@ const CartPage: React.FC = () => {
       const estimatedDelivery = timeResponse.data?.data?.estimatedDelivery ?? "Không có dữ liệu";
       setEstimatedDelivery(estimatedDelivery);  // Lưu thời gian giao hàng
 
-      toast.success(`Thời gian giao hàng ước tính: ${estimatedDelivery}`);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Không thể tính phí vận chuyển hoặc thời gian giao hàng.");
+      message.error(error.response?.data?.message || "Không thể tính phí vận chuyển hoặc thời gian giao hàng.");
+      setShippingFee(null);
     }
   };
 
@@ -321,19 +322,48 @@ const CartPage: React.FC = () => {
   };
 
   const handleToggleSelectItem = (variantId: number) => {
-    setSelectedItems((prev) =>
-      prev.includes(variantId)
+    setSelectedItems((prev) => {
+      const updatedItems = prev.includes(variantId)
         ? prev.filter((id) => id !== variantId)
-        : [...prev, variantId]
-    );
+        : [...prev, variantId];
+      handleCalculateShippingFee();
+      return updatedItems;
+    });
   };
+
 
   const handleToggleSelectAll = () => {
     if (selectedItems.length === cartItems.length) {
       setSelectedItems([]);
+      handleCalculateShippingFee();
     } else {
       setSelectedItems(cartItems.map((item) => item.variantId));
+      handleCalculateShippingFee();
     }
+  };
+
+  const handleProceedToCheckout = () => {
+    const selectedCartItems = cartItems.filter(item => selectedItems.includes(item.variantId));
+
+    const checkoutData = {
+      items: selectedCartItems,
+      address: {
+        province,
+        district,
+        ward,
+      },
+      pricing: {
+        subtotal,
+        discount,
+        shippingFee,
+        total,
+      },
+      coupon,
+      note,
+      estimatedDelivery,
+    };
+
+    navigate("/checkout", { state: checkoutData });
   };
 
   const subtotal = cartItems
@@ -439,12 +469,9 @@ const CartPage: React.FC = () => {
             note={note}
             setNote={setNote}
           />
-          <Link
-            to="/checkout"
-            className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg text-lg text-center"
-          >
+          <button onClick={handleProceedToCheckout} className="w-full bg-blue-600 text-white px-6 py-2 rounded-lg text-lg">
             Thanh toán
-          </Link>
+          </button>
         </div>
       </div>
       <Footer />

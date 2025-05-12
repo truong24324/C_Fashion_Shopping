@@ -4,22 +4,29 @@ import java.util.Date;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import Backend.Model.Account;
 import Backend.Model.Role;
 import Backend.Repository.AccountRepository;
+import Backend.Repository.RoleRepository;
+import Backend.Request.AccountRequest;
 import Backend.Request.RegisterRequest;
+import Backend.Response.AccountResponse;
+import io.swagger.v3.oas.models.security.SecurityScheme.In;
+import Backend.Exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
-@Profile("user")
 public class AccountService {
 
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -45,7 +52,7 @@ public class AccountService {
         accountRepository.save(account);
     }
 
-    // 🔹 Kiểm tra thông tin đăng nhập và xử lý thất bại
+    // 🔹 Xử lý đăng nhập
     @Transactional
     public String validateLogin(Account account, String password) {
         if (!passwordEncoder.matches(password, account.getPassword())) {
@@ -61,17 +68,16 @@ public class AccountService {
             return "Mật khẩu không đúng. Bạn còn " + (MAX_FAILED_ATTEMPTS - failedAttempts) + " lần thử.";
         }
 
-        // Đăng nhập thành công -> Reset số lần thất bại
+        // Đăng nhập thành công
         account.setFailedLoginAttempts(0);
         account.setLocked(false);
         account.setLockUntil(null);
         account.setLoginTime(new Date());
-
         accountRepository.save(account);
-        return null; // Không có lỗi
+        return null;
     }
 
-    // 🔹 Kiểm tra tồn tại email, phone, userCode
+    // 🔹 Check trùng
     public boolean existsByEmail(String email) {
         return accountRepository.existsByEmail(email);
     }
@@ -84,7 +90,7 @@ public class AccountService {
         return accountRepository.existsByUserCode(userCode);
     }
 
-    // 🔹 Đăng ký tài khoản mới
+    // 🔹 Đăng ký
     @Transactional
     public Account registerNewAccount(RegisterRequest request, Role defaultRole) {
         String encodedPassword = passwordEncoder.encode(request.getPassword());
@@ -111,4 +117,79 @@ public class AccountService {
         return accountRepository.count();
     }
 
+    // 🔹 API CRUD
+    public Page<AccountResponse> getAllAccounts(Pageable pageable) {
+        Page<Account> page = accountRepository.findAll(pageable);
+        return page.map(this::toAccountResponse);
+    }
+    
+    public AccountResponse toAccountResponse(Account account) {
+        AccountResponse res = new AccountResponse();
+        res.setAccountId(account.getAccountId());
+        res.setUserCode(account.getUserCode());
+        res.setEmail(account.getEmail());
+        res.setPhone(account.getPhone());
+        res.setRoleName(account.getRoleName());
+        res.setActive(account.isActive());
+        res.setLocked(account.isLocked());
+        res.setLoginTime(account.getLoginTime());
+        res.setCreatedAt(account.getCreatedAt());
+        return res;
+    }
+
+    public Account getById(Integer id) {
+        return accountRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tài khoản không tồn tại"));
+    }
+
+    @Transactional
+    public Account createAccount(AccountRequest request) {
+        Role role = roleRepository.findById(request.getRoleId())
+                .orElseThrow(() -> new ResourceNotFoundException("Vai trò không tồn tại"));
+
+        Account account = new Account();
+        account.setUserCode(request.getUserCode());
+        account.setEmail(request.getEmail());
+        account.setPhone(request.getPhone());
+        account.setPassword(passwordEncoder.encode(request.getPassword()));
+        account.setRole(role);
+        return accountRepository.save(account);
+    }
+
+    public Account updateAccount(Integer id, AccountRequest request) {
+        Account account = getById(id);
+        account.setUserCode(request.getUserCode());
+        account.setEmail(request.getEmail());
+        account.setPhone(request.getPhone());
+        account.setRole(roleRepository.findById(request.getRoleId())
+                .orElseThrow(() -> new ResourceNotFoundException("Vai trò không tồn tại")));
+        return accountRepository.save(account);
+    }
+
+    public void deleteAccount(Integer id) {
+        Account acc = getById(id);
+        if (acc.isProtected()) throw new IllegalStateException("Không thể xóa tài khoản hệ thống");
+        accountRepository.delete(acc);
+    }
+
+    public void lockAccount(Integer id) {
+        Account acc = getById(id);
+        acc.setLocked(true);
+        acc.setLockUntil(new Date(System.currentTimeMillis() + 60 * 60 * 1000)); // 1 giờ
+        accountRepository.save(acc);
+    }
+
+    public void unlockAccount(Integer id) {
+        Account acc = getById(id);
+        acc.setLocked(false);
+        acc.setFailedLoginAttempts(0);
+        acc.setLockUntil(null);
+        accountRepository.save(acc);
+    }
+
+    public void toggleActive(Integer id) {
+        Account acc = getById(id);
+        acc.setActive(!acc.isActive());
+        accountRepository.save(acc);
+    }
 }

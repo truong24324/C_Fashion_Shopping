@@ -7,6 +7,7 @@ import News from "../../components/News";
 import Navbar from "../../Layouts/Navbar";
 import Slider from "../../Layouts/Slider";
 import toast from "react-hot-toast";
+import TopSellingProducts from "src/Product/TopSellingProducts";
 
 interface Product {
   productId: number;
@@ -89,7 +90,7 @@ const HomePage: React.FC = () => {
         <Slider />
       </header>
       <BrandsIntroduction />
-      
+      <TopSellingProducts />
       <ProductPanel
         products={filteredProducts}
         loading={loading}

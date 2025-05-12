@@ -176,7 +176,6 @@ const Navbar: React.FC = () => {
                     </Link>
                     <button onClick={handleLogout} className="text-white flex items-center text-sm hover:text-yellow-400">
                       <FaSignOutAlt className="mr-2" />
-                      Đăng xuất
                     </button>
                   </div>
                 ) : (
@@ -212,7 +211,7 @@ const Navbar: React.FC = () => {
             </nav>
 
             <div className="md:hidden flex justify-end px-4">
-              <button onClick={toggleMenu} className="text-2xl text-white">
+              <button onClick={toggleMenu} className="text-2xl text-yellow-400">
                 {isMenuOpen ? "×" : "☰"}
               </button>
             </div>

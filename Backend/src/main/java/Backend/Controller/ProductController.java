@@ -112,10 +112,15 @@ public class ProductController {
     @DeleteMapping("/{productId}")
 	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
     public ResponseEntity<ApiResponse<String>> deleteProduct(@PathVariable Integer productId) {
-        productService.deleteProduct(productId);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Đã xóa sản phẩm thành công", null));
+        try {
+            productService.deleteProduct(productId);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Đã xóa sản phẩm thành công", null));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body(new ApiResponse<>(false, e.getMessage(), null));
+        }
     }
-
+    
     // ✅ Bắt lỗi validate từ @Valid
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<String>> handleValidationExceptions(MethodArgumentNotValidException ex) {

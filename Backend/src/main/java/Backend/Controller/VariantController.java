@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -77,10 +78,15 @@ public class VariantController {
 
     // ✅ API xóa variant
     @DeleteMapping("/{variantId}")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
     public ResponseEntity<ApiResponse<String>> deleteVariant(@PathVariable Integer variantId) {
-        variantService.deleteVariant(variantId);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Đã xóa variant thành công", null));
+        try {
+            variantService.deleteVariant(variantId);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Đã xóa biến thể thành công", null));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body(new ApiResponse<>(false, e.getMessage(), null));
+        }
     }
 
     // ✅ Bắt lỗi validate từ @Valid và trả về phản hồi chuẩn JSON

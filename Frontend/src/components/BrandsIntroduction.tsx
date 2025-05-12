@@ -3,6 +3,10 @@ import { toast } from "react-hot-toast";
 import axios from "axios";
 import Loading from "./common/Loading";
 
+const CACHE_KEY = "cachedBrands";
+const CACHE_EXPIRE_KEY = "cachedBrandsExpire";
+const CACHE_DURATION = 10 * 60 * 1000; // 10 phút
+
 const BrandsIntroduction: React.FC = () => {
   const [brands, setBrands] = useState<any[]>([]);
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -16,8 +20,15 @@ const BrandsIntroduction: React.FC = () => {
     try {
       const response = await axios.get("/api/views/listBrand");
       const brandData = response.data || [];
+
       setBrands(brandData);
+
+      // Lưu cache + thời gian hết hạn
+      localStorage.setItem(CACHE_KEY, JSON.stringify(brandData));
+      localStorage.setItem(CACHE_EXPIRE_KEY, (Date.now() + CACHE_DURATION).toString());
+
       setLoading(false);
+      setError(false);
     } catch (error) {
       toast.error("Lỗi khi tải thương hiệu. Vui lòng thử lại sau.");
       setLoading(false);
@@ -26,6 +37,24 @@ const BrandsIntroduction: React.FC = () => {
   };
 
   useEffect(() => {
+    const cached = localStorage.getItem(CACHE_KEY);
+    const expireTime = parseInt(localStorage.getItem(CACHE_EXPIRE_KEY) || "0", 10);
+
+    const isValidCache = cached && Date.now() < expireTime;
+
+    if (isValidCache) {
+      try {
+        const parsed = JSON.parse(cached!);
+        if (Array.isArray(parsed)) {
+          setBrands(parsed);
+          setLoading(false); // Tạm dùng cache, không hiển thị loading
+        }
+      } catch (e) {
+        console.error("Lỗi parse cache:", e);
+      }
+    }
+
+    // Luôn gọi lại API để làm mới (trừ khi đang dùng thử lại)
     fetchBrands();
   }, []);
 

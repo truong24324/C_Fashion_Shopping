@@ -122,8 +122,15 @@ public class VariantService {
     @Transactional
     public void deleteVariant(Integer variantId) {
         if (!variantRepository.existsById(variantId)) {
-            throw new RuntimeException("Variant không tồn tại");
+            throw new IllegalStateException("Biến thể không tồn tại");
         }
+
+        // Kiểm tra nếu variant đang được sử dụng (trong đơn hàng, giỏ hàng, v.v.)
+        if (variantRepository.existsById(variantId)) {
+            throw new IllegalStateException("Không thể xóa biến thể vì đang được sử dụng trong đơn hàng");
+        }
+
         variantRepository.deleteById(variantId);
     }
+
 }

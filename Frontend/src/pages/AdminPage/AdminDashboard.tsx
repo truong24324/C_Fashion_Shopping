@@ -8,6 +8,7 @@ import ListDisplay from "./ListDisplay";
 import CreateDisplay from "./CreateDisplay";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import AccountList from "./AccountList";
 
 const AdminDashboard: React.FC = () => {
   const [selectedMenu, setSelectedMenu] = useState("Tổng quan");
@@ -53,7 +54,7 @@ const AdminDashboard: React.FC = () => {
     ),
     "Giao dịch": <div><h2 className="text-3xl font-semibold">Giao Dịch</h2><TransactionChart /></div>,
     "Báo cáo": <div><h2 className="text-3xl font-semibold">Báo Cáo</h2></div>,
-    "Người dùng": <div><h2 className="text-3xl font-semibold">Người Dùng</h2></div>,
+    "Người dùng": <div><h2 className="text-3xl font-semibold">Người Dùng</h2><AccountList/></div>,
     "Danh sách": <div><h2 className="text-3xl font-semibold">Danh Sách</h2><ListDisplay /></div>,
     "Thêm mới": <div><h2 className="text-3xl font-semibold">Thêm Mới</h2><CreateDisplay /></div>,
     "Đăng xuất": (

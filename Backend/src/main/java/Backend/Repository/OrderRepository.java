@@ -10,6 +10,6 @@ import Backend.Model.Order;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Integer> {
     Optional<Order> findByOrderCode(String orderCode);
-    List<Order> findByAccountAccountIdAndDiscountCodeAndPaymentStatus(Integer accountId, String discountCode, Integer paymentStatus);
+    List<Order> findByAccountAccountIdAndDiscountCodeAndPaymentStatus(Integer accountId, String discountCode, String paymentStatus);
 
 }

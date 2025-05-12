@@ -53,7 +53,7 @@ public class Order {
     private String paymentMethod;
 
     @Column(name = "PAYMENT_STATUS", nullable = false)
-    private Integer paymentStatus;
+    private String paymentStatus;
 
     // Trạng thái đơn hàng
     @ManyToOne

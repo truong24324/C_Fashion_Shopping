@@ -59,23 +59,27 @@ public class MoMoService {
         Account account = accountRepository.findById(orderRequestDto.getAccountId())
                 .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
 
-        // 2️⃣ Tạo đơn hàng ban đầu (chưa thanh toán)
+        // 2️⃣ Tạo đơn hàng ban đầu
         Order order = orderService.placeOrder(orderRequestDto);
         order.setAccount(account);
         order.setOrderDate(LocalDateTime.now());
         order.setIsActive(true);
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
-        order.setPaymentStatus(0); // Chưa thanh toán
+        order.setPaymentStatus("Thanh toán thất bại"); // Tránh lỗi nếu DB column chỉ có VARCHAR(10)
         order.setPaymentMethod("MOMO");
 
-        // Gán trạng thái mặc định là "Chờ thanh toán"
-        OrderStatus pendingStatus = orderStatusRepository.findByStepOrder(0)
+        // Gán trạng thái mặc định
+        OrderStatus pendingStatus = orderStatusRepository.findByStepOrder(1)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái 'Chờ thanh toán'"));
         order.setOrderStatus(pendingStatus);
 
-        // 3️⃣ Áp dụng mã giảm giá (nếu có)
+        // 3️⃣ Tổng tiền tạm tính từ request
         BigDecimal adjustedPrice = orderRequestDto.getTotalAmount();
+        BigDecimal shippingFee = orderRequestDto.getShippingFee() != null ? orderRequestDto.getShippingFee() : BigDecimal.ZERO;
+        order.setShippingFee(shippingFee);
+
+        // 4️⃣ Áp dụng giảm giá nếu có
         if (orderRequestDto.getDiscount() != null && !orderRequestDto.getDiscount().isEmpty()) {
             DiscountRequest discountDto = orderRequestDto.getDiscount().get(0);
             String discountCode = discountDto.getDiscountCode();
@@ -87,71 +91,58 @@ public class MoMoService {
                 }
 
                 Discount discount = optionalDiscount.get();
-
                 if (!Boolean.TRUE.equals(discount.getIsActive()) || discount.getQuantity() <= 0) {
                     throw new RuntimeException("Mã giảm giá không hợp lệ hoặc đã hết!");
                 }
 
                 LocalDateTime now = LocalDateTime.now();
-
                 if (discount.getStartDate() != null && now.isBefore(discount.getStartDate())) {
                     throw new RuntimeException("Mã giảm giá chưa đến thời gian áp dụng!");
                 }
-
                 if (discount.getEndDate() != null && now.isAfter(discount.getEndDate())) {
                     throw new RuntimeException("Mã giảm giá đã hết hạn!");
                 }
 
-                BigDecimal shippingFee = orderRequestDto.getShippingFee() != null ? orderRequestDto.getShippingFee() : BigDecimal.ZERO;
-                order.setShippingFee(shippingFee);
-
-                // totalAmount = adjustedPrice (sau giảm giá) + phí vận chuyển
-                BigDecimal totalAmount = adjustedPrice.add(shippingFee).add(shippingFee);
-                order.setTotalAmount(totalAmount);
-
                 // Kiểm tra đã dùng chưa
                 List<Order> usedOrders = orderRepository
-                        .findByAccountAccountIdAndDiscountCodeAndPaymentStatus(orderRequestDto.getAccountId(), discountCode, 1);
+                        .findByAccountAccountIdAndDiscountCodeAndPaymentStatus(orderRequestDto.getAccountId(), discountCode, "Đã thanh toán");
                 if (!usedOrders.isEmpty()) {
                     throw new RuntimeException("Bạn đã sử dụng mã giảm giá này rồi");
                 }
 
-                // Áp dụng giảm giá
+                // Tính toán giá sau giảm
                 BigDecimal discountValue = BigDecimal.valueOf(discount.getDiscountValue());
                 BigDecimal discountAmount = BigDecimal.ZERO;
-
                 if (discount.getDiscountType() == DiscountType.PERCENT) {
                     discountAmount = adjustedPrice.multiply(discountValue).divide(BigDecimal.valueOf(100));
                     discountAmount = discountAmount.min(BigDecimal.valueOf(990000));
                 } else if (discount.getDiscountType() == DiscountType.AMOUNT) {
                     discountAmount = discountValue;
                 }
-
                 discountAmount = discountAmount.min(adjustedPrice);
                 adjustedPrice = adjustedPrice.subtract(discountAmount);
 
-                // Cập nhật số lượng còn lại
+                // Giảm số lượng
                 discount.setQuantity(discount.getQuantity() - 1);
                 discountRepository.save(discount);
 
-                // Lưu thông tin giảm giá vào đơn hàng
                 order.setDiscountCode(discountCode);
                 order.setDiscount(discount);
-
             }
         }
 
-        // 4️⃣ Cập nhật tổng tiền
+        // 5️⃣ Tổng cộng lại: giá sau giảm + phí ship
+        adjustedPrice = adjustedPrice.add(shippingFee);
         order.setTotalAmount(adjustedPrice);
 
-        // 5️⃣ Gán mã đơn hàng (MoMo yêu cầu)
-        String orderId = "ORDER" + System.currentTimeMillis();
+        // 6️⃣ Gán mã đơn hàng duy nhất
+        String orderId = "ORDER-" + UUID.randomUUID();
         order.setOrderCode(orderId);
 
-        // 6️⃣ Lưu đơn hàng tạm thời
+        // 7️⃣ Lưu đơn hàng tạm
         orderRepository.save(order);
 
-        // 7️⃣ Tạo yêu cầu thanh toán đến MoMo
+        // 8️⃣ Gửi yêu cầu đến MoMo
         String requestId = UUID.randomUUID().toString();
         String orderInfo = "Thanh toán đơn hàng #" + order.getOrderId();
 
@@ -189,13 +180,19 @@ public class MoMoService {
                 .build();
 
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
         JSONObject resJson = new JSONObject(response.body());
+        System.out.println("MoMo response: " + resJson.toString());
+
         String payUrl = resJson.getString("payUrl");
 
-        // 8️⃣ Trả về kết quả
+        // 9️⃣ Trả kết quả cho FE
         PaymentResponse paymentResponse = new PaymentResponse();
         paymentResponse.setCode("00");
         paymentResponse.setPaymentUrl(payUrl);
         return paymentResponse;
     }
+
+
+      
 }

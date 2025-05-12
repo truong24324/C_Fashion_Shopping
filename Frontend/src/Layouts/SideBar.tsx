@@ -44,7 +44,8 @@ const menuSections = [
 ];
 
 const Sidebar = ({ onSelect }: { onSelect: (label: string) => void }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false); // 👈 Đặt ban đầu là false
+  const [activeLabel, setActiveLabel] = useState("Tổng quan"); // 👈 Mục mặc định
 
   const toggleSidebar = () => setIsExpanded(!isExpanded);
 
@@ -53,14 +54,17 @@ const Sidebar = ({ onSelect }: { onSelect: (label: string) => void }) => {
       animate={{ width: isExpanded ? "260px" : "90px" }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
       className="h-screen bg-gray-900/40 backdrop-blur-xl border-r border-gray-700 flex flex-col p-4 shadow-xl rounded-tr-3xl rounded-br-3xl relative"
-
     >
       {/* Toggle Button */}
       <button
         onClick={toggleSidebar}
         className="absolute right-[-14px] top-5 bg-gray-800 p-2 rounded-full shadow-lg hover:bg-gray-700 transition-all"
       >
-        {isExpanded ? <ChevronLeft size={20} className="text-white" /> : <ChevronRight size={20} className="text-white" />}
+        {isExpanded ? (
+          <ChevronLeft size={20} className="text-white" />
+        ) : (
+          <ChevronRight size={20} className="text-white" />
+        )}
       </button>
 
       {/* Navigation Sections */}
@@ -68,7 +72,7 @@ const Sidebar = ({ onSelect }: { onSelect: (label: string) => void }) => {
         {menuSections.map((section, index) => (
           <div key={index} className="w-full">
             <AnimatePresence>
-              {(isExpanded) && (
+              {isExpanded && (
                 <motion.h3
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -81,29 +85,42 @@ const Sidebar = ({ onSelect }: { onSelect: (label: string) => void }) => {
               )}
             </AnimatePresence>
             <div className="flex flex-col mt-2">
-              {section.items.map(({ icon: Icon, label }, idx) => (
-                <motion.button
-                  key={idx}
-                  onClick={() => onSelect(label)}
-                  className="flex items-center gap-4 px-4 py-3 w-full text-lg font-medium rounded-xl transition-all hover:bg-green-500/20 hover:text-green-300"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Icon size={isExpanded  ? 22 : 28} className="text-green-400" />
-                  <AnimatePresence>
-                    {(isExpanded) && (
-                      <motion.span
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -10 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        {label}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </motion.button>
-              ))}
+              {section.items.map(({ icon: Icon, label }, idx) => {
+                const isActive = activeLabel === label;
+                return (
+                  <motion.button
+                    key={idx}
+                    onClick={() => {
+                      setActiveLabel(label);
+                      onSelect(label);
+                    }}
+                    className={`flex items-center gap-4 px-4 py-3 w-full text-lg font-medium rounded-xl transition-all
+                      ${isActive
+                        ? "bg-green-500/30 text-green-300"
+                        : "hover:bg-green-500/20 hover:text-green-300 text-white"
+                      }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Icon
+                      size={isExpanded ? 22 : 28}
+                      className={`${isActive ? "text-green-300" : "text-green-400"}`}
+                    />
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.span
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -10 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {label}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </motion.button>
+                );
+              })}
             </div>
           </div>
         ))}

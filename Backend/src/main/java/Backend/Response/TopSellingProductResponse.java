@@ -6,7 +6,7 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class ProductCardResponse {
+public class TopSellingProductResponse {
     private Integer productId;
     private String productName;
     private String model;
