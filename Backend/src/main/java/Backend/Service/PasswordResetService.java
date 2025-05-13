@@ -193,7 +193,8 @@ public class PasswordResetService {
 		String encodedPassword = encoder.encode(newPassword);
 		account.setPassword(encodedPassword); // Lưu mật khẩu đã mã hóa
 		account.setLocked(false);
-		account.setLockUntil(new Date(System.currentTimeMillis() + 00 * 60 * 1000)); // Khóa 30 phút
+		account.setLockUntil(new Date(System.currentTimeMillis() + 00 * 60 * 1000));
+		account.setPasswordChangedAt(new Date());
 		accountRepository.save(account);
 
 		// Đánh dấu OTP là đã sử dụng

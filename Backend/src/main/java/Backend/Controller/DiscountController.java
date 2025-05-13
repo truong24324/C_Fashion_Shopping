@@ -29,7 +29,7 @@ public class DiscountController {
 
 	// ✅ API lấy danh sách mã giảm giá (phân trang + sắp xếp)
 	@GetMapping("/all")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
 	public ResponseEntity<Page<DiscountResponse>> getAllDiscounts(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "createdAt") String sortBy) {
 
@@ -56,7 +56,7 @@ public class DiscountController {
 
 	// ✅ API thêm mã giảm giá
 	@PostMapping("/add")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
 	public ResponseEntity<ApiResponse<Discount>> createDiscount(@RequestBody @Valid DiscountRequest request) {
 		if (discountService.isDiscountCodeExists(request.getDiscountCode())) {
 			return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Mã giảm giá đã tồn tại!", null));
@@ -68,7 +68,7 @@ public class DiscountController {
 
 	// ✅ API cập nhật mã giảm giá
 	@PutMapping("/{discountId}")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
 	public ResponseEntity<ApiResponse<Discount>> updateDiscount(
 	        @PathVariable Integer discountId,
 	        @RequestBody @Valid DiscountUpdateRequest request) {
@@ -80,7 +80,7 @@ public class DiscountController {
 	}
 
 	@PatchMapping("/{discountId}/status")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
 	public ResponseEntity<ApiResponse<String>> updateDiscountStatus(@PathVariable Integer discountId,
 			@RequestParam boolean isActive) {
 
@@ -90,7 +90,7 @@ public class DiscountController {
 
 	// ✅ API xóa mã giảm giá
 	@DeleteMapping("/{discountId}")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
 	public ResponseEntity<ApiResponse<String>> deleteDiscount(@PathVariable Integer discountId) {
 		discountService.deleteDiscount(discountId);
 		return ResponseEntity.ok(new ApiResponse<>(true, "Xóa mã giảm giá thành công", null));

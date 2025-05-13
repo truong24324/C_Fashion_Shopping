@@ -28,7 +28,7 @@ public class ColorController {
 
     // ✅ API lấy danh sách màu có phân trang
     @GetMapping("/all")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<Page<Color>> getAllColors(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -53,7 +53,7 @@ public class ColorController {
 
     // ✅ API thêm mới màu
     @PostMapping("/add")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Color>> createColor(@RequestBody @Valid ColorRequest request) {
         if (colorService.isColorNameExists(request.getColorName())) {
             return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Tên màu đã tồn tại!", null));
@@ -65,7 +65,7 @@ public class ColorController {
 
     // ✅ API cập nhật màu
     @PutMapping("/{colorId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Color>> updateColor(
             @PathVariable Integer colorId,
             @RequestBody ColorUpdateRequest request) {
@@ -80,7 +80,7 @@ public class ColorController {
 
     // ✅ API xóa màu
     @DeleteMapping("/{colorId}")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<String>> deleteColor(@PathVariable Integer colorId) {
         colorService.deleteColor(colorId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Đã xóa màu thành công", null));

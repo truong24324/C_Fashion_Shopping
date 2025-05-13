@@ -28,6 +28,7 @@ public class VariantController {
     private final VariantService variantService;
     
     @GetMapping("/all")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<PaginationResponse<VariantResponse>> getAllVariants(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -60,7 +61,7 @@ public class VariantController {
 
  // Thêm API cho phép thêm nhiều biến thể cùng lúc
     @PostMapping("/batch-add")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<List<Variant>>> createVariants(@RequestBody @Valid List<VariantRequest> requests) {
         List<Variant> createdVariants = variantService.createVariants(requests);
         return ResponseEntity.ok(new ApiResponse<>(true, "Thêm variant thành công!", createdVariants));
@@ -68,7 +69,7 @@ public class VariantController {
 
     // ✅ API cập nhật variant
     @PutMapping("/{variantId}")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Variant>> updateVariant(
             @PathVariable Integer variantId,
             @RequestBody @Valid VariantRequest request) {
@@ -78,7 +79,7 @@ public class VariantController {
 
     // ✅ API xóa variant
     @DeleteMapping("/{variantId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<String>> deleteVariant(@PathVariable Integer variantId) {
         try {
             variantService.deleteVariant(variantId);

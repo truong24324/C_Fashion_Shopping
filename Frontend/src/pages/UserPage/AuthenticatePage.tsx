@@ -65,7 +65,7 @@ const AuthenticatePage: React.FC = () => {
       localStorage.setItem("token", data.token);
       localStorage.setItem("accountId", data.accountId);
 
-      if (roles.includes("ROLE_Admin")) {
+      if (roles.includes("ROLE_Admin") || roles.includes("ROLE_Super_Admin")) {
         navigate("/admin");
       } else {
         navigate("/");

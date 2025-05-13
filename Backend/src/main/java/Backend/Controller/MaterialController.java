@@ -24,7 +24,7 @@ public class MaterialController {
 
     // ✅ API lấy danh sách chất liệu có phân trang
     @GetMapping("/all")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<Page<Material>> getAllMaterials(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -37,7 +37,7 @@ public class MaterialController {
 
     // ✅ API thêm mới chất liệu
     @PostMapping("/add")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Material>> createMaterial(@RequestBody @Valid MaterialRequest request) {
         if (materialService.isMaterialNameExists(request.getMaterialName())) {
             return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Tên chất liệu đã tồn tại!", null));
@@ -49,7 +49,7 @@ public class MaterialController {
 
     // ✅ API cập nhật chất liệu
     @PutMapping("/{materialId}")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Material>> updateMaterial(
             @PathVariable Integer materialId,
             @RequestBody @Valid MaterialRequest request) {
@@ -66,7 +66,7 @@ public class MaterialController {
 
     // ✅ API xóa chất liệu
     @DeleteMapping("/{materialId}")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<String>> deleteMaterial(@PathVariable Integer materialId) {
         materialService.deleteMaterial(materialId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Đã xóa chất liệu thành công", null));

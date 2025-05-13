@@ -40,7 +40,7 @@ public class BrandController {
     private final BrandService brandService;
 
     @GetMapping("/all")
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<PaginationResponse<BrandResponse>> getAllBrands(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -71,7 +71,7 @@ public class BrandController {
     }
 
     // ✅ API thêm mới thương hiệu (dùng @Valid để bắt lỗi tự động)
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     @PostMapping("/add")
     public ResponseEntity<ApiResponse<Brand>> createBrand(@ModelAttribute @Valid BrandRequest request) {
 
@@ -90,7 +90,7 @@ public class BrandController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Thêm thương hiệu thành công!", createdBrand));
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     @PutMapping("/{brandId}")
     public ResponseEntity<ApiResponse<Brand>> updateBrand(
             @PathVariable Integer brandId,
@@ -111,7 +111,7 @@ public class BrandController {
     }
 
     // ✅ API cập nhật ảnh thương hiệu
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     @PutMapping("/{brandId}/upload")
     public ResponseEntity<ApiResponse<Brand>> updateBrand(
             @PathVariable Integer brandId,
@@ -141,7 +141,7 @@ public class BrandController {
     }
 
     // ✅ API xóa thương hiệu
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     @DeleteMapping("/{brandId}")
     public ResponseEntity<ApiResponse<String>> deleteBrand(@PathVariable Integer brandId) {
         try {

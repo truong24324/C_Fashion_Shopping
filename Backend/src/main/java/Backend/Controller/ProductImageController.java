@@ -27,7 +27,7 @@ public class ProductImageController {
     private final ProductImageService productImageService;
 
     @GetMapping("/all")
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<PaginationResponse<ProductImageResponse>> getAllProductImages(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -65,7 +65,7 @@ public class ProductImageController {
         return productImageService.getByProductId(productId);
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     @PutMapping("/{imageId}")
     public ResponseEntity<ApiResponse<ProductImageResponse>> updateImage(
             @PathVariable Integer imageId,
@@ -102,7 +102,7 @@ public class ProductImageController {
     }
 
     @PutMapping("/{imageId}/upload")
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<ProductImage>> updateImage(
             @PathVariable Integer imageId,
             @RequestParam("productId") Integer productId,

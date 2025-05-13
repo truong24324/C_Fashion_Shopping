@@ -447,7 +447,6 @@ export const getColumnsConfig = (
                 dataIndex: "roleName",
                 key: "roleName",
                 ellipsis: true
-                // Không có renderCell => không cho chỉnh sửa
             },
             {
                 title: "Cho phép đăng nhập",
@@ -456,7 +455,7 @@ export const getColumnsConfig = (
                 render: (loginAllowed: boolean, record: any) => (
                     <Switch
                         checked={loginAllowed}
-                        onChange={() => handleToggleActive(record.discountId, !loginAllowed)}
+                        onChange={() => handleToggleActive(record.roleId, !loginAllowed)}
                     />
                 )
             },

@@ -30,7 +30,7 @@ public class ProductController {
 
     // ✅ API lấy danh sách sản phẩm có phân trang
     @GetMapping("/all")
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<PaginationResponse<ProductSimpleResponse>> getProductSummary(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -72,7 +72,7 @@ public class ProductController {
 
     // ✅ API thêm mới sản phẩm
     @PostMapping("/add")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Product>> createProduct(@RequestBody @Valid ProductRequest request) {
         Product createdProduct = productService.createProduct(request);
         return ResponseEntity.ok(new ApiResponse<>(true, "Thêm sản phẩm thành công!", createdProduct));
@@ -99,7 +99,7 @@ public class ProductController {
 
     // ✅ API cập nhật sản phẩm
     @PutMapping("/{productId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Product>> updateProduct(
             @PathVariable Integer productId,
             @RequestBody @Valid ProductUpdateRequest request) {
@@ -110,7 +110,7 @@ public class ProductController {
 
     // ✅ API xóa sản phẩm
     @DeleteMapping("/{productId}")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<String>> deleteProduct(@PathVariable Integer productId) {
         try {
             productService.deleteProduct(productId);

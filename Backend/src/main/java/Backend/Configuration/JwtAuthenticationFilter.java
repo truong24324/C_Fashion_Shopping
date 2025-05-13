@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import Backend.Model.Account;
+import Backend.Model.Role;
 import Backend.Service.AccountService;
 import Backend.Service.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -66,6 +67,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     return;
                 }
 
+                if (account.isLocked()) {
+                    logger.warn("Tài khoản bị khóa: " + username);
+                    sendErrorResponse(response, "Tài khoản đã bị khóa");
+                    return;
+                }
+
+                Role role = account.getRole();
+                if (role != null && !role.isLoginAllowed()) {
+                    logger.warn("Quyền đăng nhập bị tắt cho tài khoản: " + username);
+                    sendErrorResponse(response, "Quyền đăng nhập bị tắt cho vai trò của bạn.");
+                    return;
+                }
+                
                 // Kiểm tra token hợp lệ
                 if (jwtService.isTokenValid(token, userDetails)) {
                     UsernamePasswordAuthenticationToken authenticationToken =

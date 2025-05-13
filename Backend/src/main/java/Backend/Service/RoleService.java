@@ -58,6 +58,14 @@ public class RoleService {
     public Page<Role> getAllRoles(Pageable pageable) {
         return roleRepository.findAll(pageable);
     }
+    
+    public Role updateLoginAllowedStatus(Long roleId, boolean isLoginAllowed) {
+        Role role = roleRepository.findById(roleId)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy vai trò với ID: " + roleId));
+
+        role.setLoginAllowed(isLoginAllowed);
+        return roleRepository.save(role);
+    }
 
     public Role findRoleByName(String roleName) {
         return roleRepository.findByRoleName(roleName).orElse(null);  // Or throw an exception if not found

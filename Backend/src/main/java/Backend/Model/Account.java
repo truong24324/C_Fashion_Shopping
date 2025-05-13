@@ -151,12 +151,6 @@ public class Account implements UserDetails {
 		return true; // Không bị khóa
 	}
 
-//
-//    @Override
-//    public boolean isAccountNonLocked() {
-//        return !isLocked; // Trả về trạng thái không bị khóa
-//    }
-
 	@Override
 	public boolean isCredentialsNonExpired() {
 		return true; // Mật khẩu không hết hạn

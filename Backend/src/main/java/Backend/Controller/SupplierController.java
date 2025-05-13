@@ -27,7 +27,7 @@ public class SupplierController {
 
     // ✅ API lấy danh sách nhà cung cấp có phân trang
     @GetMapping("/all")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<PaginationResponse<Supplier>> getAllSuppliers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -90,7 +90,7 @@ public class SupplierController {
 
     // ✅ API thêm mới nhà cung cấp
     @PostMapping("/add")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Supplier>> createSupplier(@RequestBody @Valid SupplierRequest request) {
         Supplier createdSupplier = supplierService.createSupplier(request);
         return ResponseEntity.ok(new ApiResponse<>(true, "Thêm nhà cung cấp thành công!", createdSupplier));
@@ -98,7 +98,7 @@ public class SupplierController {
 
     // ✅ API cập nhật nhà cung cấp
     @PutMapping("/{supplierId}")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Supplier>> updateSupplier(
             @PathVariable Integer supplierId,
             @RequestBody @Valid SupplierRequest request) {
@@ -107,7 +107,7 @@ public class SupplierController {
     }
 
     @DeleteMapping("/{supplierId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<String>> deleteSupplier(@PathVariable Integer supplierId) {
         try {
             // Gọi service để xóa nhà cung cấp

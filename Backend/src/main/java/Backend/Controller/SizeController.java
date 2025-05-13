@@ -27,7 +27,7 @@ public class SizeController {
 
     // ✅ API lấy danh sách kích thước có phân trang
     @GetMapping("/all")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<PaginationResponse<Size>> getAllSizes(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -70,7 +70,7 @@ public class SizeController {
 
     // ✅ API thêm mới kích thước
     @PostMapping("/add")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Size>> createSize(@RequestBody @Valid SizeRequest request) {
         if (sizeService.isSizeNameExists(request.getSizeName())) {
             return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Tên kích thước đã tồn tại!", null));
@@ -82,7 +82,7 @@ public class SizeController {
 
     // ✅ API cập nhật kích thước
     @PutMapping("/{sizeId}")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Size>> updateSize(
             @PathVariable Integer sizeId,
             @RequestBody @Valid SizeRequest request) {
@@ -99,7 +99,7 @@ public class SizeController {
 
     // ✅ API xóa kích thước
     @DeleteMapping("/{sizeId}")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<String>> deleteSize(@PathVariable Integer sizeId) {
         sizeService.deleteSize(sizeId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Đã xóa kích thước thành công", null));

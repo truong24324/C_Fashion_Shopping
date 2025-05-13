@@ -31,7 +31,7 @@ public class InformationController {
 
     // ✅ Lấy thông tin cá nhân theo ID tài khoản
     @GetMapping("/me")
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Customer')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Customer', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<AccountInfoResponse>> getMyInformation(@AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
         Account account = accountRepository.findByEmail(email)
@@ -78,7 +78,7 @@ public class InformationController {
 
     // ✅ Thêm mới thông tin cá nhân
     @PostMapping("/{accountId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Customer')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Customer', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<InformationResponse>> createInformation(
             @ModelAttribute @Valid InformationRequest request) {
 
@@ -109,7 +109,7 @@ public class InformationController {
 
     // ✅ Cập nhật thông tin cá nhân
     @PutMapping("/{accountId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Customer')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Customer', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<InformationResponse>> updateInformation(
             @PathVariable Long accountId,
             @ModelAttribute @Valid InformationRequest request) {
@@ -142,7 +142,7 @@ public class InformationController {
 
     // ✅ Xóa thông tin cá nhân
     @DeleteMapping("/{accountId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<String>> deleteInformation(@PathVariable Long accountId) {
         informationService.deleteInformation(accountId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Xóa thông tin thành công", "Đã xóa thông tin của accountId = " + accountId));

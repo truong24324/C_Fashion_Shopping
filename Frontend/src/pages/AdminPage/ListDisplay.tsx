@@ -89,10 +89,12 @@ const ListDisplay = () => {
         }
     };
 
-    const handleToggleActive = async (discountId: number, newStatus: boolean) => {
+    const handleToggleActive = async (itemId: number, newStatus: boolean) => {
+        const idKey = `${category}Id`;
+
         try {
             const response = await axios.patch(
-                `/api/discounts/${discountId}/status?isActive=${newStatus}`,
+                `/api/${updateApi}/${itemId}/status?isActive=${newStatus}`,
                 {},
                 {
                     headers: {
@@ -100,11 +102,18 @@ const ListDisplay = () => {
                     }
                 }
             );
+
             if (response.data.success) {
                 toast.success("Cập nhật trạng thái thành công!");
                 setData((prevData) =>
                     prevData.map((item) =>
-                        item.discountId === discountId ? { ...item, isActive: newStatus } : item
+                        item[idKey] === itemId
+                            ? {
+                                ...item,
+                                // Dùng key khác nếu là `role`
+                                [category === "role" ? "loginAllowed" : "isActive"]: newStatus
+                            }
+                            : item
                     )
                 );
             } else {
@@ -216,14 +225,14 @@ const ListDisplay = () => {
     const handleDelete = async (record: any) => {
         const idKey = `${category}Id`;
         const deleteUrl = `/api/${updateApi}/${record[idKey]}`;
-    
+
         try {
             const response = await axios.delete(deleteUrl, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`
                 }
             });
-    
+
             if (response.data.success) {
                 toast.success("Xóa thành công!");
                 setData((prevData) => prevData.filter(item => item[idKey] !== record[idKey]));

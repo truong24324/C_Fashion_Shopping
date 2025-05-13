@@ -16,12 +16,12 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/roles")
+@PreAuthorize("hasAuthority('ROLE_Super_Admin')")
 public class RoleController {
 
     private final RoleService roleService;
 
     // ✅ Lấy danh sách phân trang
-    @PreAuthorize("hasAuthority('ROLE_Admin')")
     @GetMapping("/all")
     public ResponseEntity<PaginationResponse<Role>> getAllRoles(
             @RequestParam(defaultValue = "0") int page,
@@ -43,7 +43,6 @@ public class RoleController {
     }
 
     // ✅ Tạo Role mới
-    @PreAuthorize("hasAuthority('ROLE_Admin')")
     @PostMapping("/add")
     public ResponseEntity<ApiResponse<Role>> createRole(@RequestBody @Valid RoleRequest request) {
         Role createdRole = roleService.createRole(request);
@@ -51,7 +50,6 @@ public class RoleController {
     }
 
     // ✅ Cập nhật Role (chỉ cho phép cập nhật mô tả, không sửa tên quyền)
-    @PreAuthorize("hasAuthority('ROLE_Admin')")
     @PutMapping("/{roleId}")
     public ResponseEntity<ApiResponse<Role>> updateRole(@PathVariable Long id, @RequestBody RoleRequest request) {
         Role updatedRole = roleService.updateRole(id, request);
@@ -59,7 +57,6 @@ public class RoleController {
     }
 
     // ✅ Xóa Role (chỉ khi chưa gán cho user nào)
-    @PreAuthorize("hasAuthority('ROLE_Admin')")
     @DeleteMapping("/{roleId}")
     public ResponseEntity<ApiResponse<String>> deleteRole(@PathVariable Long id) {
         boolean deleted = roleService.deleteRoleIfUnused(id);
@@ -68,4 +65,14 @@ public class RoleController {
         }
         return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Không thể xóa vai trò đã được sử dụng!", null));
     }
+    
+ // Cập nhật trạng thái isLoginAllowed của vai trò
+    @PatchMapping("/{roleId}/status")
+    public ResponseEntity<ApiResponse<Role>> updateLoginAllowedStatus(
+            @PathVariable Long roleId,
+            @RequestParam("isActive") boolean isLoginAllowed) {
+        Role updatedRole = roleService.updateLoginAllowedStatus(roleId, isLoginAllowed);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Cập nhật trạng thái đăng nhập thành công!", updatedRole));
+    }
+
 }

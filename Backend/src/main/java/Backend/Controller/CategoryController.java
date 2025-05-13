@@ -30,7 +30,7 @@ public class CategoryController {
 
     // ✅ API lấy danh sách danh mục có phân trang
     @GetMapping("/all")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<PaginationResponse<Category>> getAllCategories(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -52,7 +52,7 @@ public class CategoryController {
 
     // ✅ API thêm mới danh mục
     @PostMapping("/add")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Category>> createCategory(@RequestBody @Valid CategoryRequest request) {
 
         // 🛑 Kiểm tra tên có bị trùng không
@@ -66,7 +66,7 @@ public class CategoryController {
 
     // ✅ API cập nhật danh mục
     @PutMapping("/{categoryId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Category>> updateCategory(
             @PathVariable Integer categoryId,
             @RequestBody CategoryRequest request) {
@@ -92,7 +92,7 @@ public class CategoryController {
 
     // ✅ API xóa danh mục
     @DeleteMapping("/{categoryId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<String>> deleteCategory(@PathVariable Integer categoryId) {
         try {
             categoryService.deleteCategory(categoryId);

@@ -33,19 +33,22 @@ public class InitialAdminSetup {
 
     @EventListener(ApplicationReadyEvent.class)
     public void setupAdminAccount() {
-        if (accountService.countAccounts() == 0) {
-            Role adminRole = roleService.findRoleByName("Admin");
+        Role superAdminRole = roleService.findRoleByName("Super_Admin");
 
+        boolean hasSuperAdmin = accountService.existsByRole(superAdminRole);
+
+        if (!hasSuperAdmin) {
             Account admin = new Account();
             admin.setEmail(adminEmail);
             admin.setPassword(passwordEncoder.encode(adminPassword));
             admin.setUserCode(adminUserCode);
             admin.setPhone("0000000000");
-            admin.setRole(adminRole);
+            admin.setRole(superAdminRole);
             admin.setProtected(true); // Không cho xóa
             accountService.save(admin);
 
-            System.out.println("✅ Đã khởi tạo tài khoản admin: " + adminEmail);
+            System.out.println("✅ Đã khởi tạo tài khoản Super Admin: " + adminEmail);
         }
     }
+
 }

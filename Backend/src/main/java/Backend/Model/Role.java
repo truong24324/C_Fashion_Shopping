@@ -36,7 +36,7 @@ public class Role {
     private String roleName;
 
     @Column(name = "IS_LOGIN_ALLOWED", nullable = false)
-    private boolean isLoginAllowed = true;
+    private boolean isLoginAllowed;
 
     @Column(name = "DESCRIPTION", length = 255)
     private String description;

@@ -28,7 +28,7 @@ public class ProductStatusController {
 
     // ✅ Lấy danh sách trạng thái sản phẩm có phân trang
     @GetMapping("/all")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<PaginationResponse<ProductStatus>> getAllProductStatuses(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -69,7 +69,7 @@ public class ProductStatusController {
 
     // ✅ Thêm mới trạng thái sản phẩm
     @PostMapping("/add")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<ProductStatus>> createProductStatus(@RequestBody @Valid ProductStatusRequest request) {
         ProductStatus createdStatus = productStatusService.createProductStatus(request);
         return ResponseEntity.ok(new ApiResponse<>(true, "Thêm trạng thái sản phẩm thành công!", createdStatus));
@@ -77,7 +77,7 @@ public class ProductStatusController {
 
     // ✅ Cập nhật trạng thái sản phẩm
     @PutMapping("/{statusId}")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<ProductStatus>> updateProductStatus(
             @PathVariable Integer statusId,
             @RequestBody @Valid ProductStatusRequest request) {
@@ -87,7 +87,7 @@ public class ProductStatusController {
 
     // ✅ Xóa trạng thái sản phẩm
     @DeleteMapping("/{statusId}")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager')")
+	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<String>> deleteProductStatus(@PathVariable Integer statusId) {
         productStatusService.deleteProductStatus(statusId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Đã xóa trạng thái sản phẩm thành công", null));

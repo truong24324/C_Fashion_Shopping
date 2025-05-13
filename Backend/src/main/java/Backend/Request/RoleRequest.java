@@ -13,7 +13,7 @@ public class RoleRequest {
     @NotBlank(message = "Tên quyền không được để trống")
     private String roleName;
 
-    private boolean isLoginAllowed = true;
+    private boolean isLoginAllowed;
 
     private String description;
 
