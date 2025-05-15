@@ -147,15 +147,15 @@ public class MoMoService {
         String orderInfo = "Thanh toán đơn hàng #" + order.getOrderId();
 
         String rawSignature = "accessKey=" + accessKey +
-                "&amount=" + adjustedPrice +
-                "&extraData=" +
-                "&ipnUrl=" + ipnUrl +
-                "&orderId=" + orderId +
-                "&orderInfo=" + orderInfo +
-                "&partnerCode=" + partnerCode +
-                "&redirectUrl=" + returnUrl +
-                "&requestId=" + requestId +
-                "&requestType=" + requestType;
+	            "&amount=" + adjustedPrice +
+	            "&extraData=" +
+	            "&ipnUrl=" + ipnUrl +
+	            "&orderId=" + orderId +
+	            "&orderInfo=" + orderInfo +
+	            "&partnerCode=" + partnerCode +
+	            "&redirectUrl=" + returnUrl +
+	            "&requestId=" + requestId +
+	            "&requestType=" + requestType;
 
         String signature = momoUtil.generateSignature(rawSignature, secretKey);
 
@@ -184,6 +184,10 @@ public class MoMoService {
         JSONObject resJson = new JSONObject(response.body());
         System.out.println("MoMo response: " + resJson.toString());
 
+        if (resJson.getInt("resultCode") != 0) {
+            throw new RuntimeException("MoMo thất bại: " + resJson.getString("message"));
+        }
+
         String payUrl = resJson.getString("payUrl");
 
         // 9️⃣ Trả kết quả cho FE
@@ -192,7 +196,4 @@ public class MoMoService {
         paymentResponse.setPaymentUrl(payUrl);
         return paymentResponse;
     }
-
-
-      
 }

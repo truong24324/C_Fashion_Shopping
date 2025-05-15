@@ -2,8 +2,9 @@ package Backend.Service;
 
 import Backend.Model.*;
 import Backend.Request.OrderRequest;
-import Backend.Request.OrderStatusUpdateRequest;
+import Backend.Response.OrderDetailResponse;
 import Backend.Response.OrderResponse;
+import Backend.Response.PurchasedProductResponse;
 import lombok.RequiredArgsConstructor;
 import Backend.Repository.*;
 
@@ -26,8 +27,11 @@ public class OrderService {
     private final VariantRepository variantRepository;
     private final AccountRepository accountRepository;
     private final OrderHistoryRepository orderHistoryRepository;
-
-    @Transactional 
+    private final CartRepository cartRepository;
+    private final CartDetailRepository cartDetailRepository;
+    private final OrderDetailRepository orderDetailRepository;
+    
+    @Transactional
     public Order placeOrder(OrderRequest orderRequest) {
         Integer statusId = orderRequest.getOrderStatusId() != null ? orderRequest.getOrderStatusId() : 1;
         String paymentStatus = orderRequest.getPaymentStatus() != null ? orderRequest.getPaymentStatus() : "Chưa thanh toán";
@@ -57,6 +61,9 @@ public class OrderService {
         List<OrderDetail> orderDetails = new ArrayList<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
 
+        // Lấy các variant đã đặt
+        List<Variant> orderedVariants = new ArrayList<>();
+
         for (OrderRequest.OrderDetailRequest orderDetailRequest : orderRequest.getOrderDetails()) {
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrder(order);
@@ -80,6 +87,9 @@ public class OrderService {
 
             totalAmount = totalAmount.add(totalPrice);
             orderDetails.add(orderDetail);
+
+            // Lưu các variant đã đặt
+            orderedVariants.add(variant);
         }
 
         // Tính tổng: tổng sản phẩm + phí ship (nếu có)
@@ -90,7 +100,17 @@ public class OrderService {
         order.setTotalAmount(totalAmount);
         order.setOrderDetails(orderDetails);
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+
+        // Xóa các CartDetail liên quan đến các variant đã đặt trong giỏ hàng
+        Cart cart = cartRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException("Giỏ hàng không tồn tại cho tài khoản này"));
+
+        for (Variant variant : orderedVariants) {
+            cartDetailRepository.deleteByCartAndVariant(cart, variant);
+        }
+
+        return savedOrder;
     }
     
     public OrderResponse convertToResponse(Order order) {
@@ -145,24 +165,62 @@ public class OrderService {
         return orders.map(this::toOrderResponse);
     }
 
-    public Order updateOrderStatus(Integer orderId, OrderStatusUpdateRequest request) {
+    public Order updateOrderToNextStep(Integer orderId) {
         Order order = findById(orderId);
-        OrderStatus status = orderStatusRepository.findById(request.getStatusId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái"));
+        OrderStatus currentStatus = order.getOrderStatus();
 
-        order.setOrderStatus(status);
+        // Lấy bước tiếp theo dựa trên stepOrder
+        OrderStatus nextStatus = orderStatusRepository
+                .findFirstByStepOrder(currentStatus.getStepOrder() + 1)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bước tiếp theo"));
+
+        if (currentStatus.getIsFinal()) {
+            throw new RuntimeException("Trạng thái hiện tại đã là cuối cùng");
+        }
+
+        order.setOrderStatus(nextStatus);
+        
         order.setUpdatedAt(LocalDateTime.now());
-
+        if (nextStatus.getStatusName().equals("Giao thành công")) {
+            order.setPaymentStatus("Đã thanh toán");
+        } else {
+            order.setPaymentStatus(null);  
+        }
+        
         OrderHistory history = new OrderHistory();
         history.setOrder(order);
-        history.setOrderStatus(status);
-        history.setNote(request.getNote());
+        history.setOrderStatus(nextStatus);
+        // Cập nhật note ghi rõ trạng thái cũ và trạng thái mới
+        history.setNote("Chuyển từ trạng thái '" + currentStatus.getStatusName() + "' sang trạng thái '" + nextStatus.getStatusName() + "'");
         history.setUpdatedAt(LocalDateTime.now());
         orderHistoryRepository.save(history);
 
         return orderRepository.save(order);
     }
     
+    public Order cancelOrder(Integer orderId) {
+        Order order = findById(orderId);
+
+        if (!order.getOrderStatus().getIsCancellable()) {
+            throw new RuntimeException("Trạng thái hiện tại không thể hủy!");
+        }
+
+        OrderStatus cancelStatus = orderStatusRepository.findByStatusNameIgnoreCase("Đã hủy")
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái 'Đã hủy'"));
+
+        order.setOrderStatus(cancelStatus);
+        order.setUpdatedAt(LocalDateTime.now());
+
+        OrderHistory history = new OrderHistory();
+        history.setOrder(order);
+        history.setOrderStatus(cancelStatus);
+        history.setNote("Đơn hàng bị hủy");
+        history.setUpdatedAt(LocalDateTime.now());
+
+        orderHistoryRepository.save(history);
+        return orderRepository.save(order);
+    }
+
     public OrderResponse toOrderResponse(Order order) {
         OrderResponse response = new OrderResponse();
 
@@ -195,4 +253,78 @@ public class OrderService {
         return response;
     }
 
+    public Order updateStatusByUser(Integer orderId, Long accountId, String targetStatusName) {
+        Order order = findById(orderId);
+
+        if (!order.getAccount().getAccountId().equals(accountId)) {
+            throw new RuntimeException("Bạn không có quyền cập nhật đơn hàng này");
+        }
+
+        OrderStatus currentStatus = order.getOrderStatus();
+
+        OrderStatus targetStatus = orderStatusRepository.findByStatusNameIgnoreCase(targetStatusName)
+                .orElseThrow(() -> new RuntimeException("Trạng thái không hợp lệ"));
+
+        List<String> cancelableStatuses = List.of("Chờ xác nhận", "Đang xử lý", "Đang chuẩn bị hàng");
+
+        if (targetStatusName.equalsIgnoreCase("Đã hủy")) {
+            if (!cancelableStatuses.contains(currentStatus.getStatusName())) {
+                throw new RuntimeException("Chỉ có thể hủy đơn khi đang trong trạng thái: " + String.join(", ", cancelableStatuses));
+            }
+        } else if (List.of("Yêu cầu trả hàng", "Hoàn thành").contains(targetStatusName)) {
+            if (!currentStatus.getStatusName().equalsIgnoreCase("Giao thành công")) {
+                throw new RuntimeException("Chỉ có thể chuyển sang '" + targetStatusName + "' sau khi Giao thành công");
+            }
+        } else {
+            throw new RuntimeException("Bạn không được phép chuyển sang trạng thái này");
+        }
+
+        OrderStatus oldStatus = currentStatus;
+        order.setOrderStatus(targetStatus);
+        order.setUpdatedAt(LocalDateTime.now());
+
+        OrderHistory history = new OrderHistory();
+        history.setOrder(order);
+        history.setOrderStatus(targetStatus);
+        history.setNote("Người dùng chuyển từ '" + oldStatus.getStatusName() + "' sang '" + targetStatus.getStatusName() + "'");
+        history.setUpdatedAt(LocalDateTime.now());
+        orderHistoryRepository.save(history);
+
+        return orderRepository.save(order);
+    }
+
+    public List<OrderDetail> getAllPurchasedProductsByAccount(Long accountId) {
+        return orderDetailRepository.findAllByOrder_Account_AccountId(accountId);
+    }
+
+    public OrderDetailResponse toOrderDetailResponse(OrderDetail detail) {
+        OrderDetailResponse res = new OrderDetailResponse();
+        res.setProductName(detail.getProductName());
+        res.setColorName(detail.getColorName());
+        res.setSizeName(detail.getSizeName());
+        res.setMaterialName(detail.getMaterialName());
+        res.setProductPrice(detail.getProductPrice());
+        res.setQuantity(detail.getQuantity());
+        res.setTotalPrice(detail.getTotalPrice());
+
+        // ✅ Thêm orderId và orderStatus
+        res.setOrderId(detail.getOrder().getOrderId());
+        res.setOrderStatus(detail.getOrder().getOrderStatus().getStatusName());
+
+        // ✅ Thêm ảnh sản phẩm chính
+        List<ProductImage> images = detail.getProduct().getImages();
+        if (images != null && !images.isEmpty()) {
+            ProductImage mainImg = images.stream()
+                .filter(img -> ImageType.MAIN.equals(img.getImageType()))
+                .findFirst()
+                .orElse(images.get(0));
+            res.setProductImageUrl(mainImg.getImageUrl());
+        }
+
+        return res;
+    }
+
+    public List<PurchasedProductResponse> getCompletedPurchasedProducts(Long accountId) {
+        return orderDetailRepository.findCompletedPurchasedProductsByAccount_AccountId(accountId);
+    }
 }

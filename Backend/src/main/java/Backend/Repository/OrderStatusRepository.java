@@ -11,5 +11,7 @@ import Backend.Model.OrderStatus;
 public interface OrderStatusRepository extends JpaRepository<OrderStatus, Integer> {
     Optional<OrderStatus> findByStatusName(String statusName);
     Optional<OrderStatus> findByStepOrder(Integer stepOrder);
+    Optional<OrderStatus> findFirstByStepOrder(Integer stepOrder);
+    Optional<OrderStatus> findByStatusNameIgnoreCase(String statusName);
 
 }
