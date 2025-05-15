@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import {
   Home,
   CreditCard,
-  BarChart,
+  ListOrderedIcon,
   Users,
   FileText,
   PlusCircle,
@@ -20,7 +20,7 @@ const menuSections = [
     items: [
       { icon: Home, label: "Tổng quan" },
       { icon: CreditCard, label: "Giao dịch" },
-      { icon: BarChart, label: "Báo cáo" },
+      { icon: ListOrderedIcon , label: "Đơn hàng" },
     ],
   },
   {

@@ -21,6 +21,8 @@ import ReturnPolicyPage from '../pages/UserPage/ReturnPolixyPage';
 import NotFoundPage from 'src/NotFoundPage/NotFoundPage';
 import CheckoutPage from 'src/pages/UserPage/CheckoutPage';
 import FashionPage from 'src/pages/UserPage/FashionPage';
+import PurchasedProductsPage from 'src/pages/UserPage/PurchasedProductsPage';
+import ProductReviewPage from 'src/pages/UserPage/ProductReviewPage';
 
 const isTokenValid = (token: string | null): boolean => {
   if (!token) return false;
@@ -96,6 +98,8 @@ const AppRouterWrapper: React.FC = () => {
       <Route path="/about" element={<AboutPage />} />
       <Route path="/returns" element={<ReturnPolicyPage />} />
       <Route path="*" element={<NotFoundPage />} />
+      <Route path="/purchased" element={<PurchasedProductsPage />} />
+      <Route path="/review" element={<ProductReviewPage />} />
 
       <Route
         path="/admin"

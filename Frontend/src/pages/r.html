@@ -1,282 +1,503 @@
-import { useState, useEffect } from "react"; 
-import { Table, Input, Pagination, Spin, message, Switch } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
-import toast from "react-hot-toast";
+import React, { useState, useEffect, memo } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
+import { jwtDecode } from "jwt-decode";
+import Navbar from "../../Layouts/Navbar";
+import Footer from "../../Layouts/Footer";
+import ProductSale from "../../Product/ProductSale";
+import { FaCartPlus } from "react-icons/fa";
+import Loading from "../../components/common/Loading";
+import { useNavigate } from "react-router-dom";
+import CartItem from "src/Cart/CartItem";
+import ShippingAddress from "src/Cart/ShippingAddress";
+import DiscountAndNote from "src/Cart/DiscountAndNote";
+import { message } from "antd";
 
-const API_URLS = {
-    product: "/api/products/all",
-    brand: "/api/brands/all",
-    category: "/api/categories/all",
-    discount: "/api/discounts/all",
-};
+interface CartItemType {
+  variantId: number;
+  productName: string;
+  variantDetails: string;
+  quantity: number;
+  price: number;
+  totalPrice: number;
+  productImage: string;
+  availableColors: string[];
+  availableSizes: string[];
+  availableMaterials: string[];
+  selected: boolean;
+  toggleSelectItem: (variantId: number) => void;
+  weightPerUnit?: number; // Optional property for weight per unit
+}
 
-const ListDisplay = () => {
-    const [data, setData] = useState<any[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalItems, setTotalItems] = useState(0);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [category, setCategory] = useState<"product" | "brand" | "category" | "discount">("product");
-    const [updateApi, setUpdateApi] = useState<string>("");
-    const [editingKey, setEditingKey] = useState<string | null>(null);
-    const [editingValue, setEditingValue] = useState<string>("");
+interface Variant {
+  variantId: number;
+  colorName: string;
+  colorCode: string;
+  materialName: string;
+  sizeName: string;
+  stock: number;
+  price: number;
+}
 
-    const [pageSize, setPageSize] = useState(8);  // Default page size is 8
+interface Product {
+  productId: number;
+  productName: string;
+  price: number | null;
+  image: string;
+  imageTypes: string[];
+  colorCodes: string[];
+  sizeNames: string[];
+  materialNames: string[];
+  variants: Variant[];
+}
 
-    useEffect(() => {
-        const map: Record<typeof category, string> = {
-            product: "products",
-            brand: "brands",
-            category: "categories",
-            discount: "discounts"
-        };
-        setUpdateApi(map[category]);
-    }, [category]);
+interface DecodedToken {
+  accountId: string;
+  exp: number;
+  iat: number;
+  email: string;
+  roles: { authority: string }[];
+}
 
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [category]);
+const CartPage: React.FC = () => {
+  const [cartItems, setCartItems] = useState<CartItemType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [province, setProvince] = useState("");
+  const [district, setDistrict] = useState("");
+  const [ward, setWard] = useState("");
+  const [provinces, setProvinces] = useState<any[]>([]);
+  const [districts, setDistricts] = useState<any[]>([]);
+  const [wards, setWards] = useState<any[]>([]);
+  const [coupon, setCoupon] = useState("");
+  const [invoice, setInvoice] = useState(false);
+  const [note, setNote] = useState("");
+  const [shippingFee, setShippingFee] = useState<number | null>(null);
+  const [productList, setProductList] = useState<Product[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [estimatedDelivery, setEstimatedDelivery] = useState<string>(""); // Dùng để lưu thời gian giao hàng
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [isCalculatingFee, setIsCalculatingFee] = useState(false);
 
-    useEffect(() => {
-        fetchData();
-    }, [currentPage, category]);
+  const navigate = useNavigate();
 
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get(`${API_URLS[category]}?page=${currentPage - 1}&size=${pageSize}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                }
-            });
-            const { content, totalElements } = response.data;
-            if (totalElements === 0 && currentPage > 1) {
-                setCurrentPage(1);
-            } else {
-                setData(content);
-                setTotalItems(totalElements);
-            }
-        } catch (error) {
-            message.error("Lỗi khi tải dữ liệu!");
-            toast.error("Lỗi khi tải dữ liệu!");
-        } finally {
-            setLoading(false);
+  const getAccountIdFromToken = () => {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+    const decoded: DecodedToken = jwtDecode(token);
+    return parseInt(decoded.accountId);
+  };
+  const accountId = getAccountIdFromToken();
+
+  useEffect(() => {
+    const fetchCartItems = async () => {
+      try {
+        const response = await axios.get(`/api/cart/${accountId}/views`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        setCartItems(response.data);
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || "Lỗi khi tải giỏ hàng.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (accountId) fetchCartItems();
+  }, [accountId]);
+
+  const fetchCartItems = async () => {
+    try {
+      const response = await axios.get(`/api/cart/${accountId}/views`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      setCartItems(response.data);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Lỗi khi tải giỏ hàng.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    axios
+      .get("/api/views/suggest")
+      .then((response) => {
+        setProductList(response.data);
+      })
+      .catch((error: any) => {
+        toast.error(error.response?.data?.message || "Lỗi khi tải sản phẩm gợi ý.");
+      });
+  }, []);
+
+  // ✅ Tải tỉnh khi mở trang
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      try {
+        const response = await axios.get("/api/locations/provinces");
+        if (Array.isArray(response.data)) {
+          setProvinces(response.data);
+        } else if (response.data.data && Array.isArray(response.data.data)) {
+          setProvinces(response.data.data);
+        } else {
+          toast.error("Dữ liệu tỉnh thành không hợp lệ");
         }
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || "Không thể tải danh sách tỉnh/thành.");
+      }
     };
+    fetchProvinces();
+  }, []);
 
-    const handleToggleActive = async (discountId: number, newStatus: boolean) => {
-        try {
-            const response = await axios.patch(
-                `/api/discounts/${discountId}/status?isActive=${newStatus}`,
-                {},
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("token")}`
-                    }
-                }
-            );
-            if (response.data.success) {
-                toast.success("Cập nhật trạng thái thành công!");
-                setData((prevData) =>
-                    prevData.map((item) =>
-                        item.discountId === discountId ? { ...item, isActive: newStatus } : item
-                    )
-                );
-            } else {
-                toast.error("Lỗi khi cập nhật trạng thái!");
-            }
-        } catch (error) {
-            toast.error("Lỗi kết nối server!");
-        }
-    };
+  const handleProvinceChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedProvince = e.target.value;
+    setProvince(selectedProvince);
+    setDistrict("");
+    setDistricts([]);
+    setWard("");
+    setWards([]);
 
-    const handleEdit = (record: any, dataIndex: string) => {
-        setEditingKey(`${record[`${category}Id`]}-${dataIndex}`);
-        setEditingValue(record[dataIndex]);
-    };
+    if (!selectedProvince) return;
 
-    const saveEdit = async (record: any, dataIndex: string) => {
-        const idKey = `${category}Id`;
-        const updateUrl = `/api/${updateApi}/${record[idKey]}`;
+    try {
+      const response = await axios.get("/api/locations/districts", {
+        params: { provinceId: selectedProvince },
+      });
 
-        try {
-            const updatedItem = {
-                ...record,
-                [dataIndex]: editingValue,
-            };
+      const data = response.data?.data ?? response.data;
 
-            await axios.put(updateUrl, updatedItem, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`
-                }
-            });
+      if (Array.isArray(data)) {
+        setDistricts(data);
+      } else {
+        toast.error("Dữ liệu quận/huyện không hợp lệ");
+        setDistricts([]);
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Lỗi khi tải danh sách quận/huyện");
+    }
+  };
 
-            const newData = [...data];
-            const index = newData.findIndex((item) => item[idKey] === record[idKey]);
-            if (index > -1) {
-                newData[index] = updatedItem;
-                setData(newData);
-                toast.success("Cập nhật thành công!");
-            }
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "⚠️ Lỗi khi cập nhật dữ liệu!");
-        } finally {
-            setEditingKey(null);
-            setEditingValue("");
-        }
-    };
+  const handleDistrictChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedDistrict = e.target.value;
+    setDistrict(selectedDistrict);
+    setWard("");
+    setWards([]);
 
-    const renderCell = (text: any, record: any, dataIndex: string) => {
-        const isEditing = editingKey === `${record[`${category}Id`]}-${dataIndex}`;
-        if (isEditing) {
-            return (
-                <Input
-                    value={editingValue}
-                    onChange={(e) => setEditingValue(e.target.value)}
-                    onPressEnter={() => saveEdit(record, dataIndex)}
-                    onBlur={() => saveEdit(record, dataIndex)}
-                    autoFocus
-                />
-            );
-        }
-        return (
-            <div onDoubleClick={() => handleEdit(record, dataIndex)}>
-                {text || <i className="text-gray-400">Chưa có</i>}
-            </div>
-        );
-    };
+    if (!selectedDistrict) return;
 
-    const categories = [
-        { value: "product", label: "Sản phẩm" },
-        { value: "brand", label: "Thương hiệu" },
-        { value: "category", label: "Loại sản phẩm" },
-        { value: "discount", label: "Mã giảm giá" },
-    ];
+    try {
+      const response = await axios.get("/api/locations/wards", {
+        params: { districtId: selectedDistrict },
+      });
 
-    const columnsConfig: Record<string, any[]> = {
-        product: [
-            { title: "ID", dataIndex: "productId", key: "productId", ellipsis: true },
-            { title: "Tên sản phẩm", dataIndex: "productName", key: "productName", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "productName") },
-            { title: "Mô tả", dataIndex: "description", key: "description", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "description") },
-            { title: "Mã vạch", dataIndex: "barcode", key: "barcode", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "barcode") },
-            { title: "Thương hiệu", dataIndex: "brandName", key: "brandName", ellipsis: true },
-            { title: "Loại sản phẩm", dataIndex: "categoryName", key: "categoryName", ellipsis: true },
-            { title: "Nhà cung cấp", dataIndex: "supplierName", key: "supplierName", ellipsis: true },
-            { title: "Model", dataIndex: "model", key: "model", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "model") },
-            { title: "Thời gian bảo hành", dataIndex: "warrantyPeriod", key: "warrantyPeriod", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "warrantyPeriod") },
-        ],          
-        brand: [
-            { title: "ID", dataIndex: "brandId", key: "brandId", ellipsis: true },
-            {
-                title: "Tên thương hiệu",
-                dataIndex: "brandName",
-                key: "brandName",
-                ellipsis: true,
-                render: (text: any, record: any) => renderCell(text, record, "brandName")
-            },
-            {
-                title: "Logo",
-                dataIndex: "logo",
-                key: "logo",
-                render: (path: string) => {
-                    setPageSize(5);  // If images are present, set page size to 5
-                    return path ? (
-                        <img
-                            src={`/${path}`}
-                            alt="Logo"
-                            className="h-12 w-12 object-contain rounded-lg shadow"
-                        />
-                    ) : (
-                        "Không có ảnh"
-                    );
-                },
-            },
-        ],
-        category: [
-            { title: "ID", dataIndex: "categoryId", key: "categoryId", ellipsis: true },
-            { title: "Tên loại sản phẩm", dataIndex: "categoryName", key: "categoryName", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "categoryName") },
-            { title: "Mô tả", dataIndex: "description", key: "description", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "description") },
-        ],
-        discount: [
-            { title: "ID", dataIndex: "discountId", key: "discountId", ellipsis: true },
-            { title: "Mã giảm giá", dataIndex: "discountCode", key: "discountCode", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "discountCode") },
-            { title: "Giá trị giảm", dataIndex: "discountValueFormatted", key: "discountValueFormatted", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "discountValueFormatted") },
-            {
-                title: "Kích hoạt",
-                dataIndex: "isActive",
-                key: "isActive",
-                render: (isActive: boolean, record: any) => (
-                    <Switch
-                        checked={isActive}
-                        onChange={() => handleToggleActive(record.discountId, !isActive)}
-                    />
-                )
-            },
-            { title: "Số lượng", dataIndex: "quantity", key: "quantity", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "quantity") },
-            {
-                title: "Ngày bắt đầu",
-                dataIndex: "startDateFormatted",
-                key: "startDateFormatted",
-                ellipsis: true
-            },
-            {
-                title: "Ngày kết thúc",
-                dataIndex: "endDateFormatted",
-                key: "endDateFormatted",
-                render: (date: string | null) => date || "Không có",
-                ellipsis: true
-            },
-            { title: "Mô tả", dataIndex: "description", key: "description", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "description") },
-        ],
-    };
+      const data = response.data?.data ?? response.data;
 
-    return (
-        <div className="p-4 rounded-lg shadow-xl">
-            <div className="flex justify-between items-center mb-4">
-                <div className="flex space-x-3">
-                    {categories.map((cat) => (
-                        <button
-                            key={cat.value}
-                            onClick={() => setCategory(cat.value as any)}
-                            className={`${
-                                category === cat.value ? "bg-blue-500 text-white" : "bg-white text-black"
-                            } px-4 py-2 rounded-md`}
-                        >
-                            {cat.label}
-                        </button>
-                    ))}
-                </div>
-                <Input
-                    placeholder="Tìm kiếm..."
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    value={searchTerm}
-                    suffix={<SearchOutlined />}
-                    allowClear
-                    className="max-w-xs"
-                />
-            </div>
+      if (Array.isArray(data)) {
+        setWards(data);
+      } else {
+        toast.error("Dữ liệu phường/xã không hợp lệ");
+        setWards([]);
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Lỗi khi tải danh sách phường/xã");
+    }
+  };
 
-            <Spin spinning={loading} size="large">
-                <Table
-                    columns={columnsConfig[category]}
-                    dataSource={data}
-                    rowKey={(record) => record[`${category}Id`]}
-                    pagination={false}
-                    size="middle"
-                />
+  const handleUpdateQuantity = async (variantId: number, amount: number) => {
+    const currentItem = cartItems.find((item) => item.variantId === variantId);
+    if (!currentItem) return;
 
-                <Pagination
-                    current={currentPage}
-                    pageSize={pageSize}
-                    total={totalItems}
-                    onChange={setCurrentPage}
-                    showSizeChanger={false}
-                    showQuickJumper
-                />
-            </Spin>
-        </div>
+    const newQuantity = currentItem.quantity + amount;
+    if (newQuantity < 1) return;
+
+    try {
+      await axios.post(
+        "/api/cart/update",
+        { accountId, variantId, quantity: newQuantity },
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+      );
+
+      setCartItems((prev) =>
+        prev.map((item) =>
+          item.variantId === variantId
+            ? { ...item, quantity: newQuantity, totalPrice: item.price * newQuantity }
+            : item
+        )
+      );
+      handleCalculateShippingFee();
+
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Lỗi khi cập nhật giỏ hàng.");
+    }
+  };
+
+  // 📌 Giữ nguyên xoá item
+  const handleRemoveItem = async (variantId: number) => {
+    try {
+      await axios.delete("/api/cart/remove", {
+        params: { accountId, variantId },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      setCartItems((prev) => prev.filter((item) => item.variantId !== variantId));
+      toast.success("Đã xóa sản phẩm khỏi giỏ hàng!");
+    } catch (error: any) {
+      setError("Lỗi khi xóa sản phẩm.");
+      toast.error(error.response?.data?.message || "Lỗi khi xóa sản phẩm khỏi giỏ hàng.");
+    }
+  };
+
+  // 📌 Giữ nguyên cập nhật biến thể
+  const handleUpdateVariant = (variantId: number, newVariant: { color: string; size: string; material: string }) => {
+    console.log("User selected new variant", variantId, newVariant);
+  };
+
+  const defaultWeights = {
+    'tshirt': 200,
+    'jeans': 700,
+    'jacket': 600,
+    'dress': 350,
+    'accessory': 100,
+  };
+
+  function getWeight(item: CartItemType & { category?: keyof typeof defaultWeights }) {
+    return item.weightPerUnit
+      ?? (item.category ? defaultWeights[item.category] : undefined)
+      ?? 200; // fallback chung
+  }
+
+  const handleCalculateShippingFee = async () => {
+    const selectedCartItems = cartItems.filter(item =>
+      selectedItems.includes(item.variantId)
     );
-};
 
-export default ListDisplay;
+    if (
+      selectedCartItems.length === 0 ||
+      !province ||
+      !district ||
+      !ward
+    ) {
+      setShippingFee(null);
+      return;
+    }
+
+    try {
+      setIsCalculatingFee(true);
+
+      const totalWeight = selectedCartItems.reduce((sum, item) => {
+        const weight = getWeight(item);
+        return sum + item.quantity * weight;
+      }, 0);
+
+      const feeResponse = await axios.post("/api/locations/calculate-fee", {
+        fromProvince: 217,
+        fromDistrict: 1566,
+        fromWard: 510103,
+        toProvince: parseInt(province),
+        toDistrict: parseInt(district),
+        toWard: parseInt(ward),
+        weight: totalWeight,
+      });
+
+      if (feeResponse.status === 200 && feeResponse.data.fee) {
+        setShippingFee(feeResponse.data.fee);
+      } else {
+        toast.error("Không thể tính phí vận chuyển.");
+        setShippingFee(null);
+      }
+    } catch (error: any) {
+      message.error(error.response?.data?.message || "Không thể tính phí vận chuyển hoặc thời gian giao hàng.");
+      setShippingFee(null);
+    } finally {
+      setIsCalculatingFee(false);
+    }
+  };
+
+  useEffect(() => {
+    if (province && district && ward) {
+      handleCalculateShippingFee();
+    }
+  }, [province, district, ward]);
+
+  const nextProduct = () => {
+    setCurrentIndex((prev) => (prev + 1) % productList.length);
+  };
+
+  const prevProduct = () => {
+    setCurrentIndex((prev) => (prev - 1 + productList.length) % productList.length);
+  };
+
+  const handleToggleSelectItem = (variantId: number) => {
+    setSelectedItems((prev) => {
+      const updatedItems = prev.includes(variantId)
+        ? prev.filter((id) => id !== variantId)
+        : [...prev, variantId];
+      handleCalculateShippingFee();
+      return updatedItems;
+    });
+  };
+
+
+  const handleToggleSelectAll = () => {
+    if (selectedItems.length === cartItems.length) {
+      setSelectedItems([]);
+      handleCalculateShippingFee();
+    } else {
+      setSelectedItems(cartItems.map((item) => item.variantId));
+      handleCalculateShippingFee();
+    }
+  };
+
+  const handleProceedToCheckout = () => {
+    if (selectedItems.length === 0) {
+      toast.error("Vui lòng chọn ít nhất một sản phẩm.");
+      return;
+    }
+
+    if (!shippingFee && !isCalculatingFee) {
+      toast.error("Vui lòng đợi tính phí vận chuyển.");
+      return;
+    }
+
+    const selectedCartItems = cartItems.filter(item =>
+      selectedItems.includes(item.variantId)
+    );
+
+    const checkoutData = {
+      items: selectedCartItems,
+      address: { province, district, ward },
+      pricing: { subtotal, discount, shippingFee, total, note, coupon, invoice, estimatedDelivery },
+    };
+
+    navigate("/checkout", { state: checkoutData });
+  };
+
+  const subtotal = cartItems
+    .filter(item => selectedItems.includes(item.variantId))  // Lọc chỉ các sản phẩm đã chọn
+    .reduce((sum, item) => sum + item.totalPrice, 0);  // Tính tổng giá trị các sản phẩm đã chọn
+
+  const discount = 0;
+  const total = subtotal - discount + (shippingFee || 0);  // Tính tổng sau khi áp dụng phí vận chuyển
+
+  return (
+    <div>
+      <Navbar />
+      <div className="pt-20 flex flex-col lg:flex-row min-h-screen bg-gray-100 p-4 lg:p-6 gap-4">
+        {/* Giỏ hàng */}
+        <div className="w-full lg:w-3/5 bg-white p-4 lg:p-6 rounded-lg shadow-md">
+          <h2 className="pt-12 text-2xl font-bold flex items-center gap-3">
+            Giỏ hàng
+            <input
+              type="checkbox"
+              checked={selectedItems.length === cartItems.length}
+              onChange={handleToggleSelectAll}
+              className="ml-2"
+            />
+            <span className="text-sm font-medium">Chọn tất cả</span>
+          </h2>
+          {loading ? (
+            <Loading
+              text="Đang tải giỏ hàng..."
+              color="yellow-500"
+              size="6xl"
+              icon={<FaCartPlus className="text-yellow-500 text-6xl animate-pulse" />} // Icon đại diện người dùng
+            />
+          ) : error ? (
+            <p className="text-center text-red-500">{error}</p>
+          ) : cartItems.length === 0 ? (
+            <p className="text-center text-gray-500">Giỏ hàng của bạn đang trống.</p>
+          ) : (
+            cartItems.map((item) => (
+              <CartItem
+                key={item.variantId}
+                {...item}
+                selected={selectedItems.includes(item.variantId)}
+                toggleSelectItem={handleToggleSelectItem}
+                updateQuantity={handleUpdateQuantity}
+                removeItem={handleRemoveItem}
+                updateVariant={handleUpdateVariant}
+              />
+            ))
+          )}
+        </div>
+
+        {/* Thông tin đơn hàng */}
+        <div className="w-full lg:w-2/5 bg-white p-4 lg:p-6 rounded-lg shadow-md">
+          <div className="pt-12">
+            {productList.length > 0 && (
+              <ProductSale
+                product={productList[currentIndex]}
+                onNext={nextProduct}
+                onPrev={prevProduct}
+                onCartUpdated={fetchCartItems}
+              />
+            )}
+          </div>
+
+          <h2 className="text-xl lg:text-2xl font-bold mb-4 mt-6">Thông tin đơn hàng</h2>
+          <div className="space-y-2 text-sm lg:text-base">
+            <div className="flex justify-between">
+              <span>Tạm tính:</span>
+              <span>{subtotal.toLocaleString()} vn₫</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Giảm giá:</span>
+              <span>{discount.toLocaleString()} vn₫</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Phí vận chuyển:</span>
+              <span>{shippingFee !== null ? `${shippingFee.toLocaleString()} vn₫` : "Đang tính..."}</span>
+            </div>
+            <div className="flex justify-between font-bold text-lg text-red-500">
+              <span>Tổng cộng:</span>
+              <span>{total.toLocaleString()} vn₫</span>
+            </div>
+          </div>
+
+          <ShippingAddress
+            provinces={provinces}
+            districts={districts}
+            wards={wards}
+            province={province}
+            district={district}
+            ward={ward}
+            handleProvinceChange={handleProvinceChange}
+            handleDistrictChange={handleDistrictChange}
+            setWard={setWard}
+            estimatedDelivery={estimatedDelivery}
+          />
+
+          <DiscountAndNote
+            coupon={coupon}
+            setCoupon={setCoupon}
+            invoice={invoice}
+            setInvoice={setInvoice}
+            note={note}
+            setNote={setNote}
+          />
+          <button
+            onClick={handleProceedToCheckout}
+            disabled={
+              selectedItems.length === 0 || shippingFee === null || isCalculatingFee
+            }
+            className={`w-full text-white px-6 py-2 rounded-lg text-lg ${selectedItems.length === 0 || shippingFee === null || isCalculatingFee
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+              }`}
+          >
+            Thanh toán
+          </button>
+        </div>
+      </div>
+      <Footer />
+    </div>
+  );
+}
+
+export default CartPage;

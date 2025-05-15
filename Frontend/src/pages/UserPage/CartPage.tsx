@@ -77,6 +77,8 @@ const CartPage: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [estimatedDelivery, setEstimatedDelivery] = useState<string>(""); // Dùng để lưu thời gian giao hàng
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [isCalculatingFee, setIsCalculatingFee] = useState(false);
+
   const navigate = useNavigate();
 
   const getAccountIdFromToken = () => {
@@ -256,12 +258,45 @@ const CartPage: React.FC = () => {
     console.log("User selected new variant", variantId, newVariant);
   };
 
+  const defaultWeights = {
+    'tshirt': 200,
+    'jeans': 700,
+    'jacket': 600,
+    'dress': 350,
+    'accessory': 100,
+  };
+
+  function getWeight(item: CartItemType & { category?: keyof typeof defaultWeights }) {
+    return item.weightPerUnit
+      ?? (item.category ? defaultWeights[item.category] : undefined)
+      ?? 200; // fallback chung
+  }
+
   const handleCalculateShippingFee = async () => {
+    const selectedCartItems = cartItems.filter(item =>
+      selectedItems.includes(item.variantId)
+    );
+
+    if (
+      selectedCartItems.length === 0 ||
+      !province ||
+      !district ||
+      !ward
+    ) {
+      setShippingFee(null);
+      return;
+    }
     try {
-      // Tính tổng trọng lượng của các sản phẩm đã chọn
+      setIsCalculatingFee(true);
+
       const totalWeight = cartItems
-        .filter(item => selectedItems.includes(item.variantId))  // Lọc các sản phẩm đã chọn
-        .reduce((totalWeight, item) => totalWeight + (item.quantity * (item.weightPerUnit || 1500)), 0);  // Trọng lượng mỗi sản phẩm (1500 là giá trị mặc định nếu không có)
+        .filter(item => selectedItems.includes(item.variantId))
+        .reduce((sum, item) => {
+          const weight = getWeight(item); // từ hàm bên trên
+          return sum + item.quantity * weight;
+        }, 0);
+
+      const totalWeightKg = (totalWeight / 1000).toFixed(2);  // Trọng lượng mỗi sản phẩm (1500 là giá trị mặc định nếu không có)
 
       // Gọi API tính phí vận chuyển với trọng lượng đã tính
       const feeResponse = await axios.post("/api/locations/calculate-fee", {
@@ -276,6 +311,7 @@ const CartPage: React.FC = () => {
 
       if (feeResponse.status !== 200) {
         toast.error("Lỗi khi tính phí vận chuyển.");
+        setShippingFee(null);
         return;
       }
 
@@ -302,8 +338,10 @@ const CartPage: React.FC = () => {
       setEstimatedDelivery(estimatedDelivery);  // Lưu thời gian giao hàng
 
     } catch (error: any) {
-      message.error(error.response?.data?.message || "Không thể tính phí vận chuyển hoặc thời gian giao hàng.");
+      toast.error(error.response?.data?.message || "Không thể tính phí vận chuyển hoặc thời gian giao hàng.");
       setShippingFee(null);
+    } finally {
+      setIsCalculatingFee(false);
     }
   };
 
@@ -343,24 +381,27 @@ const CartPage: React.FC = () => {
   };
 
   const handleProceedToCheckout = () => {
-    const selectedCartItems = cartItems.filter(item => selectedItems.includes(item.variantId));
+    if (selectedItems.length === 0) {
+      toast.error("Vui lòng chọn ít nhất một sản phẩm.");
+      return;
+    }
+
+    if (!shippingFee && !isCalculatingFee) {
+      toast.error("Vui lòng đợi tính phí vận chuyển.");
+      return;
+    }
+
+    const selectedCartItems = cartItems.filter(item =>
+      selectedItems.includes(item.variantId)
+    );
 
     const checkoutData = {
       items: selectedCartItems,
       address: {
-        province,
-        district,
-        ward,
-      },
-      pricing: {
-        subtotal,
-        discount,
-        shippingFee,
-        total,
-      },
-      coupon,
-      note,
-      estimatedDelivery,
+        province: province || "",
+        district: district || "",
+        ward: ward || "",
+      }, pricing: { subtotal, discount, shippingFee, total, note, coupon, invoice, estimatedDelivery },
     };
 
     navigate("/checkout", { state: checkoutData });
@@ -469,7 +510,16 @@ const CartPage: React.FC = () => {
             note={note}
             setNote={setNote}
           />
-          <button onClick={handleProceedToCheckout} className="w-full bg-blue-600 text-white px-6 py-2 rounded-lg text-lg">
+          <button
+            onClick={handleProceedToCheckout}
+            disabled={
+              selectedItems.length === 0 || shippingFee === null || isCalculatingFee
+            }
+            className={`w-full text-white px-6 py-2 rounded-lg text-lg ${selectedItems.length === 0 || shippingFee === null || isCalculatingFee
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+              }`}
+          >
             Thanh toán
           </button>
         </div>

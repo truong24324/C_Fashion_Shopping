@@ -312,7 +312,7 @@ const Navbar: React.FC = () => {
                 <FaShoppingBag className="mr-1" />
                 <span className="hidden lg:inline">Đã mua</span>
               </Link>
-              <Link to="/reviewed" className="hover:text-yellow-400 text-white flex items-center text-sm">
+              <Link to="/review" className="hover:text-yellow-400 text-white flex items-center text-sm">
                 <FaStar className="mr-1" />
                 <span className="hidden lg:inline">Đã đánh giá</span>
               </Link>
