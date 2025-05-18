@@ -1,12 +1,10 @@
 package Backend.Controller;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import Backend.Model.Account;
@@ -16,11 +14,8 @@ import Backend.Request.WishlistRequest;
 import Backend.Response.ApiResponse;
 import Backend.Response.WishlistProductResponse;
 import Backend.Response.WishlistResponse;
-import Backend.Service.BrandService;
-import Backend.Service.ProductService;
+
 import Backend.Service.WishlistService;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -70,20 +65,4 @@ public class WishlistController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Đã thêm vào giỏ hàng!", null));
     }
 
-    // ✅ Xử lý lỗi validation
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        String errorMessage = ex.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getDefaultMessage())
-                .collect(Collectors.joining(", "));
-        return ResponseEntity.badRequest().body(new ApiResponse<>(false, errorMessage, null));
-    }
-
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ApiResponse<String>> handleConstraintViolationException(ConstraintViolationException ex) {
-        String errorMessage = ex.getConstraintViolations().stream()
-                .map(ConstraintViolation::getMessage)
-                .collect(Collectors.joining(", "));
-        return ResponseEntity.badRequest().body(new ApiResponse<>(false, errorMessage, null));
-    }
 }

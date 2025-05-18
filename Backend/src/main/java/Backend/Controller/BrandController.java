@@ -153,17 +153,6 @@ public class BrandController {
         }
     }
 
-    // ✅ Bắt lỗi validate từ @Valid và trả về phản hồi chuẩn JSON
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        List<String> errors = ex.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getDefaultMessage())
-                .collect(Collectors.toList());
-
-        String errorMessage = String.join(", ", errors);
-        return ResponseEntity.badRequest().body(new ApiResponse<>(false, errorMessage, null));
-    }
-
     // ✅ Kiểm tra file ảnh hợp lệ
     private String validateImageFile(MultipartFile file) {
         if (file.isEmpty()) {

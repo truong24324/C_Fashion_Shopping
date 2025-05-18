@@ -47,26 +47,6 @@ public class ProductStatusController {
         return ResponseEntity.ok(response);
     }
 
-    // ✅ Tìm kiếm trạng thái sản phẩm theo tên
-//    @GetMapping("/search")
-//    public ResponseEntity<PaginationResponse<ProductStatus>> searchProductStatus(
-//            @RequestParam String keyword,
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "10") int size) {
-//
-//        Pageable pageable = PageRequest.of(page, size);
-//        Page<ProductStatus> statusPage = productStatusService.searchProductStatus(keyword, pageable);
-//
-//        PaginationResponse<ProductStatus> response = new PaginationResponse<>(
-//                statusPage.getContent(),
-//                statusPage.getNumber(),
-//                statusPage.getSize(),
-//                statusPage.getTotalElements(),
-//                statusPage.getTotalPages()
-//        );
-//        return ResponseEntity.ok(response);
-//    }
-
     // ✅ Thêm mới trạng thái sản phẩm
     @PostMapping("/add")
 	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
@@ -93,21 +73,4 @@ public class ProductStatusController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Đã xóa trạng thái sản phẩm thành công", null));
     }
 
-    // ✅ Bắt lỗi validate từ @Valid
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        List<String> errors = ex.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getDefaultMessage())
-                .collect(Collectors.toList());
-        String errorMessage = String.join(", ", errors);
-        return ResponseEntity.badRequest().body(new ApiResponse<>(false, errorMessage, null));
-    }
-
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ApiResponse<String>> handleConstraintViolationException(ConstraintViolationException ex) {
-        String errorMessage = ex.getConstraintViolations().stream()
-                .map(ConstraintViolation::getMessage)
-                .collect(Collectors.joining(", "));
-        return ResponseEntity.badRequest().body(new ApiResponse<>(false, errorMessage, null));
-    }
 }

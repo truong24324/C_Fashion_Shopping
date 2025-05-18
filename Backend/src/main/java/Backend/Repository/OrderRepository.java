@@ -13,5 +13,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     Optional<Order> findByOrderCode(String orderCode);
     List<Order> findByAccountAccountIdAndDiscountCodeAndPaymentStatus(Integer accountId, String discountCode, String paymentStatus);
     Page<Order> findByOrderStatus_StatusId(Integer statusId, Pageable pageable);
-
+    List<Order> findAllByAccount_AccountIdAndOrderStatus_StatusNameAndPaymentStatus(
+            Long accountId, String statusName, String paymentStatus
+    );
 }

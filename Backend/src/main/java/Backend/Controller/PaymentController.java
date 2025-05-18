@@ -3,6 +3,7 @@ package Backend.Controller;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -11,8 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import Backend.Model.Order;
 import Backend.Model.OrderDetail;
 import Backend.Model.OrderStatus;
+import Backend.Model.Variant;
+import Backend.Repository.OrderDetailRepository;
 import Backend.Repository.OrderRepository;
 import Backend.Repository.OrderStatusRepository;
+import Backend.Repository.VariantRepository;
 import Backend.Request.OrderRequest;
 import Backend.Response.ApiResponse;
 import Backend.Response.OrderResponse;
@@ -22,6 +26,7 @@ import Backend.Service.MoMoService;
 import Backend.Service.OrderService;
 import Backend.Service.VNPayService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -36,7 +41,9 @@ public class PaymentController {
 	private final EmailService emailService;
 	private final OrderService orderService;
 	private final OrderRepository orderRepository;
+	private final OrderDetailRepository orderDetailRepository;
 	private final OrderStatusRepository orderStatusRepository;
+	private final VariantRepository variantRepository;
 
 	@PostMapping("/create/vnpay")
 	public ResponseEntity<PaymentResponse> createVnpayPayment(@RequestParam long amount,
@@ -64,57 +71,102 @@ public class PaymentController {
 		}
 	}
 
-	@PostMapping("/ipn-handler")
-	public ResponseEntity<String> handleMomoCallback(@RequestBody Map<String, String> momoResponse) {
-		try {
-			System.out.println("📩 Đã nhận IPN từ MoMo: " + momoResponse); // In toàn bộ JSON
+//	@PostMapping("/ipn-handler")
+//	public ResponseEntity<String> handleMomoCallback(@RequestBody Map<String, String> momoResponse) {
+//		try {
+//			System.out.println("📩 Đã nhận IPN từ MoMo: " + momoResponse); // In toàn bộ JSON
+//
+//			String resultCode = momoResponse.get("resultCode");
+//			String orderId = momoResponse.get("orderId");
+//
+//			Optional<Order> optionalOrder = orderRepository.findByOrderCode(orderId);
+//			if (optionalOrder.isEmpty()) {
+//				return ResponseEntity.badRequest().body("Không tìm thấy đơn hàng với mã: " + orderId);
+//			}
+//
+//			Order order = optionalOrder.get();
+//			System.out
+//					.println("✅ Đã tìm thấy đơn hàng. Trạng thái hiện tại: " + order.getOrderStatus().getStatusName());
+//
+//			// Lấy status id hiện tại
+//			Integer currentStatusId = order.getOrderStatus().getStatusId();
+//
+//			// Xử lý kết quả thanh toán
+//			if ("0".equals(resultCode)) {
+//				if (!currentStatusId.equals(1)) {
+//					OrderStatus paidStatus = orderStatusRepository.findById(1)
+//							.orElseThrow(() -> new IllegalArgumentException("Không tìm thấy trạng thái PAID"));
+//
+//					order.setOrderStatus(paidStatus);
+//					orderRepository.save(order);
+//
+//					System.out.println("🎉 Thanh toán thành công. Đã cập nhật trạng thái đơn hàng.");
+//				}
+//
+//				sendOrderConfirmationEmail(order.getAccount().getEmail(), order);
+//				return ResponseEntity.ok("Payment success");
+//			} else {
+//				if (!currentStatusId.equals(1)) {
+//					OrderStatus pendingStatus = orderStatusRepository.findById(0)
+//							.orElseThrow(() -> new IllegalArgumentException("Không tìm thấy trạng thái PENDING"));
+//
+//					order.setOrderStatus(pendingStatus);
+//					orderRepository.save(order);
+//
+//					System.out.println("🔄 Đặt lại trạng thái đơn hàng về CHỜ (PENDING)");
+//				}
+//				return ResponseEntity.status(400).body("Payment failed");
+//			}
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			return ResponseEntity.status(500).body("Lỗi xử lý IPN MoMo");
+//		}
+//	}
 
-			String resultCode = momoResponse.get("resultCode");
-			String orderId = momoResponse.get("orderId");
+	@PostMapping("/momo/ipn")
+	@Transactional
+	public ResponseEntity<String> handleMomoIpn(@RequestBody Map<String, Object> payload) {
+	    try {
+	        String orderId = (String) payload.get("orderId");
+	        String resultCode = String.valueOf(payload.get("resultCode"));
 
-			Optional<Order> optionalOrder = orderRepository.findByOrderCode(orderId);
-			if (optionalOrder.isEmpty()) {
-				return ResponseEntity.badRequest().body("Không tìm thấy đơn hàng với mã: " + orderId);
-			}
+	        if (!"0".equals(resultCode)) {
+	            return ResponseEntity.ok("MoMo báo thanh toán thất bại");
+	        }
 
-			Order order = optionalOrder.get();
-			System.out
-					.println("✅ Đã tìm thấy đơn hàng. Trạng thái hiện tại: " + order.getOrderStatus().getStatusName());
+	        Order order = orderRepository.findByOrderCode(orderId)
+	            .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
-			// Lấy status id hiện tại
-			Integer currentStatusId = order.getOrderStatus().getStatusId();
+	        if ("Đã thanh toán".equals(order.getPaymentStatus())) {
+	            return ResponseEntity.ok("Đã xử lý trước đó");
+	        }
 
-			// Xử lý kết quả thanh toán
-			if ("0".equals(resultCode)) {
-				if (!currentStatusId.equals(1)) {
-					OrderStatus paidStatus = orderStatusRepository.findById(1)
-							.orElseThrow(() -> new IllegalArgumentException("Không tìm thấy trạng thái PAID"));
+	        // ✅ Cập nhật trạng thái thanh toán
+	        order.setPaymentStatus("Đã thanh toán");
 
-					order.setOrderStatus(paidStatus);
-					orderRepository.save(order);
+	        // ✅ Cập nhật trạng thái đơn hàng (ví dụ: "Đang xử lý")
+	        OrderStatus processingStatus = orderStatusRepository.findByStepOrder(2)
+	                .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái xử lý"));
+	        order.setOrderStatus(processingStatus);
 
-					System.out.println("🎉 Thanh toán thành công. Đã cập nhật trạng thái đơn hàng.");
-				}
+	        // ✅ Giảm tồn kho
+	        List<OrderDetail> details = orderDetailRepository.findByOrder(order);
+	        for (OrderDetail detail : details) {
+	            Variant variant = detail.getVariant();
+	            if (variant.getStock() < detail.getQuantity()) {
+	                throw new RuntimeException("Sản phẩm " + variant.getVariantId() + " không đủ tồn kho");
+	            }
+	            variant.setStock(variant.getStock() - detail.getQuantity());
+	            variantRepository.save(variant);
+	        }
 
-				sendOrderConfirmationEmail(order.getAccount().getEmail(), order);
-				return ResponseEntity.ok("Payment success");
-			} else {
-				if (!currentStatusId.equals(1)) {
-					OrderStatus pendingStatus = orderStatusRepository.findById(0)
-							.orElseThrow(() -> new IllegalArgumentException("Không tìm thấy trạng thái PENDING"));
+	        orderRepository.save(order);
+	        return ResponseEntity.ok("Thanh toán thành công");
 
-					order.setOrderStatus(pendingStatus);
-					orderRepository.save(order);
-
-					System.out.println("🔄 Đặt lại trạng thái đơn hàng về CHỜ (PENDING)");
-				}
-				return ResponseEntity.status(400).body("Payment failed");
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(500).body("Lỗi xử lý IPN MoMo");
-		}
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi xử lý IPN: " + e.getMessage());
+	    }
 	}
 
 	@PostMapping("/create/COD")
@@ -174,13 +226,4 @@ public class PaymentController {
 		emailService.sendOrderConfirmation(toEmail, subject, body.toString());
 	}
 	
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        List<String> errors = ex.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getDefaultMessage())
-                .collect(Collectors.toList());
-
-        String errorMessage = String.join(", ", errors);
-        return ResponseEntity.badRequest().body(new ApiResponse<>(false, errorMessage, null));
-    }
 }

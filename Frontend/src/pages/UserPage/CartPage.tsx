@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from "react";
+import React, { useState, useEffect,} from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
@@ -11,7 +11,6 @@ import { useNavigate } from "react-router-dom";
 import CartItem from "src/Cart/CartItem";
 import ShippingAddress from "src/Cart/ShippingAddress";
 import DiscountAndNote from "src/Cart/DiscountAndNote";
-import { message } from "antd";
 
 interface CartItemType {
   variantId: number;

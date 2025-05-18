@@ -28,7 +28,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(requests -> {
                     requests
                             .requestMatchers("/api/register", "/api/login", "/api/password/**", "/api/views/**",
-                                    "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/api/locations/**"
+                                    "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/api/locations/**",
+                                    "/api/payment/momo/ipn"
                                     )
                             .permitAll()
 

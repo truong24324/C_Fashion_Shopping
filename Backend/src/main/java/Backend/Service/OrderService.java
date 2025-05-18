@@ -30,6 +30,7 @@ public class OrderService {
     private final CartRepository cartRepository;
     private final CartDetailRepository cartDetailRepository;
     private final OrderDetailRepository orderDetailRepository;
+    private final ProductReviewRepository productReviewRepository;
     
     @Transactional
     public Order placeOrder(OrderRequest orderRequest) {
@@ -102,6 +103,16 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
+        List<OrderDetail> details = orderDetailRepository.findByOrder(order);
+        for (OrderDetail detail : details) {
+            Variant variant = detail.getVariant();
+            if (variant.getStock() < detail.getQuantity()) {
+                throw new RuntimeException("Sản phẩm " + variant.getVariantId() + " không đủ tồn kho");
+            }
+            variant.setStock(variant.getStock() - detail.getQuantity());
+            variantRepository.save(variant);
+        }
+        
         // Xóa các CartDetail liên quan đến các variant đã đặt trong giỏ hàng
         Cart cart = cartRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("Giỏ hàng không tồn tại cho tài khoản này"));
@@ -198,6 +209,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
     
+    @Transactional
     public Order cancelOrder(Integer orderId) {
         Order order = findById(orderId);
 
@@ -205,12 +217,22 @@ public class OrderService {
             throw new RuntimeException("Trạng thái hiện tại không thể hủy!");
         }
 
+        // ✅ Cộng lại số lượng tồn kho
+        List<OrderDetail> details = orderDetailRepository.findByOrder(order);
+        for (OrderDetail detail : details) {
+            Variant variant = detail.getVariant();
+            variant.setStock(variant.getStock() + detail.getQuantity());
+            variantRepository.save(variant);
+        }
+
+        // ✅ Cập nhật trạng thái "Đã hủy"
         OrderStatus cancelStatus = orderStatusRepository.findByStatusNameIgnoreCase("Đã hủy")
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái 'Đã hủy'"));
 
         order.setOrderStatus(cancelStatus);
         order.setUpdatedAt(LocalDateTime.now());
 
+        // ✅ Ghi lịch sử hủy đơn
         OrderHistory history = new OrderHistory();
         history.setOrder(order);
         history.setOrderStatus(cancelStatus);
@@ -325,6 +347,47 @@ public class OrderService {
     }
 
     public List<PurchasedProductResponse> getCompletedPurchasedProducts(Long accountId) {
-        return orderDetailRepository.findCompletedPurchasedProductsByAccount_AccountId(accountId);
+        List<PurchasedProductResponse> responseList = new ArrayList<>();
+
+        // 1. Lấy tất cả đơn hàng hoàn thành và đã thanh toán của người dùng
+        List<Order> completedOrders = orderRepository.findAllByAccount_AccountIdAndOrderStatus_StatusNameAndPaymentStatus(
+                accountId, "Hoàn thành", "Đã thanh toán"
+        );
+
+        // 2. Duyệt từng OrderDetail trong mỗi đơn hàng
+        for (Order order : completedOrders) {
+            for (OrderDetail od : order.getOrderDetails()) {
+                Product product = od.getProduct();
+
+                // 3. Lấy hình ảnh MAIN nếu có
+                String mainImageUrl = product.getImages().stream()
+                        .filter(img -> img.getImageType() == ImageType.MAIN)
+                        .map(ProductImage::getImageUrl)
+                        .findFirst()
+                        .orElse(null);
+
+                // 4. Kiểm tra đã đánh giá chưa
+                boolean reviewed = productReviewRepository.existsByOrderDetailAndAccount_AccountId(od, accountId);
+
+                // 5. Tạo DTO
+                PurchasedProductResponse dto = new PurchasedProductResponse(
+                        od.getOrderDetailId(),
+                        product.getProductId(),
+                        product.getProductName(),
+                        od.getColorName(),
+                        od.getSizeName(),
+                        od.getMaterialName(),
+                        od.getProductPrice(),
+                        od.getQuantity(),
+                        mainImageUrl,
+                        reviewed
+                );
+
+                responseList.add(dto);
+            }
+        }
+
+        return responseList;
     }
+
 }

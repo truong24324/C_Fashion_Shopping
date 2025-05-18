@@ -23,32 +23,28 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserOrderController {
 
-    private final OrderService orderService;
+	private final OrderService orderService;
 
- // API cho người dùng cập nhật trạng thái đơn hàng
-    @PatchMapping("/{orderId}/status")
-    public ResponseEntity<ApiResponse<OrderResponse>> updateOrderStatusByUser(
-            @PathVariable Integer orderId,
-            @RequestParam String targetStatusName,
-            @AuthenticationPrincipal Account userAccount) {
+	// API cho người dùng cập nhật trạng thái đơn hàng
+	@PatchMapping("/{orderId}/status")
+	public ResponseEntity<ApiResponse<OrderResponse>> updateOrderStatusByUser(@PathVariable Integer orderId,
+			@RequestParam String targetStatusName, @AuthenticationPrincipal Account userAccount) {
 
-        Order updatedOrder = orderService.updateStatusByUser(orderId, userAccount.getAccountId(), targetStatusName);
-        return ResponseEntity.ok(
-            new ApiResponse<>(true, "Cập nhật trạng thái đơn hàng thành công", orderService.toOrderResponse(updatedOrder))
-        );
-    }
+		Order updatedOrder = orderService.updateStatusByUser(orderId, userAccount.getAccountId(), targetStatusName);
+		return ResponseEntity.ok(new ApiResponse<>(true, "Cập nhật trạng thái đơn hàng thành công",
+				orderService.toOrderResponse(updatedOrder)));
+	}
 
-    @GetMapping("/purchased-products")
-    public ResponseEntity<ApiResponse<List<OrderDetailResponse>>> getAllPurchasedProducts(
-            @AuthenticationPrincipal Account userAccount) {
+	@GetMapping("/purchased-products")
+	public ResponseEntity<ApiResponse<List<OrderDetailResponse>>> getAllPurchasedProducts(
+			@AuthenticationPrincipal Account userAccount) {
 
-        List<OrderDetail> orderDetails = orderService.getAllPurchasedProductsByAccount(userAccount.getAccountId());
-        
-        List<OrderDetailResponse> response = orderDetails.stream()
-                .map(orderService::toOrderDetailResponse)
-                .collect(Collectors.toList());
+		List<OrderDetail> orderDetails = orderService.getAllPurchasedProductsByAccount(userAccount.getAccountId());
 
-        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách sản phẩm đã mua thành công", response));
-    }
+		List<OrderDetailResponse> response = orderDetails.stream().map(orderService::toOrderDetailResponse)
+				.collect(Collectors.toList());
+
+		return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách sản phẩm đã mua thành công", response));
+	}
 
 }

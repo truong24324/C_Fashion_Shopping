@@ -40,9 +40,6 @@ public class ProductReview {
     @Column(name = "CONTENT", columnDefinition = "NVARCHAR(MAX)")
     private String content;
 
-    @Column(name = "IMAGE_URL", length = 500)
-    private String imageUrl;
-
     @Column(name = "IS_VISIBLE")
     private Boolean isVisible = true;
 

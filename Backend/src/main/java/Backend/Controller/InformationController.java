@@ -148,17 +148,6 @@ public class InformationController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Xóa thông tin thành công", "Đã xóa thông tin của accountId = " + accountId));
     }
 
-    // ✅ Bắt lỗi validation
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        List<String> errors = ex.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getDefaultMessage())
-                .collect(Collectors.toList());
-
-        String errorMessage = String.join(", ", errors);
-        return ResponseEntity.badRequest().body(new ApiResponse<>(false, errorMessage, null));
-    }
-
     private String validateImageFile(MultipartFile file) {
         List<String> allowedTypes = List.of("image/jpeg", "image/png", "image/webp");
 

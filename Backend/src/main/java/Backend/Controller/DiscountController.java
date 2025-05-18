@@ -96,11 +96,4 @@ public class DiscountController {
 		return ResponseEntity.ok(new ApiResponse<>(true, "Xóa mã giảm giá thành công", null));
 	}
 
-	// ✅ Xử lý lỗi validation
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<ApiResponse<String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-		List<String> errors = ex.getBindingResult().getFieldErrors().stream().map(error -> error.getDefaultMessage())
-				.collect(Collectors.toList());
-		return ResponseEntity.badRequest().body(new ApiResponse<>(false, String.join(", ", errors), null));
-	}
 }

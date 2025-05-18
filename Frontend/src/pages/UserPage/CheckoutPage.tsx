@@ -172,7 +172,8 @@ const CheckoutPage: React.FC = () => {
                         },
                     }
                 );
-                navigate("/order-success");
+                const paymentUrl = response.data.paymentUrl;  // Nhận URL thanh toán từ backend
+                window.location.href = paymentUrl;  // Chuyển hướng đến trang thanh toán MoMo
             } else if (paymentMethod === "COD") {
                 const response = await axios.post(
                     "/api/payment/create/COD",

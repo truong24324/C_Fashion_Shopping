@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,10 +16,8 @@ import Backend.Model.Account;
 import Backend.Model.Role;
 import Backend.Repository.AccountRepository;
 import Backend.Repository.RoleRepository;
-import Backend.Request.AccountRequest;
 import Backend.Request.RegisterRequest;
 import Backend.Response.AccountResponse;
-import io.swagger.v3.oas.models.security.SecurityScheme.In;
 import Backend.Exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 

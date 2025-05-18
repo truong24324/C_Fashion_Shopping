@@ -67,27 +67,6 @@ public class SupplierController {
         return ResponseEntity.ok(response);
     }
 
-    // ✅ API tìm kiếm nhà cung cấp theo tên (có phân trang)
-//    @GetMapping("/search")
-//    public ResponseEntity<PaginationResponse<Supplier>> searchSuppliers(
-//            @RequestParam String keyword,
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "10") int size) {
-//
-//        Pageable pageable = PageRequest.of(page, size);
-//        Page<Supplier> supplierPage = supplierService.searchSuppliers(keyword, pageable);
-//
-//        PaginationResponse<Supplier> response = new PaginationResponse<>(
-//                supplierPage.getContent(),
-//                supplierPage.getNumber(),
-//                supplierPage.getSize(),
-//                supplierPage.getTotalElements(),
-//                supplierPage.getTotalPages()
-//        );
-//
-//        return ResponseEntity.ok(response);
-//    }
-
     // ✅ API thêm mới nhà cung cấp
     @PostMapping("/add")
 	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
@@ -130,14 +109,4 @@ public class SupplierController {
         }
     }
 
-    // ✅ Bắt lỗi validate từ @Valid
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        List<String> errors = ex.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getDefaultMessage())
-                .collect(Collectors.toList());
-
-        String errorMessage = String.join(", ", errors);
-        return ResponseEntity.badRequest().body(new ApiResponse<>(false, errorMessage, null));
-    }
 }

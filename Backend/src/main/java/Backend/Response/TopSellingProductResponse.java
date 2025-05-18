@@ -10,6 +10,7 @@ public class TopSellingProductResponse {
     private Integer productId;
     private String productName;
     private String model;
+    private Integer totalSold;
     private List<String> image;
     private List<String> imageTypes;
     private BigDecimal price;

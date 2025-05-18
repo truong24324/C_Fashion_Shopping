@@ -119,6 +119,98 @@ public class ProductService {
 		return productDTOs;
 	}
 
+	public List<TopSellingProductResponse> getTop10BestSellingProducts() {
+	    // Bước 1: Lấy toàn bộ OrderDetail của đơn đã thanh toán
+	    List<OrderDetail> paidOrderDetails = orderDetailRepository.findAllByOrder_PaymentStatus("Đã thanh toán");
+
+	    // Bước 2: Gom nhóm theo product
+	    Map<Product, Integer> productSalesMap = new HashMap<>();
+
+	    for (OrderDetail od : paidOrderDetails) {
+	        Product product = od.getProduct();
+	        int quantity = od.getQuantity();
+
+	        productSalesMap.merge(product, quantity, Integer::sum);
+	    }
+
+	    // Bước 3: Sắp xếp giảm dần theo tổng số lượng bán
+	    List<Map.Entry<Product, Integer>> sortedTop = productSalesMap.entrySet().stream()
+	            .sorted(Map.Entry.<Product, Integer>comparingByValue().reversed())
+	            .limit(10)
+	            .collect(Collectors.toList());
+
+	    // Bước 4: Tạo danh sách kết quả
+	    List<TopSellingProductResponse> responses = new ArrayList<>();
+
+	    for (Map.Entry<Product, Integer> entry : sortedTop) {
+	        Product product = entry.getKey();
+	        Integer totalSold = entry.getValue();
+
+	        TopSellingProductResponse dto = new TopSellingProductResponse();
+	        dto.setProductId(product.getProductId());
+	        dto.setProductName(product.getProductName());
+	        dto.setModel(product.getModel());
+	        dto.setTotalSold(totalSold);
+
+	        // Hình ảnh MAIN và SECONDARY
+	        List<ProductImage> filteredImages = product.getImages().stream()
+	                .filter(img -> img.getImageType() == ImageType.MAIN || img.getImageType() == ImageType.SECONDARY)
+	                .collect(Collectors.toList());
+
+	        dto.setImage(filteredImages.stream().map(ProductImage::getImageUrl).collect(Collectors.toList()));
+	        dto.setImageTypes(filteredImages.stream().map(img -> img.getImageType().name()).collect(Collectors.toList()));
+
+	        // Giá thấp nhất
+	        List<Tuple> result = variantRepository.findMinPriceByProduct(product);
+	        if (!result.isEmpty()) {
+	            BigDecimal minPrice = (BigDecimal) result.get(0).get("minPrice");
+	            dto.setPrice(minPrice);
+	        }
+
+	        // Variant summary
+	        List<String> colorCodes = new ArrayList<>();
+	        List<String> sizeNames = new ArrayList<>();
+	        List<String> materialNames = new ArrayList<>();
+	        List<TopSellingProductResponse.VariantSummaryResponse> variantResponses = new ArrayList<>();
+
+	        for (Variant variant : product.getVariants()) {
+	            TopSellingProductResponse.VariantSummaryResponse vr = dto.new VariantSummaryResponse();
+
+	            if (variant.getColor() != null) {
+	                String colorCode = variant.getColor().getColorCode();
+	                vr.setColorCode(colorCode);
+	                if (!colorCodes.contains(colorCode)) colorCodes.add(colorCode);
+	            }
+
+	            if (variant.getSize() != null) {
+	                String size = variant.getSize().getSizeName();
+	                vr.setSizeName(size);
+	                if (!sizeNames.contains(size)) sizeNames.add(size);
+	            }
+
+	            if (variant.getMaterial() != null) {
+	                String material = variant.getMaterial().getMaterialName();
+	                vr.setMaterialName(material);
+	                if (!materialNames.contains(material)) materialNames.add(material);
+	            }
+
+	            vr.setPrice(variant.getPrice());
+	            vr.setStock(variant.getStock());
+
+	            variantResponses.add(vr);
+	        }
+
+	        dto.setColorCodes(colorCodes);
+	        dto.setSizeNames(sizeNames);
+	        dto.setMaterialNames(materialNames);
+	        dto.setVariants(variantResponses);
+
+	        responses.add(dto);
+	    }
+
+	    return responses;
+	}
+
 	public List<ProductOverviewResponse> getAllProductOverviews() {
 		List<Product> products = productRepository.findAll();
 
@@ -389,10 +481,6 @@ public class ProductService {
             throw new IllegalStateException("Sản phẩm này đang được sử dụng, không thể xóa.");
         }
         
-	}
-
-	public List<TopSellingProductResponse> getTop10BestSellingProducts() {
-		return orderDetailRepository.findTop10BestSellingProducts(PageRequest.of(0, 10));
 	}
 
 	private String saveImage(MultipartFile file) {

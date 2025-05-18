@@ -1,10 +1,11 @@
 package Backend.Response;
 
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 public class ProductReviewResponse {
     private Integer reviewId;
     private Long accountId;
