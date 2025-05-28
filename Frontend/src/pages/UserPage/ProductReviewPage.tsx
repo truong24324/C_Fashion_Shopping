@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Rate, Button, Input, Form, Upload, List, Card, Typography, Row, Col, Image } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { Rate, Button, Input, Form } from "antd";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-hot-toast";
 import axios from "axios";
@@ -8,7 +7,6 @@ import Navbar from "src/Layouts/Navbar";
 import Footer from "src/Layouts/Footer";
 
 const { TextArea } = Input;
-const { Title } = Typography;
 
 interface DecodedToken {
   accountId: string;

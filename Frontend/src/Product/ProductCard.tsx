@@ -5,7 +5,6 @@ import { Dialog } from "@headlessui/react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
-import { Variants } from "antd/es/config-provider";
 
 interface Product {
     productId: number;
@@ -194,7 +193,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
     };
 
     const WISHLIST_CACHE_KEY = "wishlist_cache";
-    const WISHLIST_CACHE_DURATION = 50 * 60 * 1000; // 5 phút
+    const WISHLIST_CACHE_DURATION = 5 * 60 * 1000; // 5 phút
 
     const getCachedWishlist = () => {
         const cached = localStorage.getItem(WISHLIST_CACHE_KEY);

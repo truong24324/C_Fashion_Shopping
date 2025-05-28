@@ -32,7 +32,7 @@ const HomePage: React.FC = () => {
     setLoading(true);
     const cacheKey = "cached_products_latest";
     const expiryKey = "cached_products_latest_expiry";
-    const cacheExpiry = 20 * 60 * 1000; // 20 phút
+    const cacheExpiry = 5 * 60 * 1000; // 20 phút
   
     try {
       const now = Date.now();

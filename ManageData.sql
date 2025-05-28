@@ -21,7 +21,7 @@ CREATE TABLE ACCOUNTS (
     EMAIL VARCHAR(50) UNIQUE NOT NULL,                 -- Địa chỉ email duy nhất
     PHONE VARCHAR(12) UNIQUE NOT NULL,                 -- Số điện thoại duy nhất
     PASSWORD NVARCHAR(255) NOT NULL,                   -- Mật khẩu đã mã hóa
-    DEVICE_NAME NVARCHAR(100),                         -- Tên thiết bị đã đăng nhập
+    DEVICE_NAME NVARCHAR(255),                         -- Tên thiết bị đã đăng nhập
     LOGIN_TIME DATETIME DEFAULT GETDATE(),             -- Thời gian đăng nhập gần nhất
     LOGOUT_TIME DATETIME,                              -- Thời gian đăng xuất
     IP_ADDRESS VARCHAR(50),                            -- Địa chỉ IP của người dùng
