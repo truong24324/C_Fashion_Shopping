@@ -2,9 +2,8 @@ package Backend.Repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import Backend.Model.OrderHistory;
 
-import java.util.List;
+import Backend.Model.OrderHistory;
 
 @Repository
 public interface OrderHistoryRepository extends JpaRepository<OrderHistory, Integer> {

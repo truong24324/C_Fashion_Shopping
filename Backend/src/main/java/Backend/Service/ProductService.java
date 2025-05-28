@@ -2,14 +2,21 @@ package Backend.Service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
@@ -17,11 +24,29 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import Backend.Exception.ResourceNotFoundException;
-import Backend.Model.*;
-import Backend.Repository.*;
+import Backend.Model.Color;
+import Backend.Model.ImageType;
+import Backend.Model.Material;
+import Backend.Model.OrderDetail;
+import Backend.Model.Product;
+import Backend.Model.ProductImage;
+import Backend.Model.Size;
+import Backend.Model.Variant;
+import Backend.Repository.BrandRepository;
+import Backend.Repository.CategoryRepository;
+import Backend.Repository.OrderDetailRepository;
+import Backend.Repository.ProductImageRepository;
+import Backend.Repository.ProductRepository;
+import Backend.Repository.ProductStatusRepository;
+import Backend.Repository.SupplierRepository;
+import Backend.Repository.VariantRepository;
 import Backend.Request.ProductRequest;
 import Backend.Request.ProductUpdateRequest;
-import Backend.Response.*;
+import Backend.Response.ProductCardResponse;
+import Backend.Response.ProductDetailResponse;
+import Backend.Response.ProductOverviewResponse;
+import Backend.Response.ProductSuggestResponse;
+import Backend.Response.TopSellingProductResponse;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.Tuple;
@@ -40,7 +65,7 @@ public class ProductService {
 	private final VariantRepository variantRepository;
 	private final OrderDetailRepository orderDetailRepository;
 
-	private final Path productUploadPath = Paths.get("uploads/products");
+	private final Path productUploadPath = Path.of("uploads/products");
 
 	public List<ProductCardResponse> getLatestProducts() {
 		List<Product> products = productRepository.findTop50ByOrderByCreatedAtDesc();
@@ -179,19 +204,25 @@ public class ProductService {
 	            if (variant.getColor() != null) {
 	                String colorCode = variant.getColor().getColorCode();
 	                vr.setColorCode(colorCode);
-	                if (!colorCodes.contains(colorCode)) colorCodes.add(colorCode);
+	                if (!colorCodes.contains(colorCode)) {
+						colorCodes.add(colorCode);
+					}
 	            }
 
 	            if (variant.getSize() != null) {
 	                String size = variant.getSize().getSizeName();
 	                vr.setSizeName(size);
-	                if (!sizeNames.contains(size)) sizeNames.add(size);
+	                if (!sizeNames.contains(size)) {
+						sizeNames.add(size);
+					}
 	            }
 
 	            if (variant.getMaterial() != null) {
 	                String material = variant.getMaterial().getMaterialName();
 	                vr.setMaterialName(material);
-	                if (!materialNames.contains(material)) materialNames.add(material);
+	                if (!materialNames.contains(material)) {
+						materialNames.add(material);
+					}
 	            }
 
 	            vr.setPrice(variant.getPrice());
@@ -480,12 +511,12 @@ public class ProductService {
             // Trả về thông báo lỗi nếu thương hiệu đang được sử dụng
             throw new IllegalStateException("Sản phẩm này đang được sử dụng, không thể xóa.");
         }
-        
+
 	}
 
 	private String saveImage(MultipartFile file) {
 		try {
-			Path uploadDir = Paths.get("uploads/products");
+			Path uploadDir = Path.of("uploads/products");
 			if (!Files.exists(uploadDir)) {
 				Files.createDirectories(uploadDir);
 			}

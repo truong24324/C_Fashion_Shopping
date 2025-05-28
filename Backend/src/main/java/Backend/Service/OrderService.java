@@ -1,22 +1,44 @@
 package Backend.Service;
 
-import Backend.Model.*;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import Backend.Model.Account;
+import Backend.Model.Cart;
+import Backend.Model.ImageType;
+import Backend.Model.Order;
+import Backend.Model.OrderDetail;
+import Backend.Model.OrderHistory;
+import Backend.Model.OrderStatus;
+import Backend.Model.Product;
+import Backend.Model.ProductImage;
+import Backend.Model.Variant;
+import Backend.Repository.AccountRepository;
+import Backend.Repository.CartDetailRepository;
+import Backend.Repository.CartRepository;
+import Backend.Repository.OrderDetailRepository;
+import Backend.Repository.OrderHistoryRepository;
+import Backend.Repository.OrderRepository;
+import Backend.Repository.OrderStatusRepository;
+import Backend.Repository.ProductReviewRepository;
+import Backend.Repository.VariantRepository;
 import Backend.Request.OrderRequest;
 import Backend.Response.OrderDetailResponse;
 import Backend.Response.OrderResponse;
 import Backend.Response.PurchasedProductResponse;
 import lombok.RequiredArgsConstructor;
-import Backend.Repository.*;
-
-import org.springframework.data.domain.*;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +53,7 @@ public class OrderService {
     private final CartDetailRepository cartDetailRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final ProductReviewRepository productReviewRepository;
-    
+
     @Transactional
     public Order placeOrder(OrderRequest orderRequest) {
         Integer statusId = orderRequest.getOrderStatusId() != null ? orderRequest.getOrderStatusId() : 1;
@@ -112,7 +134,7 @@ public class OrderService {
             variant.setStock(variant.getStock() - detail.getQuantity());
             variantRepository.save(variant);
         }
-        
+
         // Xóa các CartDetail liên quan đến các variant đã đặt trong giỏ hàng
         Cart cart = cartRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("Giỏ hàng không tồn tại cho tài khoản này"));
@@ -123,7 +145,7 @@ public class OrderService {
 
         return savedOrder;
     }
-    
+
     public OrderResponse convertToResponse(Order order) {
         OrderResponse response = new OrderResponse();
         response.setOrderId(order.getOrderId());
@@ -162,7 +184,7 @@ public class OrderService {
     public void save(Order order) {
         orderRepository.save(order);
     }
-    
+
     public Page<OrderResponse> findByStatusWithPaging(Integer statusId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("orderDate").descending());
         Page<Order> orders;
@@ -190,14 +212,14 @@ public class OrderService {
         }
 
         order.setOrderStatus(nextStatus);
-        
+
         order.setUpdatedAt(LocalDateTime.now());
         if (nextStatus.getStatusName().equals("Giao thành công")) {
             order.setPaymentStatus("Đã thanh toán");
         } else {
-            order.setPaymentStatus(null);  
+            order.setPaymentStatus(null);
         }
-        
+
         OrderHistory history = new OrderHistory();
         history.setOrder(order);
         history.setOrderStatus(nextStatus);
@@ -208,7 +230,7 @@ public class OrderService {
 
         return orderRepository.save(order);
     }
-    
+
     @Transactional
     public Order cancelOrder(Integer orderId) {
         Order order = findById(orderId);

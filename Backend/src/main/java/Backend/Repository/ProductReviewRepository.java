@@ -1,11 +1,12 @@
 package Backend.Repository;
 
-import Backend.Model.OrderDetail;
-import Backend.Model.ProductReview;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import Backend.Model.OrderDetail;
+import Backend.Model.ProductReview;
 
 public interface ProductReviewRepository extends JpaRepository<ProductReview, Integer> {
     List<ProductReview> findByProduct_ProductIdAndIsVisibleTrue(Integer productId);

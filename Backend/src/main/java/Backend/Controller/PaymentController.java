@@ -1,12 +1,12 @@
 package Backend.Controller;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import Backend.Model.Order;
@@ -191,6 +191,7 @@ public class PaymentController {
 	    try {
 	        Order createdOrder = orderService.placeOrder(orderRequest);
 	        OrderResponse orderResponse = orderService.convertToResponse(createdOrder);
+			sendOrderConfirmationEmail(null, createdOrder);
 	        return ResponseEntity.ok(new ApiResponse<>(true, "Đặt hàng thành công", orderResponse));
 	    } catch (IllegalArgumentException e) {
 	        return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
@@ -198,7 +199,6 @@ public class PaymentController {
 	        return ResponseEntity.status(500).body(new ApiResponse<>(false, "Lỗi hệ thống khi tạo đơn hàng: " + e.getMessage(), null));
 	    }
 	}
-
 
 	private void sendOrderConfirmationEmail(String toEmail, Order order) {
 		String subject = "Xác nhận đơn hàng #" + order.getOrderId();
@@ -225,5 +225,5 @@ public class PaymentController {
 
 		emailService.sendOrderConfirmation(toEmail, subject, body.toString());
 	}
-	
+
 }

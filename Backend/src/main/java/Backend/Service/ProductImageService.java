@@ -1,7 +1,9 @@
 package Backend.Service;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -23,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class ProductImageService {
 
     private final ProductImageRepository imageRepository;
-	private final Path productUploadPath = Paths.get("uploads/products");
+	private final Path productUploadPath = Path.of("uploads/products");
 
     public Page<ProductImage> getAllProductImages(Pageable pageable) {
         return imageRepository.findAll(pageable);
@@ -83,7 +85,7 @@ public class ProductImageService {
 
     private String saveImage(MultipartFile file) {
 		try {
-			Path uploadDir = Paths.get("uploads/products");
+			Path uploadDir = Path.of("uploads/products");
 			if (!Files.exists(uploadDir)) {
 				Files.createDirectories(uploadDir);
 			}

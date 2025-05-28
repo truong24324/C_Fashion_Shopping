@@ -42,10 +42,17 @@ SELECT * FROM PRODUCT_REVIEWS
 INSERT INTO ORDER_STATUSES (STATUS_NAME, STEP_ORDER, IS_FINAL, IS_CANCELLABLE)
 VALUES 
 (N'Chờ xác nhận', 1, 0, 1),
-(N'Đang xử lý', 2, 0, 0),
-(N'Đang giao hàng', 3, 0, 0),
-(N'Đã giao hàng', 4, 1, 0),
-(N'Đã hủy', 5, 1, 0);
+(N'Đang xử lý', 2, 0, 1),
+(N'Đang chuẩn bị hàng', 3, 0, 1),
+(N'Đã giao cho đơn vị vận chuyển', 4, 0, 0),
+(N'Đang giao hàng', 5, 0, 0),
+(N'Giao thất bại', 6, 0, 0),
+(N'Giao thành công', 7, 1, 0),
+(N'Hoàn thành', 8, 1, 0),
+(N'Đã hủy', -1, 1, 0),
+(N'Yêu cầu trả hàng', 90, 0, 1),
+(N'Xác nhận yêu cầu trả hàng', 91, 0, 0),
+(N'Trả hàng thành công', 92, 1, 0);
 
 INSERT INTO ORDERS (ACCOUNT_ID, FULLNAME, EMAIL, PHONE, SHIPPING_ADDRESS, TOTAL_AMOUNT, ORDER_STATUS_ID, PAYMENT_METHOD, PAYMENT_STATUS)
 VALUES 
@@ -172,8 +179,9 @@ INSERT INTO SPECIFICATIONS (PRODUCT_ID, SCREEN_SIZE, SCREEN_TYPE, SCREEN_RESOLUT
 
 INSERT INTO ROLES (ROLE_NAME, DESCRIPTION)
 VALUES
-    ('Admin', 'Quản trị viên hệ thống, có quyền truy cập đầy đủ'),
-    ('User', 'Người dùng bình thường, có quyền sử dụng các chức năng cơ bản'),
-    ('Customer', 'Khách hàng mua sắm trên hệ thống'),
-    ('Manager', 'Quản lý, có quyền truy cập vào một số phần quản trị');
+    ('Super_Admin', N'Quản trị viên hệ thống, có quyền truy cập đầy đủ'),
+    ('Admin', N'Quản trị viên hệ thống, có quyền truy cập đầy đủ'),
+    ('User', N'Người dùng bình thường, có quyền sử dụng các chức năng cơ bản'),
+    ('Customer', N'Khách hàng mua sắm trên hệ thống'),
+    ('Manager', N'Quản lý, có quyền truy cập vào một số phần quản trị');
 GO

@@ -3,12 +3,22 @@ package Backend.Controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import Backend.Model.Product;
@@ -80,9 +90,9 @@ public class ProductController {
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadProductImage(
-            @RequestParam("productId") Integer productId,
+            @RequestParam Integer productId,
             @RequestParam("image") MultipartFile imageFile,
-            @RequestParam("imageType") String imageType) {
+            @RequestParam String imageType) {
         try {
 
             if (imageFile.isEmpty()) {
@@ -120,5 +130,5 @@ public class ProductController {
                                  .body(new ApiResponse<>(false, e.getMessage(), null));
         }
     }
-  
+
 }

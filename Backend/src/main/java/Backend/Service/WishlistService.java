@@ -8,8 +8,17 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import Backend.Model.*;
-import Backend.Repository.*;
+import Backend.Model.Account;
+import Backend.Model.Cart;
+import Backend.Model.CartDetail;
+import Backend.Model.Product;
+import Backend.Model.Variant;
+import Backend.Model.Wishlist;
+import Backend.Repository.AccountRepository;
+import Backend.Repository.CartDetailRepository;
+import Backend.Repository.CartRepository;
+import Backend.Repository.ProductRepository;
+import Backend.Repository.WishlistRepository;
 import Backend.Request.WishlistRequest;
 import Backend.Response.WishlistProductResponse;
 import Backend.Response.WishlistResponse;

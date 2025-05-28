@@ -1,7 +1,8 @@
 package Backend.Configuration;
-import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Base64;
+
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 public class SecretKeyGenerator {
     public static void main(String[] args) {

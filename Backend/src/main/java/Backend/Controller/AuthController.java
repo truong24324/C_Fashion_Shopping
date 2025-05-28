@@ -58,13 +58,13 @@ public class AuthController {
 			if (account.isLocked()) {
 			    return ResponseEntity.status(403).body(new AuthResponse("Tài khoản đã bị khóa."));
 			}
-			
+
 			  // Kiểm tra quyền đăng nhập
 	        Role role = account.getRole();  // Lấy vai trò của tài khoản
 	        if (role != null && !role.isLoginAllowed()) {
 	            return ResponseEntity.status(403).body(new AuthResponse("Quyền đăng nhập bị tắt cho vai trò của bạn."));
 	        }
-	        
+
 			// Kiểm tra mật khẩu
 			String errorMessage = accountService.validateLogin(account, loginRequest.getPassword());
 			if (errorMessage != null) {

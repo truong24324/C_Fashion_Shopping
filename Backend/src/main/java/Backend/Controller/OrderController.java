@@ -1,20 +1,24 @@
 package Backend.Controller;
 
-import Backend.Model.Order;
-import Backend.Model.OrderStatus;
-import Backend.Request.OrderStatusUpdateRequest;
-import Backend.Response.ApiResponse;
-import Backend.Response.OrderResponse;
-import Backend.Service.OrderService;
-import Backend.Service.OrderStatusService;
-import lombok.RequiredArgsConstructor;
-
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import Backend.Model.Order;
+import Backend.Model.OrderStatus;
+import Backend.Response.ApiResponse;
+import Backend.Response.OrderResponse;
+import Backend.Service.OrderService;
+import Backend.Service.OrderStatusService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -52,7 +56,7 @@ public class OrderController {
 	    OrderResponse response = orderService.toOrderResponse(updatedOrder);
 	    return ResponseEntity.ok(new ApiResponse<>(true, "Chuyển sang trạng thái kế tiếp thành công", response));
 	}
-	
+
 	@PatchMapping("/{orderId}/cancel")
 	public ResponseEntity<ApiResponse<OrderResponse>> cancelOrder(@PathVariable Integer orderId) {
 	    Order updatedOrder = orderService.cancelOrder(orderId);

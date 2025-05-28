@@ -19,13 +19,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class VNPayService {
 
-    @Value("${payment.vnPay.url}") 
+    @Value("${payment.vnPay.url}")
     private String vnp_PayUrl;
-    @Value("${payment.vnPay.returnUrl}") 
+    @Value("${payment.vnPay.returnUrl}")
     private String vnp_ReturnUrl;
-    @Value("${payment.vnPay.tmnCode}") 
+    @Value("${payment.vnPay.tmnCode}")
     private String vnp_TmnCode;
-    @Value("${payment.vnPay.secretKey}") 
+    @Value("${payment.vnPay.secretKey}")
     private String secretKey;
 
     private final OrderService orderService;

@@ -79,7 +79,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     sendErrorResponse(response, "Quyền đăng nhập bị tắt cho vai trò của bạn.");
                     return;
                 }
-                
+
                 // Kiểm tra token hợp lệ
                 if (jwtService.isTokenValid(token, userDetails)) {
                     UsernamePasswordAuthenticationToken authenticationToken =
@@ -109,7 +109,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (!response.isCommitted()) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
-            String jsonError = String.format("{\"status\": %d, \"error\": \"Unauthorized\", \"message\": \"%s\"}",
+            String jsonError = "{\"status\": %d, \"error\": \"Unauthorized\", \"message\": \"%s\"}".formatted(
                     HttpServletResponse.SC_UNAUTHORIZED, errorMessage);
             response.getWriter().write(jsonError);
         }

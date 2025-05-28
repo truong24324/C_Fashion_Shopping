@@ -27,7 +27,7 @@ public class VNPayUtil {
             byte[] result = hmac512.doFinal(dataBytes);
             StringBuilder sb = new StringBuilder(2 * result.length);
             for (byte b : result) {
-                sb.append(String.format("%02x", b & 0xff));
+                sb.append("%02x".formatted(b & 0xff));
             }
             return sb.toString();
 

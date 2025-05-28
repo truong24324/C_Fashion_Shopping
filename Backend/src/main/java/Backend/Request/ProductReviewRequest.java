@@ -1,8 +1,11 @@
 package Backend.Request;
 
-import org.springframework.web.multipart.MultipartFile;
-
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
@@ -10,10 +13,10 @@ public class ProductReviewRequest {
 
 	private Integer reviewId;
 
-	
+
 	private Integer orderDetailId;
 
-	
+
 	private Integer accountId;
 
 	@NotNull(message = "rating không được để trống")

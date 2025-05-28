@@ -1,20 +1,17 @@
 package Backend.Controller;
 
-import Backend.Model.Account;
-import Backend.Request.AccountRequest;
-import Backend.Response.AccountResponse;
-import Backend.Response.ApiResponse;
-import Backend.Response.PaginationResponse;
-import Backend.Service.AccountService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
-import org.springframework.http.*;
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import Backend.Model.Account;
+import Backend.Response.AccountResponse;
+import Backend.Response.ApiResponse;
+import Backend.Service.AccountService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/accounts")

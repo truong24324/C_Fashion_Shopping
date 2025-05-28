@@ -3,7 +3,11 @@ package Backend.Response;
 import java.math.BigDecimal;
 import java.util.List;
 
-import Backend.Model.*;
+import Backend.Model.CartDetail;
+import Backend.Model.ImageType;
+import Backend.Model.Product;
+import Backend.Model.ProductImage;
+import Backend.Model.Variant;
 import lombok.Data;
 
 @Data

@@ -2,7 +2,8 @@ package Backend.Response;
 
 import java.math.BigDecimal;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 @Data
 @AllArgsConstructor

@@ -23,7 +23,7 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            String emailContent = String.format("""
+            String emailContent = """
                 <!DOCTYPE html>
                 <html lang="vi">
                 <head>
@@ -64,7 +64,7 @@ public class EmailService {
                     </div>
                 </body>
                 </html>
-            """, otp, java.time.Year.now());
+            """.formatted(otp, java.time.Year.now());
 
             helper.setTo(toEmail);
             helper.setSubject("Mã OTP xác nhận đăng nhập");
@@ -98,7 +98,7 @@ public class EmailService {
             e.printStackTrace();
         }
     }
-    
+
     public void sendOrderConfirmation(String toEmail, String subject, String body) {
         try {
             MimeMessage message = mailSender.createMimeMessage();

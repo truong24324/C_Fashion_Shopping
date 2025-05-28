@@ -18,7 +18,7 @@ public class ProductImageResponse {
     private ImageType imageType;
     private String productName;
     private LocalDateTime createdAt;
-    
+
     public ProductImageResponse(ProductImage image) {
         this.imageId = image.getImageId();
         this.productId = image.getProduct().getProductId();

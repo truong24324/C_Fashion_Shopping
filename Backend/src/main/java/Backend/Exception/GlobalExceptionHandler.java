@@ -48,7 +48,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(new ApiResponse<>(false, ex.getMessage(), null));
     }
-    
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         List<String> errors = ex.getBindingResult().getFieldErrors().stream()
@@ -58,7 +58,7 @@ public class GlobalExceptionHandler {
         String errorMessage = String.join(", ", errors);
         return ResponseEntity.badRequest().body(new ApiResponse<>(false, errorMessage, null));
     }
-    
+
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiResponse<String>> handleConstraintViolationException(ConstraintViolationException ex) {
         String errorMessage = ex.getConstraintViolations().stream()

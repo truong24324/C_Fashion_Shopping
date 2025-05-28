@@ -3,7 +3,6 @@ package Backend.Service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
@@ -24,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class BrandService {
     private final BrandRepository brandRepository;
     private final ProductRepository productRepository;
-    private final Path brandUploadPath = Paths.get("uploads/brands");
+    private final Path brandUploadPath = Path.of("uploads/brands");
 
     @PostConstruct
     public void init() throws IOException {
@@ -98,7 +97,7 @@ public class BrandService {
             // Trả về thông báo lỗi nếu thương hiệu đang được sử dụng
             throw new IllegalStateException("Thương hiệu này đang được sử dụng trong các sản phẩm khác, không thể xóa.");
         }
-        
+
         // Nếu không sử dụng, tiếp tục xóa
         Brand brand = getBrandById(brandId);
         brandRepository.delete(brand);
@@ -106,7 +105,7 @@ public class BrandService {
 
     private String saveImage(MultipartFile file) {
         try {
-        	Path uploadDir = Paths.get("uploads/brands");
+        	Path uploadDir = Path.of("uploads/brands");
         	if (!Files.exists(uploadDir)) {
         	    Files.createDirectories(uploadDir);
         	}

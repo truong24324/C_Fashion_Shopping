@@ -9,7 +9,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import Backend.Model.*;
+import Backend.Model.Color;
+import Backend.Model.Material;
+import Backend.Model.Product;
+import Backend.Model.Size;
+import Backend.Model.Variant;
 import io.lettuce.core.dynamic.annotation.Param;
 import jakarta.persistence.Tuple;
 

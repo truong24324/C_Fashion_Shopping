@@ -65,7 +65,7 @@ public class RoleController {
         }
         return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Không thể xóa vai trò đã được sử dụng!", null));
     }
-    
+
  // Cập nhật trạng thái isLoginAllowed của vai trò
     @PatchMapping("/{roleId}/status")
     public ResponseEntity<ApiResponse<Role>> updateLoginAllowedStatus(

@@ -31,13 +31,13 @@ public class WebConfig implements WebMvcConfigurer {
 				.allowCredentials(true);
 	}
 
-	@Bean
-	public RestTemplate restTemplate() {
+    @Bean
+    RestTemplate restTemplate() {
 		return new RestTemplate();
 	}
 
-	@Bean
-	public AccountService accountService() {
+    @Bean
+    AccountService accountService() {
 		return new AccountService();
 	}
 

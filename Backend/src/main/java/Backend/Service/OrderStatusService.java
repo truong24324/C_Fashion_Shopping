@@ -1,13 +1,13 @@
 package Backend.Service;
 
-import Backend.Model.*;
-import lombok.RequiredArgsConstructor;
-import Backend.Repository.*;
+import java.util.List;
 
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import Backend.Model.OrderStatus;
+import Backend.Repository.OrderStatusRepository;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -18,5 +18,5 @@ public class OrderStatusService {
         return orderStatusRepository.findAll(Sort.by("stepOrder").ascending());
     }
 
-   
+
 }

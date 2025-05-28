@@ -1,6 +1,8 @@
 package Backend.Service;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +14,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import Backend.Exception.ResourceNotFoundException;
 import Backend.Model.Account;
 import Backend.Model.Role;
 import Backend.Repository.AccountRepository;
 import Backend.Repository.RoleRepository;
 import Backend.Request.RegisterRequest;
 import Backend.Response.AccountResponse;
-import Backend.Exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -50,7 +52,7 @@ public class AccountService implements UserDetailsService{
             return response;
         }).collect(Collectors.toList());
     }
-    
+
     public String promoteAccountRole(Integer accountId) {
         Account account = accountRepository.findById(accountId)
             .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản"));
@@ -231,7 +233,7 @@ public class AccountService implements UserDetailsService{
         target.setLocked(!target.isLocked());
         accountRepository.save(target);
     }
-    
+
     public void toggleActive(Integer targetId, Account requester) {
         Account target = getById(targetId);
 
@@ -246,7 +248,7 @@ public class AccountService implements UserDetailsService{
         target.setActive(!target.isActive());
         accountRepository.save(target);
     }
-    
+
     public boolean existsByRole(Role role) {
         return accountRepository.existsByRole(role);
     }

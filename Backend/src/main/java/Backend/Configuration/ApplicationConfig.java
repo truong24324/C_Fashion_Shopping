@@ -22,10 +22,10 @@ public class ApplicationConfig {
 
 	private final AccountRepository accountRepository; // Repository để truy vấn tài khoản người dùng
 
-	// Bean để cung cấp dịch vụ tìm kiếm người dùng theo tên (email) trong cơ sở dữ
-	// liệu
-	@Bean
-	public UserDetailsService userDetailsService() {
+    // Bean để cung cấp dịch vụ tìm kiếm người dùng theo tên (email) trong cơ sở dữ
+    // liệu
+    @Bean
+    UserDetailsService userDetailsService() {
 	    return email -> {
 	        Account account = accountRepository.findByEmail(email)
 	            .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản"));
@@ -39,25 +39,25 @@ public class ApplicationConfig {
 	}
 
 
-	// Bean để mã hóa mật khẩu bằng BCrypt
-	@Bean
-	public PasswordEncoder passwordEncoder() {
+    // Bean để mã hóa mật khẩu bằng BCrypt
+    @Bean
+    PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder(); // Sử dụng BCryptPasswordEncoder để mã hóa mật khẩu
 	}
 
-	// Bean để cung cấp AuthenticationProvider sử dụng DaoAuthenticationProvider
-	@Bean
-	public AuthenticationProvider authenticationProvider() {
+    // Bean để cung cấp AuthenticationProvider sử dụng DaoAuthenticationProvider
+    @Bean
+    AuthenticationProvider authenticationProvider() {
 		DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
 		provider.setPasswordEncoder(passwordEncoder()); // Cấu hình mã hóa mật khẩu
 		provider.setUserDetailsService(userDetailsService()); // Cung cấp UserDetailsService để tìm tài khoản
 		return provider;
 	}
 
-	// Bean để cung cấp AuthenticationManager từ AuthenticationConfiguration của
-	// Spring Security
-	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    // Bean để cung cấp AuthenticationManager từ AuthenticationConfiguration của
+    // Spring Security
+    @Bean
+    AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
 		return config.getAuthenticationManager(); // Trả về AuthenticationManager để quản lý xác thực
 	}
 }

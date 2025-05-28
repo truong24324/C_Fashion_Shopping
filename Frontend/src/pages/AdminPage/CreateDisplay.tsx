@@ -7,7 +7,9 @@ import ProductStatus from "../../components/CreateForm/ProductStatus";
 import Supplier from "../../components/CreateForm/Supplier";
 import Color from "../../components/CreateForm/Color";
 import Size from "../../components/CreateForm/Size";
+import Variants from "../../components/CreateForm/Variant";
 import { Variant } from "../../components/CreateForm/Product/types";
+import Material from "../../components/CreateForm/Material";
 
 const CreateDisplay = () => {
     const [category, setCategory] = useState("product");
@@ -18,10 +20,12 @@ const CreateDisplay = () => {
         { label: "Thương hiệu", value: "brands" },
         { label: "Loại sản phẩm", value: "categories" }, // Thêm danh mục vào lựa chọn
         { label: "Nhà cung cấp", value: "supplier" },
-        { label: "Trạng thái", value: "productStatus" }, 
+        { label: "Trạng thái", value: "productStatus" },
         { label: "Mã giảm giá", value: "discount" },
-        {label: "Màu sắc", value: "color"},
-        {label: "Kích thước", value: "size"},
+        { label: "Màu sắc", value: "color" },
+        { label: "Kích thước", value: "size" },
+        { label: "Chất liệu", value: "material" },
+        { label: "Biến thể", value: "variants" }
     ];
 
     return (
@@ -32,8 +36,8 @@ const CreateDisplay = () => {
                         key={cat.value}
                         onClick={() => setCategory(cat.value)}
                         className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${category === cat.value
-                                ? "bg-gradient-to-r from-green-500 to-green-700 text-white shadow-md"
-                                : "bg-gray-300 text-gray-800 hover:bg-green-500 hover:text-white"
+                            ? "bg-gradient-to-r from-green-500 to-green-700 text-white shadow-md"
+                            : "bg-gray-300 text-gray-800 hover:bg-green-500 hover:text-white"
                             }`}
                     >
                         {cat.label}
@@ -41,12 +45,14 @@ const CreateDisplay = () => {
                 ))}
             </div>
             {category === "brands" ? <CreateBrandForm /> :
-             category === "supplier" ? <Supplier /> : 
-             category === "categories" ? <CreateCategoryForm /> : 
-             category === "productStatus" ? <ProductStatus /> : 
-             category === "color" ? <Color /> : 
-             category === "size" ? <Size />:
-             category === "discount" ? <CreateDiscountForm /> : <Product  variants={variants} setVariants={setVariants}  />}
+                category === "supplier" ? <Supplier /> :
+                    category === "categories" ? <CreateCategoryForm /> :
+                        category === "productStatus" ? <ProductStatus /> :
+                            category === "color" ? <Color /> :
+                                category === "size" ? <Size /> :
+                                    category === "variants" ? <Variants /> :
+                                        category === "material" ? <Material /> :
+                                            category === "discount" ? <CreateDiscountForm /> : <Product variants={variants} setVariants={setVariants} />}
         </div>
     );
 };

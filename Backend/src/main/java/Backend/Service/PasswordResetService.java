@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +34,7 @@ public class PasswordResetService {
 		String otp;
 
 		do {
-			otp = String.format("%06d", random.nextInt(999999)); // Tạo OTP 6 chữ số
+			otp = "%06d".formatted(random.nextInt(999999)); // Tạo OTP 6 chữ số
 		} while (isSimpleOtp(otp)); // Kiểm tra OTP không phải chuỗi số đơn giản
 
 		return otp;

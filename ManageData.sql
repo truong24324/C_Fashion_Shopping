@@ -257,7 +257,7 @@ GO
 -- Bảng ORDER (Đơn hàng)
 CREATE TABLE ORDERS (
     ORDER_ID INT IDENTITY PRIMARY KEY,           -- Mã đơn hàng, khóa chính
-	ORDER_CODE NVARCHAR(100);
+	ORDER_CODE NVARCHAR(100),
     ACCOUNT_ID INT NOT NULL,                     -- Mã tài khoản người mua    
 	ORDER_STATUS_ID INT NOT NULL,                -- Trạng thái đơn hàng
 	DISCOUNT_ID INT,
@@ -270,13 +270,13 @@ CREATE TABLE ORDERS (
     TOTAL_AMOUNT DECIMAL(18, 2) NOT NULL,        -- Tổng giá trị đơn hàng
     PAYMENT_METHOD NVARCHAR(50),                 -- Phương thức thanh toán
     PAYMENT_STATUS NVARCHAR(50) NOT NULL,              -- Trạng thái thanh toán
-	SHIPPING_FEE INT;
+	SHIPPING_FEE INT,
     IS_ACTIVE BIT DEFAULT 1,                     -- Trạng thái hoạt động (1: hoạt động, 0: không)
     CREATED_AT DATETIME DEFAULT GETDATE(),       -- Thời gian tạo đơn hàng
     UPDATED_AT DATETIME DEFAULT GETDATE(),       -- Thời gian cập nhật đơn hàng
 	FOREIGN KEY (ACCOUNT_ID) REFERENCES ACCOUNTS(ACCOUNT_ID), -- Liên kết với tài khoản người mua
     FOREIGN KEY (DISCOUNT_ID) REFERENCES DISCOUNTS(DISCOUNT_ID), -- Liên kết với tài khoản người mua
-    FOREIGN KEY (ORDER_STATUS_ID) REFERENCES ORDER_STATUSES(STATUS_ID), -- Liên kết với trạng thái đơn hàng
+    FOREIGN KEY (ORDER_STATUS_ID) REFERENCES ORDER_STATUSES(STATUS_ID) -- Liên kết với trạng thái đơn hàng
 );
 GO
 

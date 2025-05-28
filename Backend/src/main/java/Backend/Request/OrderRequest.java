@@ -1,9 +1,14 @@
-package Backend.Request;  
+package Backend.Request;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
@@ -30,7 +35,7 @@ public class OrderRequest {
     private Integer orderStatusId;  // Mã trạng thái đơn hàng
 
     private String paymentMethod;   // Phương thức thanh toán
-    
+
     private String paymentStatus;  // Trạng thái thanh toán (0: chưa thanh toán, 1: đã thanh toán)
 
     @NotEmpty(message = "Danh sách chi tiết đơn hàng không thể để trống")
@@ -50,16 +55,16 @@ public class OrderRequest {
         @Min(value = 1, message = "Số lượng phải lớn hơn 0")
         private Integer quantity;
     }
-    
+
     private List<DiscountRequest> discount;
 
     @Positive(message = "Phí vận chuyển phải lớn hơn 0")
     private BigDecimal shippingFee;
-    
+
 //    // Kiểm tra tổng số tiền có khớp với giá trị của các sản phẩm trong đơn hàng
 //    public void validateTotalAmount() {
 //        BigDecimal calculatedTotal = BigDecimal.ZERO;
-//        
+//
 //        // Tính tổng tiền dựa trên chi tiết đơn hàng
 //        for (OrderDetailRequest detail : orderDetails) {
 //            calculatedTotal = calculatedTotal.add(detail.getProductPrice().multiply(new BigDecimal(detail.getQuantity())));

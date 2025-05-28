@@ -3,7 +3,6 @@ package Backend.Service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
@@ -25,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class InformationService {
     private final InformationRepository informationRepository;
     private final AccountRepository accountRepository;
-    private final Path uploadPath = Paths.get("uploads/avatars");
+    private final Path uploadPath = Path.of("uploads/avatars");
 
     @PostConstruct
     public void init() throws IOException {

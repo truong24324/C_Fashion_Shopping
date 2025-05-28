@@ -8,8 +8,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import Backend.Model.*;
-import Backend.Repository.*;
+import Backend.Model.Color;
+import Backend.Model.Material;
+import Backend.Model.Product;
+import Backend.Model.Size;
+import Backend.Model.Variant;
+import Backend.Repository.ColorRepository;
+import Backend.Repository.MaterialRepository;
+import Backend.Repository.ProductRepository;
+import Backend.Repository.SizeRepository;
+import Backend.Repository.VariantRepository;
 import Backend.Request.VariantRequest;
 import lombok.RequiredArgsConstructor;
 
