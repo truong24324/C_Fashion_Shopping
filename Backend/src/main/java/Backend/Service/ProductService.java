@@ -6,14 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -24,22 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import Backend.Exception.ResourceNotFoundException;
-import Backend.Model.Color;
-import Backend.Model.ImageType;
-import Backend.Model.Material;
-import Backend.Model.OrderDetail;
-import Backend.Model.Product;
-import Backend.Model.ProductImage;
-import Backend.Model.Size;
-import Backend.Model.Variant;
-import Backend.Repository.BrandRepository;
-import Backend.Repository.CategoryRepository;
-import Backend.Repository.OrderDetailRepository;
-import Backend.Repository.ProductImageRepository;
-import Backend.Repository.ProductRepository;
-import Backend.Repository.ProductStatusRepository;
-import Backend.Repository.SupplierRepository;
-import Backend.Repository.VariantRepository;
+import Backend.Model.*;
+import Backend.Repository.*;
 import Backend.Request.ProductRequest;
 import Backend.Request.ProductUpdateRequest;
 import Backend.Response.ProductCardResponse;
@@ -145,101 +124,102 @@ public class ProductService {
 	}
 
 	public List<TopSellingProductResponse> getTop10BestSellingProducts() {
-	    // Bước 1: Lấy toàn bộ OrderDetail của đơn đã thanh toán
-	    List<OrderDetail> paidOrderDetails = orderDetailRepository.findAllByOrder_PaymentStatus("Đã thanh toán");
+		// Bước 1: Lấy toàn bộ OrderDetail của đơn đã thanh toán
+		List<OrderDetail> paidOrderDetails = orderDetailRepository.findAllByOrder_PaymentStatus("Đã thanh toán");
 
-	    // Bước 2: Gom nhóm theo product
-	    Map<Product, Integer> productSalesMap = new HashMap<>();
+		// Bước 2: Gom nhóm theo product
+		Map<Product, Integer> productSalesMap = new HashMap<>();
 
-	    for (OrderDetail od : paidOrderDetails) {
-	        Product product = od.getProduct();
-	        int quantity = od.getQuantity();
+		for (OrderDetail od : paidOrderDetails) {
+			Product product = od.getProduct();
+			int quantity = od.getQuantity();
 
-	        productSalesMap.merge(product, quantity, Integer::sum);
-	    }
+			productSalesMap.merge(product, quantity, Integer::sum);
+		}
 
-	    // Bước 3: Sắp xếp giảm dần theo tổng số lượng bán
-	    List<Map.Entry<Product, Integer>> sortedTop = productSalesMap.entrySet().stream()
-	            .sorted(Map.Entry.<Product, Integer>comparingByValue().reversed())
-	            .limit(10)
-	            .collect(Collectors.toList());
+		// Bước 3: Sắp xếp giảm dần theo tổng số lượng bán
+		List<Map.Entry<Product, Integer>> sortedTop = productSalesMap.entrySet().stream()
+				.sorted(Map.Entry.<Product, Integer>comparingByValue().reversed())
+				.limit(10)
+				.collect(Collectors.toList());
 
-	    // Bước 4: Tạo danh sách kết quả
-	    List<TopSellingProductResponse> responses = new ArrayList<>();
+		// Bước 4: Tạo danh sách kết quả
+		List<TopSellingProductResponse> responses = new ArrayList<>();
 
-	    for (Map.Entry<Product, Integer> entry : sortedTop) {
-	        Product product = entry.getKey();
-	        Integer totalSold = entry.getValue();
+		for (Map.Entry<Product, Integer> entry : sortedTop) {
+			Product product = entry.getKey();
+			Integer totalSold = entry.getValue();
 
-	        TopSellingProductResponse dto = new TopSellingProductResponse();
-	        dto.setProductId(product.getProductId());
-	        dto.setProductName(product.getProductName());
-	        dto.setModel(product.getModel());
-	        dto.setTotalSold(totalSold);
+			TopSellingProductResponse dto = new TopSellingProductResponse();
+			dto.setProductId(product.getProductId());
+			dto.setProductName(product.getProductName());
+			dto.setModel(product.getModel());
+			dto.setTotalSold(totalSold);
 
-	        // Hình ảnh MAIN và SECONDARY
-	        List<ProductImage> filteredImages = product.getImages().stream()
-	                .filter(img -> img.getImageType() == ImageType.MAIN || img.getImageType() == ImageType.SECONDARY)
-	                .collect(Collectors.toList());
+			// Hình ảnh MAIN và SECONDARY
+			List<ProductImage> filteredImages = product.getImages().stream()
+					.filter(img -> img.getImageType() == ImageType.MAIN || img.getImageType() == ImageType.SECONDARY)
+					.collect(Collectors.toList());
 
-	        dto.setImage(filteredImages.stream().map(ProductImage::getImageUrl).collect(Collectors.toList()));
-	        dto.setImageTypes(filteredImages.stream().map(img -> img.getImageType().name()).collect(Collectors.toList()));
+			dto.setImage(filteredImages.stream().map(ProductImage::getImageUrl).collect(Collectors.toList()));
+			dto.setImageTypes(
+					filteredImages.stream().map(img -> img.getImageType().name()).collect(Collectors.toList()));
 
-	        // Giá thấp nhất
-	        List<Tuple> result = variantRepository.findMinPriceByProduct(product);
-	        if (!result.isEmpty()) {
-	            BigDecimal minPrice = (BigDecimal) result.get(0).get("minPrice");
-	            dto.setPrice(minPrice);
-	        }
+			// Giá thấp nhất
+			List<Tuple> result = variantRepository.findMinPriceByProduct(product);
+			if (!result.isEmpty()) {
+				BigDecimal minPrice = (BigDecimal) result.get(0).get("minPrice");
+				dto.setPrice(minPrice);
+			}
 
-	        // Variant summary
-	        List<String> colorCodes = new ArrayList<>();
-	        List<String> sizeNames = new ArrayList<>();
-	        List<String> materialNames = new ArrayList<>();
-	        List<TopSellingProductResponse.VariantSummaryResponse> variantResponses = new ArrayList<>();
+			// Variant summary
+			List<String> colorCodes = new ArrayList<>();
+			List<String> sizeNames = new ArrayList<>();
+			List<String> materialNames = new ArrayList<>();
+			List<TopSellingProductResponse.VariantSummaryResponse> variantResponses = new ArrayList<>();
 
-	        for (Variant variant : product.getVariants()) {
-	            TopSellingProductResponse.VariantSummaryResponse vr = dto.new VariantSummaryResponse();
+			for (Variant variant : product.getVariants()) {
+				TopSellingProductResponse.VariantSummaryResponse vr = dto.new VariantSummaryResponse();
 
-	            if (variant.getColor() != null) {
-	                String colorCode = variant.getColor().getColorCode();
-	                vr.setColorCode(colorCode);
-	                if (!colorCodes.contains(colorCode)) {
+				if (variant.getColor() != null) {
+					String colorCode = variant.getColor().getColorCode();
+					vr.setColorCode(colorCode);
+					if (!colorCodes.contains(colorCode)) {
 						colorCodes.add(colorCode);
 					}
-	            }
+				}
 
-	            if (variant.getSize() != null) {
-	                String size = variant.getSize().getSizeName();
-	                vr.setSizeName(size);
-	                if (!sizeNames.contains(size)) {
+				if (variant.getSize() != null) {
+					String size = variant.getSize().getSizeName();
+					vr.setSizeName(size);
+					if (!sizeNames.contains(size)) {
 						sizeNames.add(size);
 					}
-	            }
+				}
 
-	            if (variant.getMaterial() != null) {
-	                String material = variant.getMaterial().getMaterialName();
-	                vr.setMaterialName(material);
-	                if (!materialNames.contains(material)) {
+				if (variant.getMaterial() != null) {
+					String material = variant.getMaterial().getMaterialName();
+					vr.setMaterialName(material);
+					if (!materialNames.contains(material)) {
 						materialNames.add(material);
 					}
-	            }
+				}
 
-	            vr.setPrice(variant.getPrice());
-	            vr.setStock(variant.getStock());
+				vr.setPrice(variant.getPrice());
+				vr.setStock(variant.getStock());
 
-	            variantResponses.add(vr);
-	        }
+				variantResponses.add(vr);
+			}
 
-	        dto.setColorCodes(colorCodes);
-	        dto.setSizeNames(sizeNames);
-	        dto.setMaterialNames(materialNames);
-	        dto.setVariants(variantResponses);
+			dto.setColorCodes(colorCodes);
+			dto.setSizeNames(sizeNames);
+			dto.setMaterialNames(materialNames);
+			dto.setVariants(variantResponses);
 
-	        responses.add(dto);
-	    }
+			responses.add(dto);
+		}
 
-	    return responses;
+		return responses;
 	}
 
 	public List<ProductOverviewResponse> getAllProductOverviews() {
@@ -377,6 +357,11 @@ public class ProductService {
 			throw new IllegalArgumentException("Mô tả không được chứa mã HTML");
 		}
 
+		// Kiểm tra trùng tên sản phẩm
+		if (productRepository.existsByProductNameIgnoreCase(request.getProductName())) {
+			throw new IllegalArgumentException("Tên sản phẩm đã tồn tại");
+		}
+
 		Product product = new Product();
 		product.setProductName(request.getProductName());
 		product.setDescription(request.getDescription());
@@ -503,14 +488,14 @@ public class ProductService {
 	// ✅ Xóa sản phẩm
 	@Transactional
 	public void deleteProduct(Integer productId) {
-	    if (!productRepository.existsById(productId)) {
-	        throw new RuntimeException("Sản phẩm không tồn tại");
-	    }
+		if (!productRepository.existsById(productId)) {
+			throw new RuntimeException("Sản phẩm không tồn tại");
+		}
 
-	    if (productRepository.existsById(productId)) {
-            // Trả về thông báo lỗi nếu thương hiệu đang được sử dụng
-            throw new IllegalStateException("Sản phẩm này đang được sử dụng, không thể xóa.");
-        }
+		if (productRepository.existsById(productId)) {
+			// Trả về thông báo lỗi nếu thương hiệu đang được sử dụng
+			throw new IllegalStateException("Sản phẩm này đang được sử dụng, không thể xóa.");
+		}
 
 	}
 

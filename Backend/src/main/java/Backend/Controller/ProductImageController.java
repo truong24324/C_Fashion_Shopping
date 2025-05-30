@@ -10,14 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import Backend.Model.ImageType;
@@ -86,7 +79,7 @@ public class ProductImageController {
             return ResponseEntity.notFound().build();
         }
 
-        String newImageUrl = Optional.ofNullable(request.getImageFile())
+        String newImageUrl = Optional.ofNullable(request.getLogo())
                 .map(MultipartFile::getOriginalFilename)
                 .orElse(null);
 
@@ -100,9 +93,7 @@ public class ProductImageController {
 
         ProductImage updatedImage = productImageService.update(
                 imageId,
-                request.getProductId(),
-                request.getImageType(),
-                request.getImageFile()
+                request.getLogo()
         );
 
         ProductImageResponse responseDto = new ProductImageResponse(updatedImage);
@@ -115,18 +106,16 @@ public class ProductImageController {
     @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<ProductImage>> updateImage(
             @PathVariable Integer imageId,
-            @RequestParam Integer productId,
-            @RequestParam ImageType imageType,
-            @RequestParam("imageUrl") MultipartFile imageFile) {
+            @RequestParam MultipartFile logo) {
         // Validate file
-        if (imageFile != null && !imageFile.isEmpty()) {
-            String validationMessage = validateImageFile(imageFile);
+        if (logo != null && !logo.isEmpty()) {
+            String validationMessage = validateImageFile(logo);
             if (validationMessage != null) {
                 return ResponseEntity.badRequest().body(new ApiResponse<>(false, validationMessage, null));
             }
         }
 
-        ProductImage updatedImage = productImageService.update(imageId, productId, imageType, imageFile);
+        ProductImage updatedImage = productImageService.update(imageId, logo);
         return ResponseEntity.ok(new ApiResponse<>(true, "Cập nhật ảnh thành công!", updatedImage));
     }
 

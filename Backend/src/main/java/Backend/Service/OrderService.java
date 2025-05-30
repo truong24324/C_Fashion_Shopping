@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -57,7 +58,8 @@ public class OrderService {
     @Transactional
     public Order placeOrder(OrderRequest orderRequest) {
         Integer statusId = orderRequest.getOrderStatusId() != null ? orderRequest.getOrderStatusId() : 1;
-        String paymentStatus = orderRequest.getPaymentStatus() != null ? orderRequest.getPaymentStatus() : "Chưa thanh toán";
+        String paymentStatus = orderRequest.getPaymentStatus() != null ? orderRequest.getPaymentStatus()
+                : "Chưa thanh toán";
 
         OrderStatus orderStatus = orderStatusRepository.findById(statusId)
                 .orElseThrow(() -> new IllegalArgumentException("Trạng thái đơn hàng không hợp lệ"));
@@ -78,7 +80,8 @@ public class OrderService {
         order.setIsActive(true);
 
         Random random = new Random(); // Khởi tạo
-        String generatedOrderCode = "ORD" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + random.nextInt(1000);
+        String generatedOrderCode = "ORD" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+                + random.nextInt(1000);
         order.setOrderCode(generatedOrderCode);
 
         List<OrderDetail> orderDetails = new ArrayList<>();
@@ -156,6 +159,9 @@ public class OrderService {
         response.setTotalAmount(order.getTotalAmount());
         response.setPaymentMethod(order.getPaymentMethod());
         response.setOrderStatus(order.getOrderStatus().getStatusName());
+        response.setPaymentStatus(order.getPaymentStatus());
+        response.setShippingFee(order.getShippingFee());
+        response.setCreatedAt(order.getCreatedAt());
 
         List<OrderResponse.OrderDetailResponse> detailResponses = new ArrayList<>();
         for (OrderDetail detail : order.getOrderDetails()) {
@@ -174,7 +180,6 @@ public class OrderService {
         response.setOrderDetails(detailResponses);
         return response;
     }
-
 
     public Order findById(Integer orderId) {
         return orderRepository.findById(orderId)
@@ -224,7 +229,8 @@ public class OrderService {
         history.setOrder(order);
         history.setOrderStatus(nextStatus);
         // Cập nhật note ghi rõ trạng thái cũ và trạng thái mới
-        history.setNote("Chuyển từ trạng thái '" + currentStatus.getStatusName() + "' sang trạng thái '" + nextStatus.getStatusName() + "'");
+        history.setNote("Chuyển từ trạng thái '" + currentStatus.getStatusName() + "' sang trạng thái '"
+                + nextStatus.getStatusName() + "'");
         history.setUpdatedAt(LocalDateTime.now());
         orderHistoryRepository.save(history);
 
@@ -277,21 +283,27 @@ public class OrderService {
         response.setPaymentMethod(order.getPaymentMethod());
         response.setOrderStatus(order.getOrderStatus().getStatusName());
 
-        // Convert orderDetails to OrderDetailResponse
+        Set<String> successfulStatuses = Set.of("Giao thành công", "Hoàn thành");
+        String statusName = order.getOrderStatus().getStatusName();
+
+        response.setOrderStatus(statusName);
+        response.setPaymentStatus(
+                successfulStatuses.contains(statusName) ? "Thanh toán thành công" : "Thanh toán thất bại");
+
         List<OrderResponse.OrderDetailResponse> detailResponses = order.getOrderDetails()
-            .stream()
-            .map(detail -> {
-                OrderResponse.OrderDetailResponse res = new OrderResponse.OrderDetailResponse();
-                res.setVariantId(detail.getVariant().getVariantId());
-                res.setProductName(detail.getProductName());
-                res.setColorName(detail.getColorName());
-                res.setSizeName(detail.getSizeName());
-                res.setMaterialName(detail.getMaterialName());
-                res.setProductPrice(detail.getProductPrice());
-                res.setQuantity(detail.getQuantity());
-                res.setTotalPrice(detail.getTotalPrice());
-                return res;
-            }).toList();
+                .stream()
+                .map(detail -> {
+                    OrderResponse.OrderDetailResponse res = new OrderResponse.OrderDetailResponse();
+                    res.setVariantId(detail.getVariant().getVariantId());
+                    res.setProductName(detail.getProductName());
+                    res.setColorName(detail.getColorName());
+                    res.setSizeName(detail.getSizeName());
+                    res.setMaterialName(detail.getMaterialName());
+                    res.setProductPrice(detail.getProductPrice());
+                    res.setQuantity(detail.getQuantity());
+                    res.setTotalPrice(detail.getTotalPrice());
+                    return res;
+                }).toList();
 
         response.setOrderDetails(detailResponses);
         return response;
@@ -313,7 +325,8 @@ public class OrderService {
 
         if (targetStatusName.equalsIgnoreCase("Đã hủy")) {
             if (!cancelableStatuses.contains(currentStatus.getStatusName())) {
-                throw new RuntimeException("Chỉ có thể hủy đơn khi đang trong trạng thái: " + String.join(", ", cancelableStatuses));
+                throw new RuntimeException(
+                        "Chỉ có thể hủy đơn khi đang trong trạng thái: " + String.join(", ", cancelableStatuses));
             }
         } else if (List.of("Yêu cầu trả hàng", "Hoàn thành").contains(targetStatusName)) {
             if (!currentStatus.getStatusName().equalsIgnoreCase("Giao thành công")) {
@@ -330,7 +343,8 @@ public class OrderService {
         OrderHistory history = new OrderHistory();
         history.setOrder(order);
         history.setOrderStatus(targetStatus);
-        history.setNote("Người dùng chuyển từ '" + oldStatus.getStatusName() + "' sang '" + targetStatus.getStatusName() + "'");
+        history.setNote(
+                "Người dùng chuyển từ '" + oldStatus.getStatusName() + "' sang '" + targetStatus.getStatusName() + "'");
         history.setUpdatedAt(LocalDateTime.now());
         orderHistoryRepository.save(history);
 
@@ -359,9 +373,9 @@ public class OrderService {
         List<ProductImage> images = detail.getProduct().getImages();
         if (images != null && !images.isEmpty()) {
             ProductImage mainImg = images.stream()
-                .filter(img -> ImageType.MAIN.equals(img.getImageType()))
-                .findFirst()
-                .orElse(images.get(0));
+                    .filter(img -> ImageType.MAIN.equals(img.getImageType()))
+                    .findFirst()
+                    .orElse(images.get(0));
             res.setProductImageUrl(mainImg.getImageUrl());
         }
 
@@ -372,9 +386,9 @@ public class OrderService {
         List<PurchasedProductResponse> responseList = new ArrayList<>();
 
         // 1. Lấy tất cả đơn hàng hoàn thành và đã thanh toán của người dùng
-        List<Order> completedOrders = orderRepository.findAllByAccount_AccountIdAndOrderStatus_StatusNameAndPaymentStatus(
-                accountId, "Hoàn thành", "Đã thanh toán"
-        );
+        List<Order> completedOrders = orderRepository
+                .findAllByAccount_AccountIdAndOrderStatus_StatusNameAndPaymentStatus(
+                        accountId, "Hoàn thành", "Đã thanh toán");
 
         // 2. Duyệt từng OrderDetail trong mỗi đơn hàng
         for (Order order : completedOrders) {
@@ -402,8 +416,7 @@ public class OrderService {
                         od.getProductPrice(),
                         od.getQuantity(),
                         mainImageUrl,
-                        reviewed
-                );
+                        reviewed);
 
                 responseList.add(dto);
             }

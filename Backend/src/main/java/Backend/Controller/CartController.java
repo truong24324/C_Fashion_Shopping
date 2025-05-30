@@ -7,14 +7,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import Backend.Model.Variant;
 import Backend.Repository.VariantRepository;
@@ -47,7 +40,8 @@ public class CartController {
     @PostMapping("/update")
     public ResponseEntity<ApiResponse<String>> updateCartDetail(@RequestBody CartDetailRequest request) {
         try {
-            String message = cartService.updateCartDetail(request.getAccountId(), request.getVariantId(), request.getQuantity());
+            String message = cartService.updateCartDetail(request.getAccountId(), request.getVariantId(),
+                    request.getQuantity());
             return ResponseEntity.ok(new ApiResponse<>(true, message, null));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage(), null));
@@ -56,22 +50,30 @@ public class CartController {
 
     @GetMapping("/find")
     public ResponseEntity<?> findVariantId(
-            @RequestParam Integer productId,
-            @RequestParam String color,
-            @RequestParam String size,
-            @RequestParam String material) {
+            @RequestParam(required = false) Integer productId,
+            @RequestParam(required = false) String color,
+            @RequestParam(required = false) String size,
+            @RequestParam(required = false) String material) {
 
-        // Tìm biến thể theo productId và các thuộc tính
+        // Kiểm tra thiếu tham số
+        if (productId == null)
+            throw new IllegalArgumentException("Thiếu tham số: productId");
+        if (color == null || color.isBlank())
+            throw new IllegalArgumentException("Thiếu tham số: Màu sắc (color)");
+        if (size == null || size.isBlank())
+            throw new IllegalArgumentException("Thiếu tham số: Kích thước (size)");
+        if (material == null || material.isBlank())
+            throw new IllegalArgumentException("Thiếu tham số: Chất liệu (material)");
+
         Variant variant = variantRepository.findByProductAndAttributes(productId, color, size, material)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy biến thể phù hợp"));
 
-        // Trả về thông tin variant bao gồm stock và variantId
         Map<String, Object> response = new HashMap<>();
         response.put("variantId", variant.getVariantId());
-        response.put("stock", variant.getStock());  // Lấy stock từ variant
+        response.put("stock", variant.getStock());
         response.put("price", variant.getPrice());
 
-        return ResponseEntity.ok(response);  // Trả về map chứa variantId và stock
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/remove")

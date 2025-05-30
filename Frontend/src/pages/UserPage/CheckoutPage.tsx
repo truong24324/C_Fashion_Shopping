@@ -186,13 +186,14 @@ const CheckoutPage: React.FC = () => {
                 );
                 toast.success("Đặt hàng thành công!");  // hoặc chuyển trang
                 // Điều hướng đến trang thành công hoặc reset form
-                navigate("/order-success"); // giả sử bạn có trang này
+                const createdOrder = response.data;
+                navigate("/order-success", { state: { order: createdOrder.data } });
             }
             else {
                 toast.error("Chưa chọn phương thức thanh toán.");
             }
-        } catch (error) {
-            toast.error("Có lỗi xảy ra khi xử lý thanh toán.");
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || "Có lỗi xảy ra khi xử lý thanh toán.");
         }
     };
 
@@ -293,7 +294,7 @@ const CheckoutPage: React.FC = () => {
                                 </option>
                             ))}
                         </select>
-                        
+
 
                         {pricing.estimatedDelivery && (
                             <div className="mt-4 text-lg">

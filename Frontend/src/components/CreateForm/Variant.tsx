@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Form,
   InputNumber,
@@ -26,12 +26,8 @@ const Variant = () => {
   });
 
   // Hàm trích xuất mảng an toàn từ response
-  const extractArray = (res: any) =>
-    Array.isArray(res?.data)
-      ? res.data
-      : Array.isArray(res?.data?.data)
-      ? res.data.data
-      : [];
+ const extractArray = (res: any) =>
+  Array.isArray(res?.data?.content) ? res.data.content : [];
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -68,15 +64,15 @@ const Variant = () => {
     try {
       setLoading(true);
       const res = await axios.post(
-        "/api/variants/add",
-        {
+        "/api/variants/batch-add",
+        [{
           productId: values.productId,
-          colorId: values.colorId,
-          sizeId: values.sizeId,
-          materialId: values.materialId,
+          color: values.colorId,
+          size: values.sizeId,
+          material: values.materialId,
           stock: values.stock,
           price: values.price,
-        },
+        }],
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

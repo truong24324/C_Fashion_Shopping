@@ -36,13 +36,9 @@ public class ProductImageService {
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
-    public ProductImage update(Integer id, Integer ProductId, ImageType imageType, MultipartFile newImage) {
+    public ProductImage update(Integer id, MultipartFile newImage) {
         ProductImage image = imageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy ảnh!"));
-
-        if (imageType != null) {
-        	image.setImageType(imageType); // <-- Đảm bảo có dòng này
-        }
 
         // Cập nhật image nếu có file mới
         if (newImage != null && !newImage.isEmpty()) {

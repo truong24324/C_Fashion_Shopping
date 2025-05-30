@@ -4,18 +4,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import Backend.Model.Brand;
-import Backend.Response.BrandResponse;
-import Backend.Response.ProductCardResponse;
-import Backend.Response.ProductDetailResponse;
-import Backend.Response.ProductOverviewResponse;
-import Backend.Response.ProductSuggestResponse;
-import Backend.Response.TopSellingProductResponse;
+import Backend.Response.*;
 import Backend.Service.BrandService;
 import Backend.Service.ProductService;
 import lombok.RequiredArgsConstructor;

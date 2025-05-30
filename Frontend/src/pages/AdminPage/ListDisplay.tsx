@@ -17,6 +17,7 @@ const API_URLS = {
     material: "/api/materials/all",
     supplier: "/api/suppliers/all",
     role: "/api/roles/all",
+    status: "/api/product-status/all",
 };
 
 const ListDisplay = () => {
@@ -25,7 +26,7 @@ const ListDisplay = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [searchTerm, setSearchTerm] = useState("");
-    const [category, setCategory] = useState<"product" | "variant" | "image" | "color" | "size" | "material" | "supplier" | "role" | "brand" | "category" | "discount">("product");
+    const [category, setCategory] = useState<"product" | "status" | "variant" | "image" | "color" | "size" | "material" | "supplier" | "role" | "brand" | "category" | "discount">("product");
     const [updateApi, setUpdateApi] = useState<string>("");
     const [editingKey, setEditingKey] = useState<string | null>(null);
     const [editingValue, setEditingValue] = useState<string>("");
@@ -47,6 +48,7 @@ const ListDisplay = () => {
             material: "materials",
             supplier: "suppliers",
             role: "roles",
+            status: "product-status",
         };
         setUpdateApi(map[category]);
     }, [category]);
@@ -268,6 +270,7 @@ const ListDisplay = () => {
         { value: "product", label: "Sản phẩm" },
         { value: "variant", label: "Biến thể" },
         { value: "image", label: "Hình ảnh sản phẩm" },
+        { value: "status", label: "Trạng thái sản phẩm" },
         { value: "color", label: "Màu sắc" },
         { value: "size", label: "Kích thước" },
         { value: "material", label: "Chất liệu" },

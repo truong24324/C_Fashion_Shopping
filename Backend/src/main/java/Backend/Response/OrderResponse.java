@@ -1,6 +1,7 @@
 package Backend.Response;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.Data;
@@ -14,7 +15,10 @@ public class OrderResponse {
     private String shippingAddress;
     private BigDecimal totalAmount;
     private String paymentMethod;
+    private String paymentStatus;
     private String orderStatus;
+    private BigDecimal shippingFee;
+    private LocalDateTime createdAt;
     private List<OrderDetailResponse> orderDetails;
 
     @Data

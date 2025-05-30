@@ -23,6 +23,7 @@ import CheckoutPage from 'src/pages/UserPage/CheckoutPage';
 import FashionPage from 'src/pages/UserPage/FashionPage';
 import PurchasedProductsPage from 'src/pages/UserPage/PurchasedProductsPage';
 import ProductReviewPage from 'src/pages/UserPage/ProductReviewPage';
+import OrderSuccessPage from 'src/pages/UserPage/OrderSuccessPage';
 
 const isTokenValid = (token: string | null): boolean => {
   if (!token) return false;
@@ -97,9 +98,10 @@ const AppRouterWrapper: React.FC = () => {
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/returns" element={<ReturnPolicyPage />} />
-      <Route path="*" element={<NotFoundPage />} />
       <Route path="/purchased" element={<PurchasedProductsPage />} />
       <Route path="/review" element={<ProductReviewPage />} />
+      <Route path="/order-success" element={<OrderSuccessPage />} />
+      <Route path="*" element={<NotFoundPage />} />
 
       <Route
         path="/admin"

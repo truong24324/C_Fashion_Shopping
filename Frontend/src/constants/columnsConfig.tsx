@@ -142,9 +142,9 @@ export const getColumnsConfig = (
                 key: "imageType",
                 ellipsis: true,
                 render: (text: any, record: any) => (
-                  <ImageTypeCell value={text} imageId={record.imageId} />
+                    <ImageTypeCell value={text} imageId={record.imageId} />
                 )
-              },              
+            },
             {
                 title: "Ảnh",
                 dataIndex: "imageUrl",
@@ -256,6 +256,43 @@ export const getColumnsConfig = (
                 )
             },
         ],
+        status: [
+            {
+                title: "ID",
+                dataIndex: "statusId",
+                key: "statusId",
+                ellipsis: true,
+            },
+            {
+                title: "Tên trạng thái",
+                dataIndex: "statusName",
+                key: "statusName",
+                ellipsis: true,
+                render: (text: any, record: any) => renderCell(text, record, "statusName"),
+            },
+            {
+                title: "Mô tả",
+                dataIndex: "description",
+                key: "description",
+                ellipsis: true,
+                render: (text: any, record: any) => renderCell(text, record, "description"),
+            },
+            {
+                title: "Hành động",
+                key: "action",
+                render: (text: any, record: any) => (
+                    <Popconfirm
+                        title="Bạn có chắc chắn muốn xóa trạng thái sản phẩm này?"
+                        onConfirm={() => handleDelete(record)}
+                        okText="Có"
+                        cancelText="Không"
+                    >
+                        <Button danger>Xóa</Button>
+                    </Popconfirm>
+                ),
+            },
+        ],
+
         discount: [
             { title: "ID", dataIndex: "discountId", key: "discountId", ellipsis: true },
             { title: "Mã giảm giá", dataIndex: "discountCode", key: "discountCode", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "discountCode") },
@@ -317,13 +354,13 @@ export const getColumnsConfig = (
                 ellipsis: true,
                 render: (text: any, record: any) => (
                     <div className="flex items-center gap-2">
-                      <div
-                        className="w-6 h-6 rounded-full border border-gray-300"
-                        style={{ backgroundColor: text }}
-                      />
-                      {renderCell(text, record, "colorCode")}
+                        <div
+                            className="w-6 h-6 rounded-full border border-gray-300"
+                            style={{ backgroundColor: text }}
+                        />
+                        {renderCell(text, record, "colorCode")}
                     </div>
-                  )                  
+                )
             },
             {
                 title: "Hành động",
@@ -481,6 +518,8 @@ export const getColumnsConfig = (
                 )
             },
         ],
+
+
 
     }[category]
 

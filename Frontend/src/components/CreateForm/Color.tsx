@@ -52,7 +52,7 @@ const Color = () => {
                         label={<span className="text-gray-600">Tên màu</span>}
                         rules={[
                             { required: true, message: "⚠️ Vui lòng nhập tên màu!" },
-                            { min: 3, message: "⚠️ Tên màu phải có ít nhất 3 ký tự!" },
+                            { min: 2, message: "⚠️ Tên màu phải có ít nhất 2 ký tự!" },
                             { max: 30, message: "⚠️ Tên màu không được quá 30 ký tự!" },
                             { pattern: /^[^\s]+(\s+[^\s]+)*$/, message: "⚠️ Không được nhập toàn khoảng trắng!" },
                             { pattern: /^[a-zA-Z0-9\sÀ-Ỹà-ỹ]+$/, message: "⚠️ Không được chứa ký tự đặc biệt!" },

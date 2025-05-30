@@ -1,10 +1,12 @@
 package Backend.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
@@ -19,12 +21,13 @@ import Backend.Model.Account;
 import Backend.Model.Role;
 import Backend.Repository.AccountRepository;
 import Backend.Repository.RoleRepository;
+import Backend.Request.AccountRequest;
 import Backend.Request.RegisterRequest;
 import Backend.Response.AccountResponse;
 import jakarta.transaction.Transactional;
 
 @Service
-public class AccountService implements UserDetailsService{
+public class AccountService implements UserDetailsService {
 
     @Autowired
     private AccountRepository accountRepository;
@@ -55,7 +58,7 @@ public class AccountService implements UserDetailsService{
 
     public String promoteAccountRole(Integer accountId) {
         Account account = accountRepository.findById(accountId)
-            .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản"));
 
         String currentRole = account.getRoleName();
         Role newRole;
@@ -63,15 +66,15 @@ public class AccountService implements UserDetailsService{
         switch (currentRole) {
             case "Customer" -> {
                 newRole = roleRepository.findByRoleName("Manager")
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy vai trò Manager"));
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy vai trò Manager"));
             }
             case "Manager" -> {
                 newRole = roleRepository.findByRoleName("Admin")
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy vai trò Admin"));
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy vai trò Admin"));
             }
             case "Admin" -> {
                 newRole = roleRepository.findByRoleName("Customer")
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy vai trò Customer"));
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy vai trò Customer"));
             }
             default -> throw new RuntimeException("Không hỗ trợ thay đổi vai trò cho: " + currentRole);
         }
@@ -85,7 +88,7 @@ public class AccountService implements UserDetailsService{
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Account account = accountRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản: " + email));
 
         if (!account.isActive()) {
             throw new DisabledException("Tài khoản đã bị vô hiệu hóa");
@@ -211,18 +214,19 @@ public class AccountService implements UserDetailsService{
             throw new IllegalStateException("Không thể thực hiện thao tác này trên chính tài khoản của bạn!");
         }
 
-        if (target.getRole().getRoleName().equals("Super_Admin") && !requester.getRole().getRoleName().equals("Super_Admin")) {
+        if (target.getRole().getRoleName().equals("Super_Admin")
+                && !requester.getRole().getRoleName().equals("Super_Admin")) {
             throw new IllegalStateException("Không được phép xóa Super Admin!");
         }
 
         accountRepository.delete(target);
     }
 
-
     public void toggleLock(Integer targetId, Account requester) {
         Account target = getById(targetId);
 
-        if (target.getRole().getRoleName().equals("Super_Admin") && !requester.getRole().getRoleName().equals("Super_Admin")) {
+        if (target.getRole().getRoleName().equals("Super_Admin")
+                && !requester.getRole().getRoleName().equals("Super_Admin")) {
             throw new IllegalStateException("Không được phép khóa/mở Super Admin!");
         }
 
@@ -237,7 +241,8 @@ public class AccountService implements UserDetailsService{
     public void toggleActive(Integer targetId, Account requester) {
         Account target = getById(targetId);
 
-        if (target.getRole().getRoleName().equals("Super_Admin") && !requester.getRole().getRoleName().equals("Super_Admin")) {
+        if (target.getRole().getRoleName().equals("Super_Admin")
+                && !requester.getRole().getRoleName().equals("Super_Admin")) {
             throw new IllegalStateException("Không được phép thay đổi trạng thái hoạt động của Super Admin!");
         }
 
@@ -251,6 +256,43 @@ public class AccountService implements UserDetailsService{
 
     public boolean existsByRole(Role role) {
         return accountRepository.existsByRole(role);
+    }
+
+    public List<Account> createBulkAccounts(List<AccountRequest> accountRequests) throws BadRequestException {
+        List<Account> createdAccounts = new ArrayList<>();
+
+        for (AccountRequest req : accountRequests) {
+            String roleName = req.getRoleName();
+
+            String roleNameTrimmed = roleName == null ? "" : roleName.trim();
+
+            if (!"Admin".equalsIgnoreCase(roleNameTrimmed) && !"Manager".equalsIgnoreCase(roleNameTrimmed)) {
+                throw new BadRequestException("Chỉ được phép tạo tài khoản với vai trò Admin hoặc Manager.");
+            }
+
+            // ❌ Kiểm tra email hoặc số điện thoại đã tồn tại
+            if (accountRepository.existsByEmail(req.getEmail())) {
+                throw new BadRequestException("Email đã tồn tại: " + req.getEmail());
+            }
+
+            if (accountRepository.existsByPhone(req.getPhone())) {
+                throw new BadRequestException("Số điện thoại đã tồn tại: " + req.getPhone());
+            }
+
+            Account acc = new Account();
+            acc.setUserCode(req.getUserCode());
+            acc.setEmail(req.getEmail());
+            acc.setPhone(req.getPhone());
+            acc.setPassword(passwordEncoder.encode(req.getPassword()));
+            acc.setRole(roleRepository.findByRoleName(roleName)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vai trò: " + roleName)));
+            acc.setActive(true);
+            acc.setLocked(false);
+
+            createdAccounts.add(accountRepository.save(acc));
+        }
+
+        return createdAccounts;
     }
 
 }

@@ -17,6 +17,7 @@ const CreateDisplay = () => {
 
     const categories = [
         { label: "Sản phẩm", value: "product" },
+        { label: "Biến thể", value: "variants" },
         { label: "Thương hiệu", value: "brands" },
         { label: "Loại sản phẩm", value: "categories" }, // Thêm danh mục vào lựa chọn
         { label: "Nhà cung cấp", value: "supplier" },
@@ -25,7 +26,6 @@ const CreateDisplay = () => {
         { label: "Màu sắc", value: "color" },
         { label: "Kích thước", value: "size" },
         { label: "Chất liệu", value: "material" },
-        { label: "Biến thể", value: "variants" }
     ];
 
     return (

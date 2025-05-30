@@ -7,15 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import Backend.Model.Category;
 import Backend.Request.CategoryRequest;
@@ -32,7 +24,7 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    // ✅ API lấy danh sách danh mục có phân trang
+    // ✅ API lấy danh sách loại sản phẩm có phân trang
     @GetMapping("/all")
 	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<PaginationResponse<Category>> getAllCategories(
@@ -54,21 +46,21 @@ public class CategoryController {
         return ResponseEntity.ok(response);
     }
 
-    // ✅ API thêm mới danh mục
+    // ✅ API thêm mới loại sản phẩm
     @PostMapping("/add")
 	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Category>> createCategory(@RequestBody @Valid CategoryRequest request) {
 
         // 🛑 Kiểm tra tên có bị trùng không
         if (categoryService.isCategoryNameExists(request.getCategoryName())) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Tên danh mục đã tồn tại!", null));
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Tên loại sản phẩm đã tồn tại!", null));
         }
 
         Category createdCategory = categoryService.createCategory(request.getCategoryName(), request.getDescription());
-        return ResponseEntity.ok(new ApiResponse<>(true, "Thêm danh mục thành công!", createdCategory));
+        return ResponseEntity.ok(new ApiResponse<>(true, "Thêm loại sản phẩm thành công!", createdCategory));
     }
 
-    // ✅ API cập nhật danh mục
+    // ✅ API cập nhật loại sản phẩm
     @PutMapping("/{categoryId}")
     @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Category>> updateCategory(
@@ -77,12 +69,12 @@ public class CategoryController {
 
         Category existingCategory = categoryService.getCategoryById(categoryId);
 
-        // Xử lý tên danh mục (nếu có nhập và thay đổi)
+        // Xử lý tên loại sản phẩm (nếu có nhập và thay đổi)
         String newName = request.getCategoryName();
         if (newName != null && !newName.trim().isEmpty()
                 && !newName.equals(existingCategory.getCategoryName())
                 && categoryService.isCategoryNameExists(newName)) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Tên danh mục đã tồn tại!", null));
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Tên loại sản phẩm đã tồn tại!", null));
         }
 
         Category updatedCategory = categoryService.updateCategory(
@@ -91,16 +83,16 @@ public class CategoryController {
                 request.getDescription()
         );
 
-        return ResponseEntity.ok(new ApiResponse<>(true, "Cập nhật danh mục thành công!", updatedCategory));
+        return ResponseEntity.ok(new ApiResponse<>(true, "Cập nhật loại sản phẩm thành công!", updatedCategory));
     }
 
-    // ✅ API xóa danh mục
+    // ✅ API xóa loại sản phẩm
     @DeleteMapping("/{categoryId}")
     @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<String>> deleteCategory(@PathVariable Integer categoryId) {
         try {
             categoryService.deleteCategory(categoryId);
-            return ResponseEntity.ok(new ApiResponse<>(true, "Đã xóa danh mục thành công", null));
+            return ResponseEntity.ok(new ApiResponse<>(true, "Đã xóa loại sản phẩm thành công", null));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                  .body(new ApiResponse<>(false, e.getMessage(), null));

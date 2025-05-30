@@ -33,7 +33,7 @@ public class CategoryService {
 
     // ✅ Lấy danh mục theo ID
     public Category getCategoryById(Integer categoryId) {
-        return categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục!"));
+        return categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Không tìm thấy loại sản phẩm!"));
     }
 
     // ✅ Thêm danh mục mới

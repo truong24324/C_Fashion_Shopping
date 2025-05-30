@@ -1,51 +1,67 @@
-import React from "react";
-import { 
-  BarChart, Bar, PieChart, Pie, Cell, 
-  XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid 
+import React, { useEffect, useState } from "react";
+import {
+  BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from "recharts";
 import Card from "./UI/Card";
+import toast from "react-hot-toast";
+import Loading from "./common/Loading";
 
-// 🔹 Dữ liệu số lượng đơn hàng theo tháng
-const transactionData = [
-  { month: "Jan", transactions: 120 },
-  { month: "Feb", transactions: 150 },
-  { month: "Mar", transactions: 200 },
-  { month: "Apr", transactions: 300 },
-  { month: "May", transactions: 350 },
-  { month: "Jun", transactions: 280 },
-  { month: "Jul", transactions: 400 },
-  { month: "Aug", transactions: 420 },
-  { month: "Sep", transactions: 500 },
-  { month: "Oct", transactions: 450 },
-  { month: "Nov", transactions: 520 },
-  { month: "Dec", transactions: 600 },
-];
-
-// 🔹 Dữ liệu phương thức thanh toán phổ biến
-const paymentData = [
-  { method: "MoMo", value: 40 },
-  { method: "Thẻ tín dụng", value: 35 },
-  { method: "Tiền mặt", value: 15 },
-  { method: "VNPay", value: 10 },
-];
 const PAYMENT_COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444"];
-
-// 🔹 Dữ liệu tỷ lệ đơn hàng thành công vs. thất bại
-const orderStatusData = [
-  { status: "Thành công", value: 85 },
-  { status: "Thất bại", value: 15 },
-];
 const STATUS_COLORS = ["#22c55e", "#ef4444"];
 
-// 🔹 Dữ liệu lý do hủy đơn hàng
-const cancelData = [
-  { reason: "Sai kích thước", count: 35 },
-  { reason: "Không đúng mẫu", count: 25 },
-  { reason: "Giao hàng chậm", count: 20 },
-  { reason: "Lý do khác", count: 10 },
-];
-
 const TransactionChart: React.FC = () => {
+  const [transactionData, setTransactionData] = useState([]);
+  const [paymentData, setPaymentData] = useState([]);
+  const [orderStatusData, setOrderStatusData] = useState([]);
+  const [cancelData, setCancelData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+
+  const fetchData = () => {
+    setLoading(true);
+    setLoadError(false);
+
+    fetch("/api/admin/dashboard/statistics", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Lỗi khi gọi API");
+        return res.json();
+      })
+      .then((data) => {
+        setTransactionData(data.monthlyOrders || []);
+        setPaymentData(data.paymentMethods || []);
+        setOrderStatusData(data.orderSuccessRates || []);
+        setCancelData(data.cancelReasons || []);
+      })
+      .catch((error) => {
+        console.error("Lỗi thống kê:", error);
+        toast.error("Không thể tải dữ liệu thống kê. Vui lòng thử lại sau.");
+        setLoadError(true);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <Loading
+        text="Đang tải biểu đồ thống kê..."
+        showRetryButton={loadError}
+        onRetry={fetchData}
+        retryText="Thử lại"
+      />
+    );
+  }
+
   return (
     <div className="grid grid-cols-3 gap-6">
       {/* 🔹 Biểu đồ số lượng đơn hàng theo tháng */}
@@ -69,7 +85,7 @@ const TransactionChart: React.FC = () => {
           <PieChart>
             <Pie data={paymentData} dataKey="value" nameKey="method" cx="50%" cy="50%" outerRadius={80}>
               {paymentData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={PAYMENT_COLORS[index]} />
+                <Cell key={`cell-${index}`} fill={PAYMENT_COLORS[index % PAYMENT_COLORS.length]} />
               ))}
             </Pie>
             <Tooltip />
@@ -84,7 +100,7 @@ const TransactionChart: React.FC = () => {
           <PieChart>
             <Pie data={orderStatusData} dataKey="value" nameKey="status" cx="50%" cy="50%" outerRadius={80}>
               {orderStatusData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={STATUS_COLORS[index]} />
+                <Cell key={`cell-${index}`} fill={STATUS_COLORS[index % STATUS_COLORS.length]} />
               ))}
             </Pie>
             <Tooltip />
@@ -92,7 +108,7 @@ const TransactionChart: React.FC = () => {
         </ResponsiveContainer>
       </Card>
 
-      {/* 🔹 Biểu đồ đơn hàng bị hủy */}
+      {/* 🔹 Biểu đồ lý do đơn hàng bị hủy */}
       <Card className="p-6 col-span-1">
         <h2 className="text-lg font-semibold">❌ Đơn hàng bị hủy</h2>
         <ResponsiveContainer width="100%" height={200}>
@@ -105,20 +121,6 @@ const TransactionChart: React.FC = () => {
           </BarChart>
         </ResponsiveContainer>
       </Card>
-
-      {/* 🔹 Biểu đồ thời gian cao điểm giao dịch
-      <Card className="p-6 col-span-2">
-        <h2 className="text-lg font-semibold">⏰ Thời gian cao điểm giao dịch</h2>
-        <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={peakHoursData}>
-            <XAxis dataKey="hour" stroke="#ffffff" />
-            <YAxis stroke="#ffffff" />
-            <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-            <Tooltip />
-            <Line type="monotone" dataKey="transactions" stroke="#f59e0b" strokeWidth={3} />
-          </LineChart>
-        </ResponsiveContainer>
-      </Card> */}
     </div>
   );
 };

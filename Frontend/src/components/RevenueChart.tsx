@@ -1,27 +1,38 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { LineChart, Line, Tooltip, XAxis, YAxis, ResponsiveContainer, CartesianGrid } from "recharts";
 import Card from "./UI/Card";
+import axios from "axios";
+import toast from "react-hot-toast";
 
-const revenueData = [
-  { month: "Jan", revenue: 1200 },
-  { month: "Feb", revenue: 1600 },
-  { month: "Mar", revenue: 2100 },
-  { month: "Apr", revenue: 2500 },
-  { month: "May", revenue: 3100 },
-  { month: "Jun", revenue: 2800 },
-  { month: "Jul", revenue: 3400 },
-  { month: "Aug", revenue: 3700 },
-  { month: "Sep", revenue: 3900 },
-  { month: "Oct", revenue: 4100 },
-  { month: "Nov", revenue: 4500 },
-  { month: "Dec", revenue: 5000 },
-];
-
-interface ChartProps {
-  className?: string;
+interface RevenueItem {
+  month: number;
+  revenue: number;
 }
 
-const RevenueChart: React.FC<ChartProps> = ({ className }) => {
+const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+const RevenueChart: React.FC<{ className?: string }> = ({ className }) => {
+  const [revenueData, setRevenueData] = useState<{ month: string; revenue: number }[]>([]);
+
+  useEffect(() => {
+    axios.get<RevenueItem[]>("/api/admin/dashboard/monthly-revenue", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
+    })
+      .then((res) => {
+        const formatted = res.data.map(item => ({
+          month: monthNames[item.month - 1],
+          revenue: item.revenue,
+        }));
+        setRevenueData(formatted);
+      })
+      .catch(err => {
+        console.error("Failed to fetch revenue data", err);
+        toast.error(err.response?.data?.message || "Lỗi khi tải thống kê năm");
+      });
+  }, []);
+
   return (
     <Card className={`p-6 col-span-2 ${className}`}>
       <h2 className="text-xl font-semibold text-gray-200">📈 Doanh Thu Cửa Hàng</h2>
@@ -40,4 +51,4 @@ const RevenueChart: React.FC<ChartProps> = ({ className }) => {
   );
 };
 
-export default RevenueChart;
+export default RevenueChart

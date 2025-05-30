@@ -3,23 +3,11 @@ package Backend.Controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import Backend.Model.Brand;
@@ -69,8 +57,8 @@ public class BrandController {
     }
 
     // ✅ API thêm mới thương hiệu (dùng @Valid để bắt lỗi tự động)
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     @PostMapping("/add")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Brand>> createBrand(@ModelAttribute @Valid BrandRequest request) {
 
         // 🛑 Kiểm tra tên có bị trùng không
@@ -88,8 +76,8 @@ public class BrandController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Thêm thương hiệu thành công!", createdBrand));
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     @PutMapping("/{brandId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Brand>> updateBrand(
             @PathVariable Integer brandId,
             @RequestBody  BrandRequest request) {
@@ -109,8 +97,8 @@ public class BrandController {
     }
 
     // ✅ API cập nhật ảnh thương hiệu
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     @PutMapping("/{brandId}/upload")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Brand>> updateBrand(
             @PathVariable Integer brandId,
             @ModelAttribute BrandRequest request,
@@ -139,8 +127,8 @@ public class BrandController {
     }
 
     // ✅ API xóa thương hiệu
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     @DeleteMapping("/{brandId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<String>> deleteBrand(@PathVariable Integer brandId) {
         try {
             brandService.deleteBrand(brandId);

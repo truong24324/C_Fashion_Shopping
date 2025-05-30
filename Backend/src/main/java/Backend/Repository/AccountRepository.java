@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import Backend.Model.Account;
@@ -21,5 +22,8 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     Optional<Account> findByAccountId(Long accountId);
     List<Account> findByRole_RoleNameIgnoreCase(String roleName);
     boolean existsByRole(Role role);
+
+	 @Query("SELECT COUNT(a) FROM Account a WHERE a.createdAt >= CURRENT_DATE")
+    Long countNewAccountsToday();
 
 }

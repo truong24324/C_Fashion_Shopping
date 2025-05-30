@@ -25,4 +25,7 @@ public class AccountRequest {
 
     @NotNull(message = "Vai trò không được để trống")
     private Long roleId;
+
+    private String roleName; 
+
 }

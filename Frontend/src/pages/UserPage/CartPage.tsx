@@ -368,7 +368,6 @@ const CartPage: React.FC = () => {
     });
   };
 
-
   const handleToggleSelectAll = () => {
     if (selectedItems.length === cartItems.length) {
       setSelectedItems([]);
@@ -469,24 +468,6 @@ const CartPage: React.FC = () => {
           </div>
 
           <h2 className="text-xl lg:text-2xl font-bold mb-4 mt-6">Thông tin đơn hàng</h2>
-          <div className="space-y-2 text-sm lg:text-base">
-            <div className="flex justify-between">
-              <span>Tạm tính:</span>
-              <span>{subtotal.toLocaleString()} vn₫</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Giảm giá:</span>
-              <span>{discount.toLocaleString()} vn₫</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Phí vận chuyển:</span>
-              <span>{shippingFee !== null ? `${shippingFee.toLocaleString()} vn₫` : "Đang tính..."}</span>
-            </div>
-            <div className="flex justify-between font-bold text-lg text-red-500">
-              <span>Tổng cộng:</span>
-              <span>{total.toLocaleString()} vn₫</span>
-            </div>
-          </div>
 
           <ShippingAddress
             provinces={provinces}
@@ -509,6 +490,24 @@ const CartPage: React.FC = () => {
             note={note}
             setNote={setNote}
           />
+           <div className="space-y-2 text-sm lg:text-base">
+            <div className="flex justify-between">
+              <span>Tạm tính:</span>
+              <span>{subtotal.toLocaleString()} vn₫</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Giảm giá:</span>
+              <span>{discount.toLocaleString()} vn₫</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Phí vận chuyển:</span>
+              <span>{shippingFee !== null ? `${shippingFee.toLocaleString()} vn₫` : "Đang tính..."}</span>
+            </div>
+            <div className="flex justify-between font-bold text-lg text-red-500">
+              <span>Tổng cộng:</span>
+              <span>{total.toLocaleString()} vn₫</span>
+            </div>
+          </div>
           <button
             onClick={handleProceedToCheckout}
             disabled={

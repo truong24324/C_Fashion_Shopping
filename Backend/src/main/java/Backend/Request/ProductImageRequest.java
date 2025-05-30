@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class ProductImageRequest {
     private Integer imageId;
     private Integer productId;
-    private MultipartFile imageFile;
+    private MultipartFile logo;
     private ImageType imageType;
 
 }

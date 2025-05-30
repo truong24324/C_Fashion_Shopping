@@ -269,7 +269,7 @@ CREATE TABLE ORDERS (
     ORDER_DATE DATETIME DEFAULT GETDATE(),       -- Ngày đặt hàng
     TOTAL_AMOUNT DECIMAL(18, 2) NOT NULL,        -- Tổng giá trị đơn hàng
     PAYMENT_METHOD NVARCHAR(50),                 -- Phương thức thanh toán
-    PAYMENT_STATUS NVARCHAR(50) NOT NULL,              -- Trạng thái thanh toán
+    PAYMENT_STATUS NVARCHAR(50),              -- Trạng thái thanh toán
 	SHIPPING_FEE INT,
     IS_ACTIVE BIT DEFAULT 1,                     -- Trạng thái hoạt động (1: hoạt động, 0: không)
     CREATED_AT DATETIME DEFAULT GETDATE(),       -- Thời gian tạo đơn hàng
