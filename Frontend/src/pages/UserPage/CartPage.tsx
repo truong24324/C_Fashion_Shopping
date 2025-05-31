@@ -126,7 +126,7 @@ const CartPage: React.FC = () => {
     axios
       .get("/api/views/suggest")
       .then((response) => {
-        setProductList(response.data);
+      setProductList(response.data.data); // ✅ FIX HERE
       })
       .catch((error: any) => {
         toast.error(error.response?.data?.message || "Lỗi khi tải sản phẩm gợi ý.");

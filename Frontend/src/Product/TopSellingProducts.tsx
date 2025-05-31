@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaStar } from "react-icons/fa";
 import Loading from "../components/common/Loading";
-import {toast} from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import ProductCard from "./ProductCard";
 
 interface VariantSummary {
@@ -32,9 +32,19 @@ const TopSellingProducts: React.FC = () => {
 
   useEffect(() => {
     axios
-      .get<SpecialProduct[]>("/api/views/top-selling")
-      .then((res) => setProducts(res.data))
-      .catch((err) => toast.error("Lỗi khi tải top sản phẩm:", err))
+      .get("/api/views/top-selling")
+      .then((res) => {
+        // Giả sử API trả về { data: [...] }
+        if (res.data && Array.isArray(res.data.data)) {
+          setProducts(res.data.data);
+        } else if (Array.isArray(res.data)) {
+          setProducts(res.data);
+        } else {
+          setProducts([]);
+          toast.error("Dữ liệu sản phẩm không hợp lệ");
+        }
+      })
+      .catch((err) => toast.error("Lỗi khi tải top sản phẩm: " + err.message))
       .finally(() => setLoading(false));
   }, []);
 

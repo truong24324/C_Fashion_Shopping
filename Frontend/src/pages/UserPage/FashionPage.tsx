@@ -61,7 +61,7 @@ const FashionPage: React.FC = () => {
       setError(false);
 
       const response = await axios.get("/api/views/overview");
-      const data = response.data as Product[];
+      const data = response.data.data as Product[]; // ✅ correct path to array
       setProducts(data);
 
       const allColors = new Map<string, string>();

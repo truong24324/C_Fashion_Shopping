@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import axios from "axios";
 import {
@@ -16,6 +16,12 @@ const Navbar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [user, setUser] = useState<{ avatar: string; fullName: string } | null>(null);
   const [isListening, setIsListening] = useState(false); // NEW
+  interface TopSuggestion {
+    productId: string;
+    productName: string;
+  }
+  const [topSuggestions, setTopSuggestions] = useState<TopSuggestion[]>([]);
+  const navigate = useNavigate();
 
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
 
@@ -42,7 +48,7 @@ const Navbar: React.FC = () => {
       setUser(null);
     }
   };
-  
+
   interface DecodedToken {
     accountId: string;
     exp: number; // thời điểm hết hạn (unix timestamp)
@@ -50,11 +56,11 @@ const Navbar: React.FC = () => {
     email: string;
     roles: { authority: string }[];
   }
-  
+
   const fetchProfile = async () => {
     const token = localStorage.getItem("token");
     if (!token) return;
-  
+
     // Decode token để lấy thời gian hết hạn
     let decoded: DecodedToken;
     try {
@@ -63,14 +69,14 @@ const Navbar: React.FC = () => {
       console.error("Không thể decode token:", err);
       return;
     }
-  
+
     const now = Date.now() / 1000; // convert to seconds
     if (decoded.exp <= now) {
       console.warn("Token đã hết hạn.");
       localStorage.removeItem("user_cache");
       return;
     }
-  
+
     // Kiểm tra cache
     const cached = localStorage.getItem("user_cache");
     if (cached) {
@@ -78,7 +84,7 @@ const Navbar: React.FC = () => {
       setUser(parsed);
       return;
     }
-  
+
     // Nếu không có cache thì gọi API
     try {
       const response = await fetch("/api/information/me", {
@@ -88,7 +94,7 @@ const Navbar: React.FC = () => {
           "Content-Type": "application/json",
         },
       });
-  
+
       const data = await response.json();
       if (data.success) {
         setUser(data.data);
@@ -100,7 +106,7 @@ const Navbar: React.FC = () => {
       toast.error("Lỗi khi lấy thông tin cá nhân");
     }
   };
-  
+
 
   useEffect(() => {
     fetchProfile();
@@ -135,6 +141,34 @@ const Navbar: React.FC = () => {
       setIsListening(false);
     }
   }, [isSearchOpen]);
+
+  useEffect(() => {
+    const fetchTopSelling = async () => {
+      try {
+        const res = await axios.get("/api/views/top-selling-names");
+        if (res.data.success) {
+          setTopSuggestions(res.data.data);
+        }
+      } catch (err) {
+        console.error("Lỗi khi lấy top sản phẩm:", err);
+      }
+    };
+    fetchTopSelling();
+  }, []);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      const match = topSuggestions.find((item) =>
+        item.productName.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      if (match) {
+        navigate(`/product/${match.productId}`);
+      } else {
+        // Optional: navigate to search results page
+        navigate(`/search?query=${encodeURIComponent(searchQuery)}`);
+      }
+    }
+  };
 
   return (
     <div className="fixed inset-x-0 top-0 z-50">
@@ -174,6 +208,7 @@ const Navbar: React.FC = () => {
                       />
                       <span>{user?.fullName}</span>
                     </Link>
+
                     <button onClick={handleLogout} className="text-white flex items-center text-sm hover:text-yellow-400">
                       <FaSignOutAlt className="mr-2" />
                     </button>
@@ -257,6 +292,7 @@ const Navbar: React.FC = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Tìm kiếm sản phẩm..."
                   className="flex-grow bg-transparent text-white px-2 focus:outline-none"
+                  onKeyDown={handleKeyDown}
                 />
 
                 {searchQuery && (
@@ -285,12 +321,13 @@ const Navbar: React.FC = () => {
               <div className="mt-1 w-full">
                 <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Top tìm kiếm</h3>
                 <div className="grid grid-cols-3 gap-1">
-                  {["Áo thun nam", "Giày sneaker", "Túi xách nữ", "Laptop gaming", "Đồng hồ", "Balo thời trang"].map((item, index) => (
+                  {topSuggestions.map((item) => (
                     <div
-                      key={index}
+                      key={item.productId}
+                      onClick={() => navigate(`/product/${item.productId}`)}
                       className="bg-gray-800 text-gray-300 text-xs p-1.5 rounded-md text-center cursor-pointer hover:bg-yellow-400 hover:text-black transition"
                     >
-                      {item}
+                      {item.productName}
                     </div>
                   ))}
                 </div>

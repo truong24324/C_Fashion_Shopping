@@ -21,44 +21,48 @@ public class ProductListController {
 	private final BrandService brandService;
 
 	@GetMapping("/{productId}")
-	public ResponseEntity<ProductDetailResponse> getProductDetail(@PathVariable Integer productId) {
+	public ResponseEntity<ApiResponse<ProductDetailResponse>> getProductDetail(@PathVariable Integer productId) {
 		ProductDetailResponse response = productService.getProductDetail(productId);
-		return ResponseEntity.ok(response);
+		return ResponseEntity.ok(new ApiResponse<>(true, "Lấy chi tiết sản phẩm thành công!", response));
 	}
 
-	// Hiển thị danh sách 50 sản phẩm mới nhất
 	@GetMapping("/latest")
-	public ResponseEntity<List<ProductCardResponse>> getLatestProducts() {
+	public ResponseEntity<ApiResponse<List<ProductCardResponse>>> getLatestProducts() {
 		List<ProductCardResponse> products = productService.getLatestProducts();
-		return ResponseEntity.ok(products);
+		return ResponseEntity.ok(new ApiResponse<>(true, "Lấy sản phẩm mới nhất thành công!", products));
 	}
 
-	// Hiển thị gợi ý sản phẩm để mua
 	@GetMapping("/suggest")
-	public ResponseEntity<List<ProductSuggestResponse>> getProductsSuggest() {
+	public ResponseEntity<ApiResponse<List<ProductSuggestResponse>>> getProductsSuggest() {
 		List<ProductSuggestResponse> products = productService.getProductsSuggest();
-		return ResponseEntity.ok(products);
+		return ResponseEntity.ok(new ApiResponse<>(true, "Lấy gợi ý sản phẩm thành công!", products));
 	}
 
 	@GetMapping("/overview")
-	public ResponseEntity<List<ProductOverviewResponse>> getProductOverviews() {
-		return ResponseEntity.ok(productService.getAllProductOverviews());
+	public ResponseEntity<ApiResponse<List<ProductOverviewResponse>>> getProductOverviews() {
+		return ResponseEntity.ok(
+				new ApiResponse<>(true, "Lấy tổng quan sản phẩm thành công!", productService.getAllProductOverviews()));
 	}
 
 	@GetMapping("/listBrand")
-	public ResponseEntity<List<BrandResponse>> getAllBrandsNoPagination() {
-		List<Brand> brands = brandService.getAllBrands(); // Gọi phương thức trả về List<Brand>
-
+	public ResponseEntity<ApiResponse<List<BrandResponse>>> getAllBrandsNoPagination() {
+		List<Brand> brands = brandService.getAllBrands();
 		List<BrandResponse> brandResponses = brands.stream()
 				.map(brand -> new BrandResponse(brand.getBrandId(), brand.getBrandName(), brand.getLogo()))
 				.collect(Collectors.toList());
 
-		return ResponseEntity.ok(brandResponses);
+		return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách thương hiệu thành công!", brandResponses));
 	}
 
 	@GetMapping("/top-selling")
-	public ResponseEntity<List<TopSellingProductResponse>> getTopSellingProducts() {
-		return ResponseEntity.ok(productService.getTop10BestSellingProducts());
+	public ResponseEntity<ApiResponse<List<TopSellingProductResponse>>> getTopSellingProducts() {
+		return ResponseEntity.ok(new ApiResponse<>(true, "Lấy sản phẩm bán chạy thành công!",
+				productService.getTop10BestSellingProducts()));
 	}
 
+	@GetMapping("/top-selling-names")
+	public ResponseEntity<ApiResponse<List<TopSellingProductNameResponse>>> getTopSellingProductNames() {
+		List<TopSellingProductNameResponse> results = productService.getTopSellingProductNames();
+		return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách sản phẩm bán chạy thành công!", results));
+	}
 }

@@ -17,6 +17,7 @@ const AuthenticatePage: React.FC = () => {
   });
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [accountId, setAccountId] = useState<string | null>(null);
+  const [loadingLogin, setLoadingLogin] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -38,42 +39,47 @@ const AuthenticatePage: React.FC = () => {
   const goToLogin = () => setStep("login");
   const goToRegister = () => setStep("register");
   const goToForgotPassword = () => setStep("forgotpassword");
-  const handleLogin = async () => {
-    try {
-      if (!formData.email || !formData.password) {
-        toast.error("Vui lòng nhập đầy đủ thông tin đăng nhập!");
-        return;
-      }
-
-      const response = await fetch("/api/login", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || data.token || 'Đăng nhập thất bại!');
-
-      toast.success("Đăng nhập thành công!");
-
-      // Giải mã token để lấy thông tin người dùng
-      const decoded: any = jwtDecode(data.token);
-      const roles = decoded.roles.map((role: any) => role.authority); // Lấy danh sách quyền
-
-      // Lưu token vào localStorage
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("accountId", data.accountId);
-
-      if (roles.includes("ROLE_Admin") || roles.includes("ROLE_Super_Admin")) {
-        navigate("/admin");
-      } else {
-        navigate("/");
-      }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || error.message || 'Đăng nhập thất bại!');
+ const handleLogin = async () => {
+  if (loadingLogin) return;
+  setLoadingLogin(true);
+  try {
+    if (!formData.email || !formData.password) {
+      toast.error("Vui lòng nhập đầy đủ thông tin đăng nhập!");
+      return;
     }
-  };
+
+    const response = await fetch("/api/login", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || data.token || 'Đăng nhập thất bại!');
+
+    toast.success("Đăng nhập thành công!");
+    const decoded: any = jwtDecode(data.token);
+    const roles = decoded.roles.map((role: any) => role.authority);
+
+    const keysToClear = [
+      "cachedBrands", "cachedBrandsExpire", "cached_products_latest", "cached_products_latest_expiry",
+      "variants_cache", "wishlist_cache", "accountId", "token"
+    ];
+    keysToClear.forEach(key => localStorage.removeItem(key));
+    localStorage.setItem("token", data.token);
+
+    if (roles.includes("ROLE_Admin") || roles.includes("ROLE_Super_Admin") || roles.includes("ROLE_Manager")) {
+      navigate("/admin");
+    } else {
+      navigate("/");
+    }
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || error.message || 'Đăng nhập thất bại!');
+  } finally {
+    setLoadingLogin(false);
+  }
+};
 
   const handleRegister = async () => {
     try {
@@ -89,9 +95,7 @@ const AuthenticatePage: React.FC = () => {
       const decoded: any = jwtDecode(data.token);
       const accountId = decoded?.accountId;
       setAccountId(accountId);
-      console.log(accountId);
-      console.log('Account ID from register:', data.accountId);
-      localStorage.setItem('accountId', data.accountId);
+    
       localStorage.setItem('token', data.token);
 
       // Sau khi đăng ký thành công, tự động đăng nhập
@@ -107,8 +111,7 @@ const AuthenticatePage: React.FC = () => {
       if (!loginResponse.ok) throw new Error(loginData.message || loginData.token || 'Đăng nhập thất bại!');
 
       // Lưu lại thông tin đăng nhập vào localStorage
-      console.log('Account ID from login:', loginData.accountId);
-      localStorage.setItem('accountId', loginData.accountId);
+      
       localStorage.setItem('token', loginData.token);
 
       toast.success('Đăng ký và đăng nhập thành công! Mời bạn nhập thông tin cá nhân của bạn');
@@ -200,7 +203,7 @@ const AuthenticatePage: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-600 p-6 relative overflow-hidden">
       {step === "welcome" && <WelcomeScreen goToLogin={goToLogin} goToRegister={goToRegister} />}
-      {step === "login" && <LoginForm formData={formData} handleChange={handleChange} handleLogin={handleLogin} goToWelcome={goToWelcome} goToForgotPassword={goToForgotPassword} />}
+      {step === "login" && <LoginForm formData={formData} handleChange={handleChange} handleLogin={handleLogin} goToWelcome={goToWelcome} goToForgotPassword={goToForgotPassword} loading={loadingLogin} />}
       {step === "forgotpassword" && <ForgotPassword goToLogin={goToLogin} />}
       {step === "register" && <RegisterForm formData={formData} handleChange={handleChange} handleRegister={handleRegister} goToWelcome={goToWelcome} />}
       {step === "personalInfo" && <PersonalInfoForm formData={formData} avatarPreview={avatarPreview} handleChange={handleChange} handleAvatarChange={handleAvatarChange} handleSubmitPersonalInfo={handleSubmitPersonalInfo} goToRegister={goToRegister} />}

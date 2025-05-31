@@ -47,15 +47,14 @@ public class ProductImageController {
                         image.getImageUrl(),
                         image.getImageType(),
                         image.getProduct().getProductName(),
-                        image.getCreatedAt()
-                ))
+                        image.getCreatedAt()))
                 .collect(Collectors.toList());
 
         // Tạo PaginationResponse và trả về
         PaginationResponse<ProductImageResponse> response = new PaginationResponse<>(
-                imageDTOs,  // Danh sách ảnh sản phẩm
-                imagePage.getNumber(),   // Số trang hiện tại
-                imagePage.getSize(),     // Kích thước mỗi trang
+                imageDTOs, // Danh sách ảnh sản phẩm
+                imagePage.getNumber(), // Số trang hiện tại
+                imagePage.getSize(), // Kích thước mỗi trang
                 imagePage.getTotalElements(), // Tổng số bản ghi
                 imagePage.getTotalPages() // Tổng số trang
         );
@@ -74,32 +73,15 @@ public class ProductImageController {
             @PathVariable Integer imageId,
             @ModelAttribute ProductImageRequest request) {
 
-        ProductImage existingImage = productImageService.getById(imageId);
-        if (existingImage == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        String newImageUrl = Optional.ofNullable(request.getLogo())
-                .map(MultipartFile::getOriginalFilename)
-                .orElse(null);
-
-        if (newImageUrl != null && !newImageUrl.trim().isEmpty()
-                && !existingImage.getImageUrl().equals(newImageUrl)
-                && productImageService.isImageUrlExists(newImageUrl)) {
-            return ResponseEntity.badRequest().body(
-                    new ApiResponse<>(false, "URL ảnh đã tồn tại!", null)
-            );
-        }
-
         ProductImage updatedImage = productImageService.update(
                 imageId,
-                request.getLogo()
+                request.getLogo(),
+                request.getImageType() // <-- truyền thêm imageType
         );
 
         ProductImageResponse responseDto = new ProductImageResponse(updatedImage);
         return ResponseEntity.ok(
-                new ApiResponse<>(true, "Cập nhật ảnh thành công!", responseDto)
-        );
+                new ApiResponse<>(true, "Cập nhật thông tin thành công!", responseDto));
     }
 
     @PutMapping("/{imageId}/upload")
@@ -115,7 +97,7 @@ public class ProductImageController {
             }
         }
 
-        ProductImage updatedImage = productImageService.update(imageId, logo);
+        ProductImage updatedImage = productImageService.update(imageId, logo, null);
         return ResponseEntity.ok(new ApiResponse<>(true, "Cập nhật ảnh thành công!", updatedImage));
     }
 
@@ -127,7 +109,8 @@ public class ProductImageController {
     public String validateImageFile(MultipartFile file) {
         String contentType = file.getContentType();
         if (contentType == null ||
-            !(contentType.equals("image/jpeg") || contentType.equals("image/png") || contentType.equals("image/webp"))) {
+                !(contentType.equals("image/jpeg") || contentType.equals("image/png")
+                        || contentType.equals("image/webp"))) {
             return "Chỉ hỗ trợ ảnh JPG, PNG, WEBP.";
         }
 

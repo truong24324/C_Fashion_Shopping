@@ -8,8 +8,6 @@ type HandleImageChangeFn = (e: React.ChangeEvent<HTMLInputElement>, record: any)
 type HandleIdDoubleClickFn = (id: number) => void;
 type HandleDeleteFn = (id: number) => void;
 
-const { Option } = Select;
-
 export const getColumnsConfig = (
     category: string,
     renderCell: RenderCellFn,
@@ -17,6 +15,12 @@ export const getColumnsConfig = (
     handleImageChange: HandleImageChangeFn,
     handleIdDoubleClick: HandleIdDoubleClickFn,
     handleDelete: HandleDeleteFn,
+    editingKey?: any,
+    editingField?: string,
+    setEditingKey?: (key: any) => void,
+    setEditingField?: (field: string) => void,
+    handleUpdate?: (record: any, field: string, value: any) => void,
+    options?: { brand?: any[]; category?: any[]; supplier?: any[] }
 ) => {
     return {
         product: [
@@ -37,9 +41,93 @@ export const getColumnsConfig = (
             { title: "Tên sản phẩm", dataIndex: "productName", key: "productName", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "productName") },
             { title: "Mô tả", dataIndex: "description", key: "description", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "description") },
             { title: "Mã vạch", dataIndex: "barcode", key: "barcode", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "barcode") },
-            { title: "Thương hiệu", dataIndex: "brandName", key: "brandName", ellipsis: true },
-            { title: "Loại sản phẩm", dataIndex: "categoryName", key: "categoryName", ellipsis: true },
-            { title: "Nhà cung cấp", dataIndex: "supplierName", key: "supplierName", ellipsis: true },
+            {
+                title: 'Brand',
+                dataIndex: 'brandName',
+                key: 'brandName',
+                render: (_: any, record: any) => {
+                    if (editingKey === record.id && editingField === 'brand') {
+                        return (
+                            <Select
+                                style={{ width: 120 }}
+                                options={options?.brand || []}
+                                defaultValue={record.brandId}
+                                onBlur={() => setEditingKey?.(null)} // thoát khỏi chế độ edit khi mất focus
+                                onChange={value => {
+                                    handleUpdate?.(record, 'brand', value); // 👈 gọi tại đây
+                                    setEditingKey?.(null); // tắt chế độ edit
+                                }}
+                            />
+                        );
+                    }
+                    return (
+                        <div onDoubleClick={() => {
+                            if (setEditingKey) setEditingKey(record.id);
+                            if (setEditingField) setEditingField('brand');
+                        }}>
+                            {record.brandName}
+                        </div>
+                    );
+                }
+            },
+            {
+                title: 'Category',
+                dataIndex: 'categoryName',
+                key: 'categoryName',
+                render: (_: any, record: any) => {
+                    if (editingKey === record.id && editingField === 'category') {
+                        return (
+                            <Select
+                                style={{ width: 120 }}
+                                options={options?.category}
+                                defaultValue={record.categoryId}
+                                onBlur={() => setEditingKey?.(null)}
+                                onChange={value => {
+                                    handleUpdate?.(record, 'category', value); // 👈 gọi tại đây
+                                    setEditingKey?.(null);
+                                }}
+                            />
+                        );
+                    }
+                    return (
+                        <div onDoubleClick={() => {
+                            setEditingKey?.(record.id);
+                            setEditingField?.('category');
+                        }}>
+                            {record.categoryName}
+                        </div>
+                    );
+                }
+            },
+            {
+                title: 'Supplier',
+                dataIndex: 'supplierName',
+                key: 'supplierName',
+                render: (_: any, record: any) => {
+                    if (editingKey === record.id && editingField === 'supplier') {
+                        return (
+                            <Select
+                                style={{ width: 120 }}
+                                options={options?.supplier}
+                                defaultValue={record.supplierId}
+                                onBlur={() => setEditingKey?.(null)}
+                                onChange={value => {
+                                    handleUpdate?.(record, 'supplier', value); // 👈 gọi tại đây
+                                    setEditingKey?.(null);
+                                }}
+                            />
+                        );
+                    }
+                    return (
+                        <div onDoubleClick={() => {
+                            setEditingKey?.(record.id);
+                            setEditingField?.('supplier');
+                        }}>
+                            {record.supplierName}
+                        </div>
+                    );
+                }
+            },
             { title: "Model", dataIndex: "model", key: "model", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "model") },
             { title: "Thời gian bảo hành", dataIndex: "warrantyPeriod", key: "warrantyPeriod", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "warrantyPeriod") },
             {
@@ -134,7 +222,7 @@ export const getColumnsConfig = (
                 dataIndex: "productName",
                 key: "productName",
                 ellipsis: true,
-                render: (text: any) => text?.productName || "N/A",
+                render: (text: any) => text || "N/A",
             },
             {
                 title: "Loại ảnh",
@@ -173,7 +261,20 @@ export const getColumnsConfig = (
                 dataIndex: "createdAt",
                 key: "createdAt",
                 ellipsis: true,
-                render: (text: any) => new Date(text).toLocaleString(),
+                render: (createdAt: any) => {
+                    if (Array.isArray(createdAt) && createdAt.length >= 6) {
+                        const date = new Date(
+                            createdAt[0],                // year
+                            createdAt[1] - 1,            // month (0-based)
+                            createdAt[2],                // day
+                            createdAt[3],                // hour
+                            createdAt[4],                // minute
+                            createdAt[5]                 // second
+                        );
+                        return date.toLocaleString();
+                    }
+                    return "N/A";
+                },
             },
             {
                 title: "Hành động",

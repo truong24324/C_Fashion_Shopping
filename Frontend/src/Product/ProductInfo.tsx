@@ -51,36 +51,37 @@ interface DecodedToken {
 }
 
 const ProductInfo: React.FC<Props> = ({ product, onSizeSuggest }) => {
-  const colors = useMemo(
-    () => Array.from(new Set(product.variants.map((v) => v.colorName))),
-    [product.variants]
-  );
-  const sizes = useMemo(
-    () => Array.from(new Set(product.variants.map((v) => v.sizeName))),
-    [product.variants]
-  );
-  const materials = useMemo(
-    () => Array.from(new Set(product.variants.map((v) => v.materialName))),
-    [product.variants]
-  );
+const colors = useMemo(
+  () => Array.from(new Set(product?.variants?.map((v) => v.colorName) || [])),
+  [product?.variants]
+);
 
+const sizes = useMemo(
+  () => Array.from(new Set(product?.variants?.map((v) => v.sizeName) || [])),
+  [product?.variants]
+);
+
+const materials = useMemo(
+  () => Array.from(new Set(product?.variants?.map((v) => v.materialName) || [])),
+  [product?.variants]
+);
   const [selectedColor, setSelectedColor] = useState(colors[0] || "");
   const [selectedSize, setSelectedSize] = useState(sizes[0] || "");
   const [selectedMaterial, setSelectedMaterial] = useState(materials[0] || "");
   const [quantity, setQuantity] = useState(1);
 
   const matchedVariant = useMemo(() => {
-    return product.variants.find(
+    return product?.variants?.find(
       (v) =>
         v.colorName === selectedColor &&
         v.sizeName === selectedSize &&
         v.materialName === selectedMaterial
     );
-  }, [selectedColor, selectedSize, selectedMaterial, product.variants]);
+  }, [selectedColor, selectedSize, selectedMaterial, product?.variants]);
 
   const lowestPrice = useMemo(() => {
-    return Math.min(...product.variants.map((v) => v.price));
-  }, [product.variants]);
+    return Math.min(...(product?.variants?.map((v) => v.price) || [0]));
+  }, [product?.variants]);
 
   const getAccountIdFromToken = (): number | null => {
     const token = localStorage.getItem("token"); // hoặc từ cookie/context

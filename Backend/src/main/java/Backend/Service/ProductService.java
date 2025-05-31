@@ -25,6 +25,7 @@ import Backend.Response.ProductCardResponse;
 import Backend.Response.ProductDetailResponse;
 import Backend.Response.ProductOverviewResponse;
 import Backend.Response.ProductSuggestResponse;
+import Backend.Response.TopSellingProductNameResponse;
 import Backend.Response.TopSellingProductResponse;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
@@ -516,4 +517,8 @@ public class ProductService {
 			throw new RuntimeException("Lỗi khi lưu ảnh sản phẩm!", e);
 		}
 	}
+
+	 public List<TopSellingProductNameResponse> getTopSellingProductNames() {
+        return orderDetailRepository.findTopSellingProductsByName();
+    }
 }

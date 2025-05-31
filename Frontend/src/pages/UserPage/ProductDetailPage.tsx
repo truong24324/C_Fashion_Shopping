@@ -49,7 +49,7 @@ const ProductDetailPage: React.FC = () => {
     const fetchProduct = async () => {
       try {
         const res = await axios.get(`/api/views/${productId}`);
-        setProduct(res.data);
+        setProduct(res.data.data);
       } catch (error: any) {
         toast.error(error.response?.data?.message || "⚠️ Có lỗi xảy ra khi tải dữ liệu!");
       } finally {

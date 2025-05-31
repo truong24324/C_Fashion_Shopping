@@ -1,4 +1,4 @@
-import React from 'react';   
+import React from 'react';
 import { FaLock, FaEnvelope, FaArrowLeft } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
@@ -10,14 +10,16 @@ interface LoginFormProps {
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleLogin: () => void;
   goToWelcome: () => void;
-  goToForgotPassword: () => void; 
+  goToForgotPassword: () => void;
+  loading: boolean;
 }
+
 const schema = yup.object({
   email: yup.string().email('Email không hợp lệ').required('Email không được để trống'),
   password: yup.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự').required('Mật khẩu không được để trống'),
 }).required();
 
-const LoginForm: React.FC<LoginFormProps> = ({ formData, handleChange, handleLogin, goToWelcome, goToForgotPassword  }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ formData, handleChange, handleLogin, goToWelcome, goToForgotPassword, loading }) => {
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: yupResolver(schema),
   });
@@ -27,9 +29,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ formData, handleChange, handleLog
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: -20 }} 
-      animate={{ opacity: 1, y: 0 }} 
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
       <div className="bg-white shadow-xl rounded-xl p-8 border border-gray-200 w-full max-w-lg">
@@ -73,9 +75,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ formData, handleChange, handleLog
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               type="submit"
-              className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-md"
+              disabled={loading}
+              className={`px-5 py-2 rounded-lg transition-all shadow-md text-white ${loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                }`}
             >
-              Đăng nhập
+              {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </motion.button>
           </div>
           <motion.button
