@@ -9,33 +9,26 @@ const Slider: React.FC = () => {
 
   const slides = [
     {
-      image: "https://file1.dangcongsan.vn/DATA/0/2018/10/68___gi%E1%BA%BFng_l%C3%A0ng_qu%E1%BA%A3ng_ph%C3%BA_c%E1%BA%A7u__%E1%BB%A9ng_h%C3%B2a___%E1%BA%A3nh_vi%E1%BA%BFt_m%E1%BA%A1nh-16_51_07_908.jpg",
+      image: "/images/banner_1.jpg",
       title: "Sản phẩm 1",
       description: "Mô tả sản phẩm 1",
       price: "99.000 VNĐ",
       link: "/san-pham/1"
     },
     {
-      image: "https://th.bing.com/th/id/OIP.JlRrta9thPS6T8Li5vVKywHaEK?w=1240&h=698&rs=1&pid=ImgDetMain",
+      image: "/images/banner_2.jpg",
       title: "Sản phẩm 2",
       description: "Mô tả sản phẩm 2",
       price: "129.000 VNĐ",
       link: "/san-pham/2"
     },
     {
-      image: "https://www.thewanderinglens.com/wp-content/uploads/2018/05/Fitzroy-Island-Nudey-Beach-24.jpg",
+      image: "/images/banner_3.webp",
       title: "Sản phẩm 3",
       description: "Mô tả sản phẩm 3",
       price: "149.000 VNĐ",
       link: "/san-pham/3"
     },
-    {
-      image: "https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png",
-      title: "Sản phẩm 4",
-      description: "Mô tả sản phẩm 4",
-      price: "199.000 VNĐ",
-      link: "/san-pham/4"
-    }
   ];
 
   const nextSlide = () => {
@@ -67,8 +60,12 @@ const Slider: React.FC = () => {
     };
   }, []);
 
+  // ✅ Nếu slides chưa có hoặc currentIndex không hợp lệ thì không render
+  if (!slides.length || !slides[currentIndex]) return null;
+
   return (
-    <div className="relative w-full h-screen bg-cover bg-center transition-all duration-500 ease-in-out" style={{ backgroundImage: `url(${slides[currentIndex].image})` }}>
+    <div className="relative w-full h-screen bg-cover bg-center transition-all duration-500 ease-in-out"
+      style={{ backgroundImage: `url(${slides[currentIndex].image})` }}>
       <div className="absolute inset-0 bg-black bg-opacity-50"></div>
       <div className="absolute inset-0 flex justify-center items-center z-10 px-8 py-4 text-center text-white">
         <div>
@@ -106,7 +103,6 @@ const Slider: React.FC = () => {
             onClick={() => { setCurrentIndex(index); resetAutoSlide(); }}
             style={{ borderColor: currentIndex === index ? "#FACC15" : "#9CA3AF" }} // Vàng hoặc xám
           >
-            {/* Thanh đếm thời gian bên trong chấm dài */}
             <div
               className="absolute top-0 left-0 h-full bg-yellow-400 transition-all duration-100"
               style={{ width: currentIndex === index ? `${progress}%` : "0%" }}

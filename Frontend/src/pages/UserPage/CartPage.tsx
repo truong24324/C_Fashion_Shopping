@@ -1,4 +1,4 @@
-import React, { useState, useEffect,} from "react";
+import React, { useState, useEffect, } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
@@ -126,7 +126,7 @@ const CartPage: React.FC = () => {
     axios
       .get("/api/views/suggest")
       .then((response) => {
-      setProductList(response.data.data); // ✅ FIX HERE
+        setProductList(response.data.data); // ✅ FIX HERE
       })
       .catch((error: any) => {
         toast.error(error.response?.data?.message || "Lỗi khi tải sản phẩm gợi ý.");
@@ -490,7 +490,7 @@ const CartPage: React.FC = () => {
             note={note}
             setNote={setNote}
           />
-           <div className="space-y-2 text-sm lg:text-base">
+          <div className="space-y-2 text-sm lg:text-base">
             <div className="flex justify-between">
               <span>Tạm tính:</span>
               <span>{subtotal.toLocaleString()} vn₫</span>

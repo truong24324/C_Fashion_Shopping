@@ -13,6 +13,7 @@
     "framer-motion": "^12.4.2",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
+    "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.477.0",
     "react": "^19.0.0",
     "react-color": "^2.19.3",
@@ -57,6 +58,7 @@
   },
   "devDependencies": {
     "@types/js-cookie": "^3.0.6",
+    "@types/lodash.debounce": "^4.0.9",
     "@types/react": "^19.0.10",
     "@types/react-color": "^3.0.13",
     "@types/react-dom": "^19.0.4",

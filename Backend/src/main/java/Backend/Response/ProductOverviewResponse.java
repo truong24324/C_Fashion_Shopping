@@ -19,4 +19,5 @@ public class ProductOverviewResponse {
     private List<String> materialNames;
     private String supplierName;
     private String warrantyPeriod;
+    private String model;
 }

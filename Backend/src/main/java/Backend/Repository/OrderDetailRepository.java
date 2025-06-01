@@ -19,8 +19,10 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
 
     List<OrderDetail> findByOrder(Order order);
 
-    @Query("SELECT new Backend.Response.TopSellingProductNameResponse(od.product.productId, od.product.productName, SUM(od.quantity)) " +
-       "FROM OrderDetail od GROUP BY od.product.productId, od.product.productName ORDER BY SUM(od.quantity) DESC")
+  @Query("SELECT new Backend.Response.TopSellingProductNameResponse(p.productId, p.productName, COALESCE(SUM(od.quantity), 0)) " +
+       "FROM Product p LEFT JOIN OrderDetail od ON od.product.productId = p.productId " +
+       "GROUP BY p.productId, p.productName " +
+       "ORDER BY COALESCE(SUM(od.quantity), 0) DESC")
 List<TopSellingProductNameResponse> findTopSellingProductsByName();
 
 }

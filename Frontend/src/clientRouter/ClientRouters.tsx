@@ -6,7 +6,11 @@ import {
   useNavigate,
 } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import axios from 'axios';
+import { Spin} from 'antd';
+import { toast } from 'react-hot-toast';
 
+// Pages
 import HomePage from '../pages/UserPage/HomePage';
 import AuthenticatePage from '../pages/UserPage/AuthenticatePage';
 import CartPage from '../pages/UserPage/CartPage';
@@ -29,60 +33,68 @@ const isTokenValid = (token: string | null): boolean => {
   if (!token) return false;
   try {
     const decoded: { exp: number } = jwtDecode(token);
-    const now = Date.now() / 1000;
-    return decoded.exp > now;
-  } catch (e) {
+    return decoded.exp > Date.now() / 1000;
+  } catch {
     return false;
   }
 };
-
-const PrivateRoute: React.FC<{ children: ReactNode; requiredRole?: string }> = ({
+const PrivateRoute: React.FC<{ children: ReactNode; requiredRoles?: string[] }> = ({
   children,
-  requiredRole,
+  requiredRoles,
 }) => {
-  // const token = localStorage.getItem('jwt_token');
-  // const location = useLocation();
-
-  // if (!token) {
-  //   toast.error('Không tìm thấy token. Vui lòng đăng nhập.');
-  //   return <Navigate to="/" state={{ from: location }} replace />;
-  // }
-
-  // if (requiredRole) {
-  //   try {
-  //     const decoded: { roles: { authority: string }[] } = jwtDecode(token);
-  //     const hasRole = decoded.roles.some(role => role.authority === requiredRole);
-  //     if (!hasRole) {
-  //       toast.error('Bạn không có quyền truy cập vào trang này.');
-  //       return <Navigate to="/" replace />;
-  //     }
-  //   } catch (err) {
-  //     toast.error('Token không hợp lệ.');
-  //     return <Navigate to="/" replace />;
-  //   }
-  // }
-
-  return <>{children}</>;
-};
-
-const AppRouterWrapper: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [hasAccess, setHasAccess] = useState(false);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // const token = localStorage.getItem('jwt_token');
-    // if (token) {
-    //   try {
-    //     const decoded: { roles: { authority: string }[] } = jwtDecode(token);
-    //     const isAdmin = decoded.roles.some(role => role.authority === 'ROLE_Admin');
-    //     if (isAdmin && window.location.pathname === '/') {
-    //       navigate('/admin');
-    //     }
-    //   } catch (err: any) {
-    //     toast.error('Lỗi giải mã token:', err);
-    //   }
-    // }
-  }, [navigate]);  
+    const checkAccess = async () => {
+     
+      if (requiredRoles?.includes('ROLE_Admin') || requiredRoles?.includes('ROLE_Super_Admin') || requiredRoles?.includes('ROLE_Manager')) {
+        try {
+          const res = await axios.get('/api/check-admin', {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`
+            }
+          });
+          if (res.status === 200) {
+            setHasAccess(true);
+          }
+        } catch {
+          toast.error('Bạn không có quyền truy cập trang quản trị.');
+          navigate('/');
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setHasAccess(true);
+        setLoading(false);
+      }
+    };
+
+    checkAccess();
+  }, [requiredRoles, navigate]);
+
+  if (loading) return <Spin fullscreen />;
+  return hasAccess ? <>{children}</> : null;
+};
+
+const AppRouterWrapper: React.FC = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('jwt_token');
+    if (token && isTokenValid(token)) {
+      try {
+        const decoded: { roles: { authority: string }[] } = jwtDecode(token);
+        const isAdmin = decoded.roles?.some(role => role.authority === 'ROLE_Admin');
+        if (isAdmin && window.location.pathname === '/') {
+          navigate('/admin');
+        }
+      } catch (error: any) {
+        toast.error(error.response?.data?.message ||' Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại!');
+      }
+    }
+  }, [navigate]);
 
   return (
     <Routes>
@@ -106,7 +118,7 @@ const AppRouterWrapper: React.FC = () => {
       <Route
         path="/admin"
         element={
-          <PrivateRoute requiredRole="ROLE_Admin">
+          <PrivateRoute requiredRoles={['ROLE_Admin', 'ROLE_Super_Admin', 'ROLE_Manager']}>
             <AdminDashboard />
           </PrivateRoute>
         }

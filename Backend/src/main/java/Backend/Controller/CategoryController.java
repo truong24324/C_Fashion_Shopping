@@ -29,7 +29,7 @@ public class CategoryController {
 	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<PaginationResponse<Category>> getAllCategories(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "100") int size,
             @RequestParam(defaultValue = "categoryName") String sortBy) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));

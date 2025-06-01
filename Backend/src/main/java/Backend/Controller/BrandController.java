@@ -29,7 +29,7 @@ public class BrandController {
     @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<PaginationResponse<BrandResponse>> getAllBrands(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "100") int size,
             @RequestParam(defaultValue = "brandName") String sortBy) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));

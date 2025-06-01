@@ -233,6 +233,7 @@ public class ProductService {
 			dto.setWarrantyPeriod(product.getWarrantyPeriod());
 			dto.setSupplierName(product.getSupplier().getSupplierName());
 			dto.setBrandName(product.getBrand().getBrandName());
+			dto.setModel(product.getModel());
 
 			// Lấy ảnh MAIN và SECONDARY
 			List<ProductImage> filteredImages = product.getImages().stream()

@@ -26,7 +26,7 @@ public class MaterialController {
 	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<Page<Material>> getAllMaterials(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "100") int size,
             @RequestParam(defaultValue = "materialName") String sortBy) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));

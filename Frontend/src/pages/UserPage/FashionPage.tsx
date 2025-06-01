@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { FaTshirt } from "react-icons/fa";
 import ProductCard from "../../Product/ProductCard";
 import Loading from "src/components/common/Loading";
@@ -7,6 +7,7 @@ import axios from "axios";
 import clsx from "clsx";
 import Navbar from "src/Layouts/Navbar";
 import Footer from "src/Layouts/Footer";
+import { FiFilter } from "react-icons/fi";
 
 interface Product {
   productId: number;
@@ -44,6 +45,9 @@ const FashionPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [showMobileFilter, setShowMobileFilter] = useState(false);
+  const filterButtonRef = useRef<HTMLDivElement | null>(null);
+const [wishlistProducts, setWishlistProducts] = useState<number[]>([]);
 
   const [uniqueValues, setUniqueValues] = useState({
     colors: [] as ColorOption[],
@@ -190,11 +194,66 @@ const FashionPage: React.FC = () => {
     </div>
   );
 
+  useEffect(() => {
+    const btn = filterButtonRef.current;
+    if (!btn) return;
+
+    let offsetX = 0;
+    let offsetY = 0;
+    let isDragging = false;
+
+    const handleMouseDown = (e: MouseEvent | TouchEvent) => {
+      isDragging = true;
+      const pageX = (e as MouseEvent).pageX ?? (e as TouchEvent).touches[0].pageX;
+      const pageY = (e as MouseEvent).pageY ?? (e as TouchEvent).touches[0].pageY;
+      offsetX = pageX - btn.offsetLeft;
+      offsetY = pageY - btn.offsetTop;
+    };
+
+    const handleMouseMove = (e: MouseEvent | TouchEvent) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      const pageX = (e as MouseEvent).pageX ?? (e as TouchEvent).touches[0].pageX;
+      const pageY = (e as MouseEvent).pageY ?? (e as TouchEvent).touches[0].pageY;
+      btn.style.left = `${pageX - offsetX}px`;
+      btn.style.top = `${pageY - offsetY}px`;
+    };
+
+    const handleMouseUp = () => {
+      isDragging = false;
+    };
+
+    btn.addEventListener("mousedown", handleMouseDown);
+    btn.addEventListener("touchstart", handleMouseDown);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("touchmove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("touchend", handleMouseUp);
+
+    return () => {
+      btn.removeEventListener("mousedown", handleMouseDown);
+      btn.removeEventListener("touchstart", handleMouseDown);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchmove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchend", handleMouseUp);
+    };
+  }, []);
+
   return (
     <>
       <Navbar />
       <div className="pt-20 w-full bg-gray-50 px-4 py-6 max-w-7xl mx-auto">
         {/* Banner */}
+        {/* Nút nổi giống bong bóng chat với icon */}
+        <div
+          ref={filterButtonRef}
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center cursor-move md:hidden"
+          onClick={() => setShowMobileFilter(true)}
+        >
+          <FiFilter className="text-2xl" />
+        </div>
+
         <div
           className="w-full h-72 sm:h-96 bg-cover bg-center rounded-lg shadow-lg mb-6"
           style={{
@@ -210,8 +269,7 @@ const FashionPage: React.FC = () => {
         </div>
 
         <div className="flex gap-6">
-          {/* Sidebar filter */}
-          <div className="w-3/10 lg:w-1/4 bg-white p-4 rounded shadow-md">
+          <div className="hidden md:block w-3/10 lg:w-1/4 bg-white p-4 rounded shadow-md">
             {renderColorFilter()}
             {renderFilterBox("Kích cỡ", uniqueValues.sizes, "size")}
             {renderFilterBox("Chất liệu", uniqueValues.materials, "material")}
@@ -239,12 +297,52 @@ const FashionPage: React.FC = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {filteredProducts.map((product) => (
-                  <ProductCard key={product.productId} product={product} />
+                  <ProductCard
+                    key={product.productId}
+                    product={product}
+                    wishlistProducts={wishlistProducts}
+                    setWishlistProducts={setWishlistProducts}
+                  />
                 ))}
               </div>
             )}
           </div>
         </div>
+        {/* Overlay background */}
+        {showMobileFilter && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setShowMobileFilter(false)}
+          />
+        )}
+
+        {/* Sidebar filter mobile */}
+        <div
+          className={clsx(
+            "fixed top-0 left-0 w-3/4 sm:w-2/3 max-w-xs h-full bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out",
+            showMobileFilter ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
+          <div className="p-4 overflow-y-auto h-full">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold">Bộ lọc</h2>
+              <button
+                className="text-gray-500 hover:text-black text-xl"
+                onClick={() => setShowMobileFilter(false)}
+              >
+                ×
+              </button>
+            </div>
+            {renderColorFilter()}
+            {renderFilterBox("Kích cỡ", uniqueValues.sizes, "size")}
+            {renderFilterBox("Chất liệu", uniqueValues.materials, "material")}
+            {renderFilterBox("Thương hiệu", uniqueValues.brands, "brand")}
+            {renderFilterBox("Danh mục", uniqueValues.categories, "category")}
+            {renderFilterBox("Nhà cung cấp", uniqueValues.suppliers, "supplier")}
+            {renderFilterBox("Bảo hành", uniqueValues.warranties, "warrantyPeriod")}
+          </div>
+        </div>
+
       </div>
       <Footer />
     </>

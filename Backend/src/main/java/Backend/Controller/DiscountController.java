@@ -9,16 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import Backend.Model.Discount;
 import Backend.Request.DiscountRequest;
@@ -42,7 +33,7 @@ public class DiscountController {
 	@GetMapping("/all")
 	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
 	public ResponseEntity<Page<DiscountResponse>> getAllDiscounts(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "createdAt") String sortBy) {
+			@RequestParam(defaultValue = "100") int size, @RequestParam(defaultValue = "createdAt") String sortBy) {
 
 		Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).descending());
 		Page<DiscountResponse> discountPage = discountService.getAllDiscounts(pageable);

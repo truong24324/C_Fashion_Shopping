@@ -16,14 +16,18 @@ const ProductImageGallery: React.FC<Props> = ({ images, name }) => {
     <div className="flex w-full md:w-1/2 p-4">
       {/* Cột trái - thumbnails */}
       <div className="w-1/5 flex flex-col gap-2">
-        {images.slice(0, 5).map((img, index) => (
+        {images.map((img, index) => (
           <div
             key={index}
             className={`cursor-pointer border-2 rounded-md aspect-square overflow-hidden ${currentImageIndex === index ? "border-blue-500" : "border-gray-200"
               }`}
             onClick={() => handleThumbnailClick(index)}
           >
-            <img src={`/${img}`} alt={`Thumbnail ${index + 1}`} className="object-cover w-full h-full" />
+            <img
+              src={`/${img}`}
+              alt={`Thumbnail ${index + 1}`}
+              className="object-cover w-full h-full"
+            />
           </div>
         ))}
       </div>

@@ -34,7 +34,11 @@ interface Variant {
     price: number;
 }
 
-const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
+const ProductCard: React.FC<{
+    product: Product;
+    wishlistProducts: number[];
+    setWishlistProducts: React.Dispatch<React.SetStateAction<number[]>>;
+}> = ({ product, wishlistProducts, setWishlistProducts }) => {
     const [isHovered, setIsHovered] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
@@ -45,7 +49,6 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
     const [variantStock, setVariantStock] = useState<number | null>(null);
     const [quantity, setQuantity] = useState(1);
     const [variantList, setVariantList] = useState<Variant[]>([]);
-    const [wishlistProducts, setWishlistProducts] = useState<number[]>([]);
     const navigate = useNavigate();
 
     const filteredColors = useMemo(() => {
@@ -263,12 +266,12 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
                     },
                 });
 
-                const wishlistProductIds = res.data
-                    .filter((item: any) => !item.isDeleted)
+                const wishlistProductIds = res.data.data
+                    .filter((item: any) => !item.deleted) // nhớ dùng `deleted` thay vì `isDeleted`
                     .map((item: any) => item.productId);
 
                 setWishlistProducts(wishlistProductIds);
-                setCachedWishlist(wishlistProductIds); // Lưu vào cache
+                setCachedWishlist(wishlistProductIds);
             } catch (err) {
                 console.error("Lỗi khi tải wishlist:", err);
             }

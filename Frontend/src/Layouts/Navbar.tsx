@@ -40,6 +40,12 @@ const Navbar: React.FC = () => {
         },
       });
       toast.success("Đăng xuất thành công!");
+
+      const keysToClear = [
+        "cachedBrands", "cachedBrandsExpire", "cached_products_latest", "cached_products_latest_expiry",
+        "variants_cache", "wishlist_cache", "accountId", "token"
+      ];
+      keysToClear.forEach(key => localStorage.removeItem(key));
     } catch (error) {
       toast.error("Lỗi khi đăng xuất!");
     } finally {
@@ -184,11 +190,11 @@ const Navbar: React.FC = () => {
             <div className="flex justify-between items-center px-4 py-2 bg-gray-900 bg-opacity-90 sm:px-8 shadow-md">
               <div className="flex items-center space-x-4">
                 <img
-                  src="https://th.bing.com/th?id=OSK.Gx03gXuGYG4opIcw73oEeAm33KFjNvHyQaeBmIQaoBg&w=46&h=46&c=11&rs=1&qlt=80&o=6&dpr=1.3&pid=SANGAM"
+                  src="/images/logo.jpg"
                   alt="Logo"
                   className="w-10 h-10"
                 />
-                <span className="text-xl font-bold text-white hidden md:inline">Thương hiệu</span>
+                <span className="text-xl font-bold text-white hidden md:inline">C WEB</span>
               </div>
 
               <div className="flex-grow flex justify-center items-center overflow-hidden">
@@ -275,13 +281,6 @@ const Navbar: React.FC = () => {
             transition={{ duration: 0.3 }}
             className="bg-gray-900 p-3 text-white flex items-center"
           >
-            <div className="flex items-center">
-              <img
-                src="https://th.bing.com/th?id=OSK.Gx03gXuGYG4opIcw73oEeAm33KFjNvHyQaeBmIQaoBg&w=46&h=46&c=11&rs=1&qlt=80&o=6&dpr=1.3&pid=SANGAM"
-                alt="Logo"
-                className="w-10 h-10"
-              />
-            </div>
 
             <div className="flex-1 flex flex-col items-center px-4">
               <div className="flex w-full max-w-md bg-gray-800 rounded-full px-4 py-2 shadow-md items-center">

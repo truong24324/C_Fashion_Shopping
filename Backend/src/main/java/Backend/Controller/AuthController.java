@@ -1,6 +1,8 @@
 package Backend.Controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import Backend.Model.Account;
@@ -35,7 +37,7 @@ public class AuthController {
 	@Operation(summary = "Đăng nhập", description = "Xác thực người dùng và trả về JWT token.", responses = {
 			@ApiResponse(responseCode = "200", description = "Đăng nhập thành công", content = @Content(schema = @Schema(implementation = AuthResponse.class))),
 			@ApiResponse(responseCode = "401", description = "Thông tin đăng nhập không hợp lệ"),
-		    @ApiResponse(responseCode = "403", description = "Tài khoản bị khóa hoặc quyền đăng nhập bị tắt") })
+			@ApiResponse(responseCode = "403", description = "Tài khoản bị khóa hoặc quyền đăng nhập bị tắt") })
 	@PostMapping("/login")
 	public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request,
 			HttpServletResponse response) {
@@ -52,18 +54,18 @@ public class AuthController {
 
 			// Kiểm tra tài khoản có hoạt động không
 			if (!account.isActive()) {
-			    return ResponseEntity.status(403).body(new AuthResponse("Tài khoản đã bị vô hiệu hóa."));
+				return ResponseEntity.status(403).body(new AuthResponse("Tài khoản đã bị vô hiệu hóa."));
 			}
 
 			if (account.isLocked()) {
-			    return ResponseEntity.status(403).body(new AuthResponse("Tài khoản đã bị khóa."));
+				return ResponseEntity.status(403).body(new AuthResponse("Tài khoản đã bị khóa."));
 			}
 
-			  // Kiểm tra quyền đăng nhập
-	        Role role = account.getRole();  // Lấy vai trò của tài khoản
-	        if (role != null && !role.isLoginAllowed()) {
-	            return ResponseEntity.status(403).body(new AuthResponse("Quyền đăng nhập bị tắt cho vai trò của bạn."));
-	        }
+			// Kiểm tra quyền đăng nhập
+			Role role = account.getRole(); // Lấy vai trò của tài khoản
+			if (role != null && !role.isLoginAllowed()) {
+				return ResponseEntity.status(403).body(new AuthResponse("Quyền đăng nhập bị tắt cho vai trò của bạn."));
+			}
 
 			// Kiểm tra mật khẩu
 			String errorMessage = accountService.validateLogin(account, loginRequest.getPassword());
@@ -95,11 +97,11 @@ public class AuthController {
 		}
 	}
 
-    @Operation(summary = "Đăng ký", description = "Tạo tài khoản mới.", responses = {
-            @ApiResponse(responseCode = "200", description = "Đăng ký thành công", content = @Content(schema = @Schema(implementation = AuthResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Email hoặc số điện thoại đã được sử dụng"),
-            @ApiResponse(responseCode = "500", description = "Lỗi hệ thống")
-    })
+	@Operation(summary = "Đăng ký", description = "Tạo tài khoản mới.", responses = {
+			@ApiResponse(responseCode = "200", description = "Đăng ký thành công", content = @Content(schema = @Schema(implementation = AuthResponse.class))),
+			@ApiResponse(responseCode = "400", description = "Email hoặc số điện thoại đã được sử dụng"),
+			@ApiResponse(responseCode = "500", description = "Lỗi hệ thống")
+	})
 	@PostMapping("/register")
 	public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest registerRequest,
 			HttpServletResponse response) {
@@ -136,10 +138,9 @@ public class AuthController {
 		}
 	}
 
-
-    @Operation(summary = "Đăng xuất", description = "Xóa JWT khỏi cookie và đăng xuất người dùng.", responses = {
-            @ApiResponse(responseCode = "200", description = "Đăng xuất thành công", content = @Content(schema = @Schema(implementation = AuthResponse.class)))
-    })
+	@Operation(summary = "Đăng xuất", description = "Xóa JWT khỏi cookie và đăng xuất người dùng.", responses = {
+			@ApiResponse(responseCode = "200", description = "Đăng xuất thành công", content = @Content(schema = @Schema(implementation = AuthResponse.class)))
+	})
 	@PostMapping("/logout")
 	public ResponseEntity<AuthResponse> logout(HttpServletResponse response) {
 		// Xóa cookie chứa JWT token
@@ -161,4 +162,21 @@ public class AuthController {
 		return ResponseEntity.ok(new AuthResponse("Đăng xuất thành công!"));
 	}
 
+	@GetMapping("/check-admin")
+	public ResponseEntity<?> checkAdminAccess(@AuthenticationPrincipal Account account) {
+		if (account == null || !account.isEnabled()) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+		}
+
+		boolean hasAccess = account.getAuthorities().stream()
+				.anyMatch(auth -> auth.getAuthority().equals("ROLE_Admin") ||
+						auth.getAuthority().equals("ROLE_Super_Admin") ||
+						auth.getAuthority().equals("ROLE_Manager"));
+
+		if (hasAccess) {
+			return ResponseEntity.ok(true);
+		} else {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
+		}
+	}
 }

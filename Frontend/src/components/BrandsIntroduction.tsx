@@ -9,21 +9,20 @@ const CACHE_DURATION = 10 * 60 * 1000; // 10 phút
 
 const BrandsIntroduction: React.FC = () => {
   const [brands, setBrands] = useState<any[]>([]);
-  const [scrollPosition, setScrollPosition] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<number>(0);
 
   const fetchBrands = async () => {
     try {
       const response = await axios.get("/api/views/listBrand");
-      const brandData = response.data || [];
+      const brandData = response.data.data || [];
 
       setBrands(brandData);
 
-      // Lưu cache + thời gian hết hạn
       localStorage.setItem(CACHE_KEY, JSON.stringify(brandData));
       localStorage.setItem(CACHE_EXPIRE_KEY, (Date.now() + CACHE_DURATION).toString());
 
@@ -44,34 +43,35 @@ const BrandsIntroduction: React.FC = () => {
 
     if (isValidCache) {
       try {
-        const parsed = JSON.parse(cached!);
+        const parsed = JSON.parse(cached);
         if (Array.isArray(parsed)) {
           setBrands(parsed);
-          setLoading(false); // Tạm dùng cache, không hiển thị loading
+          setLoading(false);
         }
       } catch (e) {
         console.error("Lỗi parse cache:", e);
       }
     }
 
-    // Luôn gọi lại API để làm mới (trừ khi đang dùng thử lại)
+    // Gọi API để làm mới
     fetchBrands();
   }, []);
 
   useEffect(() => {
     const container = containerRef.current;
-    const scrollWidth = container?.scrollWidth || 0;
+    if (!container || !brands.length) return;
+
+    const scrollWidth = container.scrollWidth / 2;
 
     const interval = setInterval(() => {
-      if (container && !isHovered) {
-        const newPosition = scrollPosition + 2;
-        setScrollPosition(newPosition >= scrollWidth / 2 ? 0 : newPosition);
-        container.scrollLeft = newPosition;
+      if (!isHovered && container) {
+        scrollRef.current = (scrollRef.current + 2) % scrollWidth;
+        container.scrollLeft = scrollRef.current;
       }
     }, 30);
 
     return () => clearInterval(interval);
-  }, [scrollPosition, isHovered]);
+  }, [brands, isHovered]);
 
   const handleRetry = () => {
     setError(false);
@@ -103,15 +103,15 @@ const BrandsIntroduction: React.FC = () => {
           >
             <div
               className="flex gap-4"
-              style={{ width: `${(brands?.length || 0) * 2 * 150}px` }}
+              style={{ width: `${brands.length * 2 * 150}px` }}
             >
-              {(brands?.length ? brands.concat(brands) : []).map((brand, index) => (
-                <div key={index} className="w-40 sm:w-48 px-2 py-2 flex-shrink-0">
+              {[...brands, ...brands].map((brand, index) => (
+                <div key={`${brand.brandId}-${index}`} className="w-40 sm:w-48 px-2 py-2 flex-shrink-0">
                   <div className="bg-white shadow-md rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 hover:shadow-lg h-full">
                     <div className="relative w-full" style={{ paddingBottom: "100%" }}>
                       <img
-                        src={brand.logo}
-                        alt={brand.brandName}
+                        src={brand.logo || "/images/placeholder.png"}
+                        alt={brand.brandName || "Thương hiệu"}
                         className="absolute inset-0 w-full h-full object-cover rounded-t-lg transition-transform duration-300 hover:scale-110"
                       />
                     </div>

@@ -50,7 +50,7 @@ const Category = () => {
                         label={<span className="text-gray-600">Tên loại sản phẩm</span>}
                         rules={[
                             { required: true, message: "⚠️ Vui lòng nhập tên loại sản phẩm!" },
-                            { min: 3, message: "⚠️ Tên loại sản phẩm phải có ít nhất 3 ký tự!" },
+                            { min: 2, message: "⚠️ Tên loại sản phẩm phải có ít nhất 2 ký tự!" },
                             { max: 50, message: "⚠️ Tên loại sản phẩm không được quá 50 ký tự!" },
                             { pattern: /^[^\s]+(\s+[^\s]+)*$/, message: "⚠️ Không được nhập toàn khoảng trắng!" },
                             { pattern: /^[a-zA-Z0-9\sÀ-Ỹà-ỹ]+$/, message: "⚠️ Không được chứa ký tự đặc biệt!" },

@@ -51,20 +51,20 @@ interface DecodedToken {
 }
 
 const ProductInfo: React.FC<Props> = ({ product, onSizeSuggest }) => {
-const colors = useMemo(
-  () => Array.from(new Set(product?.variants?.map((v) => v.colorName) || [])),
-  [product?.variants]
-);
+  const colors = useMemo(
+    () => Array.from(new Set(product?.variants?.map((v) => v.colorName) || [])),
+    [product?.variants]
+  );
 
-const sizes = useMemo(
-  () => Array.from(new Set(product?.variants?.map((v) => v.sizeName) || [])),
-  [product?.variants]
-);
+  const sizes = useMemo(
+    () => Array.from(new Set(product?.variants?.map((v) => v.sizeName) || [])),
+    [product?.variants]
+  );
 
-const materials = useMemo(
-  () => Array.from(new Set(product?.variants?.map((v) => v.materialName) || [])),
-  [product?.variants]
-);
+  const materials = useMemo(
+    () => Array.from(new Set(product?.variants?.map((v) => v.materialName) || [])),
+    [product?.variants]
+  );
   const [selectedColor, setSelectedColor] = useState(colors[0] || "");
   const [selectedSize, setSelectedSize] = useState(sizes[0] || "");
   const [selectedMaterial, setSelectedMaterial] = useState(materials[0] || "");

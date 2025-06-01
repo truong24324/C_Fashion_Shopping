@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Loading from "../components/common/Loading";
 import { FaTshirt } from "react-icons/fa";
 import ProductCard from "./ProductCard";
@@ -32,6 +32,7 @@ const ProductPanel: React.FC<ProductPanelProps> = ({
   onSearch,
   onSort,
 }) => {
+  const [wishlistProducts, setWishlistProducts] = useState<number[]>([]);
   return (
     <div className="w-full bg-gray-50">
       {/* Banner */}
@@ -95,7 +96,11 @@ const ProductPanel: React.FC<ProductPanelProps> = ({
         ) : (
           products.map((product) => (
             <div key={product.productId} className="flex justify-center">
-              <ProductCard product={product} />
+              <ProductCard
+                product={product}
+                wishlistProducts={wishlistProducts}
+                setWishlistProducts={setWishlistProducts}
+              />
             </div>
           ))
         )}
