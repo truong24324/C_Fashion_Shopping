@@ -1,67 +1,106 @@
-🛍️ Giới thiệu dự án
-C_Fashion_Shopping là một hệ thống thương mại điện tử được thiết kế để bán các sản phẩm thời trang. Dự án bao gồm cả frontend và backend, cho phép người dùng duyệt, tìm kiếm và mua sản phẩm, trong khi quản trị viên có thể quản lý hàng hóa và đơn hàng.
+🛍️ C_Fashion_Shopping
+C_Fashion_Shopping là hệ thống thương mại điện tử hiện đại chuyên về sản phẩm thời trang, cung cấp đầy đủ chức năng cho cả người dùng và quản trị viên. Hệ thống gồm cả frontend và backend, cho phép người dùng duyệt, lọc và mua sắm sản phẩm, đồng thời cung cấp giao diện quản trị mạnh mẽ để quản lý hệ thống.
 
 🖥️ Công nghệ sử dụng
-Frontend: ReactJS, TypeWind CSS, TypeScript, HTML, CSS, .
+Frontend:
+⚛️ ReactJS
 
-Backend: Java(Spring Boot, JWT, Security, Swagger, MOMO Payment).
+🌀 Tailwind CSS
 
-Cơ sở dữ liệu: T-SQL (Microsoft SQL Server).
+🟦 TypeScript
+
+📄 HTML/CSS
+
+Backend:
+☕ Java 21 (Spring Boot)
+
+🔐 Spring Security, JWT
+
+📄 Swagger (API Docs)
+
+💳 MoMo Payment Integration
+
+Database:
+🛢️ Microsoft SQL Server (T-SQL)
 
 ⚙️ Hướng dẫn cài đặt
 1. Yêu cầu hệ thống
-Java Development Kit (JDK) 21.
+Java Development Kit (JDK) 21
 
-Node.js và npm.
+Node.js & npm
 
-Microsoft SQL Server.
+Microsoft SQL Server
 
 2. Cài đặt cơ sở dữ liệu
-Mở SQL Server Management Studio.
+Mở SQL Server Management Studio
 
-Chạy Manage.sql để tạo cấu trúc cơ sở dữ liệu.
+Chạy file Manage.sql để tạo cấu trúc cơ sở dữ liệu
 
-Chạy ManageData.sql để thêm dữ liệu mẫu.
+Chạy file ManageData.sql để thêm dữ liệu mẫu
 
-3. Cài đặt backend
-Điều hướng đến thư mục Backend/.
-
-Xây dựng và chạy ứng dụng Java.
-
-4. Cài đặt frontend
-Điều hướng đến thư mục Frontend/.
-
-Chạy npm install để cài đặt các phụ thuộc.
-
-Chạy npm start để khởi động ứng dụng frontend.
-
+3. Cài đặt Backend
+bash
+Copy
+Edit
+cd Backend/
+# Sử dụng IDE như IntelliJ hoặc chạy lệnh:
+./mvnw spring-boot:run
+4. Cài đặt Frontend
+bash
+Copy
+Edit
+cd Frontend/
+npm install
+npm start
 ✅ Tính năng hệ thống
 👥 Người dùng
-Đăng ký / Đăng nhập (JWT)
+Đăng ký / Đăng nhập với JWT
 
 Quản lý tài khoản, đổi mật khẩu
 
-Duyệt và tìm kiếm sản phẩm
+Duyệt & tìm kiếm sản phẩm
 
-Lọc theo màu, kích thước, chất liệu, danh mục, thương hiệu, bảo hành
+Lọc nâng cao: màu sắc, kích cỡ, chất liệu, danh mục, thương hiệu, bảo hành
 
 Thêm sản phẩm vào giỏ hàng
 
-Thanh toán qua MoMo
+Thanh toán trực tuyến qua MoMo
 
-Lịch sử đơn hàng
+Quản lý & xem lịch sử đơn hàng
 
-Đánh giá và hình ảnh sản phẩm đã mua
+Đánh giá sản phẩm, bao gồm văn bản và hình ảnh
 
 👨‍💼 Quản trị viên
-Quản lý người dùng (role, khóa tài khoản, thống kê login)
+Quản lý người dùng:
 
-Quản lý sản phẩm (tạo, sửa, xoá, gắn màu, size, thương hiệu, hình ảnh,...)
+Phân quyền (roles)
+
+Khóa/mở khóa tài khoản
+
+Thống kê lượt đăng nhập
+
+Quản lý sản phẩm:
+
+Tạo / sửa / xoá sản phẩm
+
+Quản lý hình ảnh, màu sắc, kích thước, thương hiệu
 
 Quản lý danh mục, thương hiệu, chất liệu, nhà cung cấp
 
-Quản lý đơn hàng và trạng thái đơn hàng (đang xử lý, đang giao, hoàn tất, huỷ,...)
+Quản lý đơn hàng:
+
+Theo dõi trạng thái đơn (đang xử lý, đang giao, hoàn tất, huỷ)
 
 Quản lý mã giảm giá
 
-Dashboard thống kê (doanh thu, số đơn, người dùng,...)
+Dashboard thống kê:
+
+Doanh thu
+
+Số đơn hàng
+
+Người dùng
+
+🛡️ Tài khoản admin mặc định:
+Email: admin@example.com
+Mật khẩu: admin123
