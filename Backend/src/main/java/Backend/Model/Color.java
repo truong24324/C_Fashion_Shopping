@@ -11,6 +11,10 @@ import lombok.Data;
 @Data
 @Table(name = "COLORS")
 public class Color {
+    public static final java.awt.Color BLACK = null;
+
+    public static final java.awt.Color WHITE = null;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "COLOR_ID")

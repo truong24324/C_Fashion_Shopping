@@ -1,14 +1,22 @@
 package Backend.Controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.util.*;
 
+import javax.imageio.ImageIO;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+
+import Backend.Mailer.SendEmail;
 import Backend.Model.Order;
 import Backend.Model.OrderDetail;
 import Backend.Model.OrderStatus;
@@ -21,10 +29,10 @@ import Backend.Request.OrderRequest;
 import Backend.Response.ApiResponse;
 import Backend.Response.OrderResponse;
 import Backend.Response.PaymentResponse;
-import Backend.Service.EmailService;
 import Backend.Service.MoMoService;
 import Backend.Service.OrderService;
 import Backend.Service.VNPayService;
+import Backend.Service.VietQRService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -38,13 +46,17 @@ public class PaymentController {
 
 	private final VNPayService vnPayService;
 	private final MoMoService momoService;
-	private final EmailService emailService;
+	private final SendEmail sendEmail;
 	private final OrderService orderService;
 	private final OrderRepository orderRepository;
 	private final OrderDetailRepository orderDetailRepository;
 	private final OrderStatusRepository orderStatusRepository;
 	private final VariantRepository variantRepository;
+	private final VietQRService vietQRService;
 
+	@Value("${payment.momo.secretKey}")
+	private String secretKey;
+	
 	@PostMapping("/create/vnpay")
 	public ResponseEntity<PaymentResponse> createVnpayPayment(@RequestParam long amount,
 			@RequestParam(required = false) String bankCode, @RequestBody OrderRequest order,
@@ -71,108 +83,65 @@ public class PaymentController {
 		}
 	}
 
-	// @PostMapping("/ipn-handler")
-	// public ResponseEntity<String> handleMomoCallback(@RequestBody Map<String,
-	// String> momoResponse) {
-	// try {
-	// System.out.println("📩 Đã nhận IPN từ MoMo: " + momoResponse); // In toàn bộ
-	// JSON
-	//
-	// String resultCode = momoResponse.get("resultCode");
-	// String orderId = momoResponse.get("orderId");
-	//
-	// Optional<Order> optionalOrder = orderRepository.findByOrderCode(orderId);
-	// if (optionalOrder.isEmpty()) {
-	// return ResponseEntity.badRequest().body("Không tìm thấy đơn hàng với mã: " +
-	// orderId);
-	// }
-	//
-	// Order order = optionalOrder.get();
-	// System.out
-	// .println("✅ Đã tìm thấy đơn hàng. Trạng thái hiện tại: " +
-	// order.getOrderStatus().getStatusName());
-	//
-	// // Lấy status id hiện tại
-	// Integer currentStatusId = order.getOrderStatus().getStatusId();
-	//
-	// // Xử lý kết quả thanh toán
-	// if ("0".equals(resultCode)) {
-	// if (!currentStatusId.equals(1)) {
-	// OrderStatus paidStatus = orderStatusRepository.findById(1)
-	// .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy trạng thái
-	// PAID"));
-	//
-	// order.setOrderStatus(paidStatus);
-	// orderRepository.save(order);
-	//
-	// System.out.println("🎉 Thanh toán thành công. Đã cập nhật trạng thái đơn
-	// hàng.");
-	// }
-	//
-	// sendOrderConfirmationEmail(order.getAccount().getEmail(), order);
-	// return ResponseEntity.ok("Payment success");
-	// } else {
-	// if (!currentStatusId.equals(1)) {
-	// OrderStatus pendingStatus = orderStatusRepository.findById(0)
-	// .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy trạng thái
-	// PENDING"));
-	//
-	// order.setOrderStatus(pendingStatus);
-	// orderRepository.save(order);
-	//
-	// System.out.println("🔄 Đặt lại trạng thái đơn hàng về CHỜ (PENDING)");
-	// }
-	// return ResponseEntity.status(400).body("Payment failed");
-	// }
-	//
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// return ResponseEntity.status(500).body("Lỗi xử lý IPN MoMo");
-	// }
-	// }
-
-	@PostMapping("/momo/ipn")
+	@PostMapping("/momo/verify")
 	@Transactional
 	public ResponseEntity<String> handleMomoIpn(@RequestBody Map<String, Object> payload) {
 		try {
-			String orderId = (String) payload.get("orderId");
-			String resultCode = String.valueOf(payload.get("resultCode"));
-
-			if (!"0".equals(resultCode)) {
-				return ResponseEntity.ok("MoMo báo thanh toán thất bại");
+			// Ép kiểu sang String
+			Map<String, String> params = new HashMap<>();
+			for (Map.Entry<String, Object> entry : payload.entrySet()) {
+				params.put(entry.getKey(), String.valueOf(entry.getValue()));
 			}
 
+			// 1️⃣ Xác minh chữ ký
+			String signature = params.get("signature");
+			String rawData = momoService.buildRawData(params); // Tạo rawData từ các trường cần thiết
+			String generatedSignature = momoService.hmacSHA256(rawData, secretKey);
+
+			if (!generatedSignature.equals(signature)) {
+				return ResponseEntity.badRequest().body("❌ Sai chữ ký!");
+			}
+
+			// 2️⃣ Xác minh kết quả
+			String resultCode = params.get("resultCode");
+			if (!"0".equals(resultCode)) {
+				return ResponseEntity.ok("🔁 MoMo báo thanh toán thất bại");
+			}
+
+			// 3️⃣ Tìm đơn hàng
+			String orderId = params.get("orderId");
 			Order order = orderRepository.findByOrderCode(orderId)
-					.orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+					.orElseThrow(() -> new RuntimeException("❌ Không tìm thấy đơn hàng: " + orderId));
 
 			if ("Đã thanh toán".equals(order.getPaymentStatus())) {
-				return ResponseEntity.ok("Đã xử lý trước đó");
+				return ResponseEntity.ok("✅ Đơn đã xử lý trước đó");
 			}
 
-			// ✅ Cập nhật trạng thái thanh toán
+			// 4️⃣ Cập nhật trạng thái
 			order.setPaymentStatus("Đã thanh toán");
 
-			// ✅ Cập nhật trạng thái đơn hàng (ví dụ: "Đang xử lý")
 			OrderStatus processingStatus = orderStatusRepository.findByStepOrder(2)
-					.orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái xử lý"));
+					.orElseThrow(() -> new RuntimeException("❌ Không tìm thấy trạng thái xử lý"));
+
 			order.setOrderStatus(processingStatus);
 
-			// ✅ Giảm tồn kho
+			// 5️⃣ Giảm tồn kho
 			List<OrderDetail> details = orderDetailRepository.findByOrder(order);
 			for (OrderDetail detail : details) {
 				Variant variant = detail.getVariant();
 				if (variant.getStock() < detail.getQuantity()) {
-					throw new RuntimeException("Sản phẩm " + variant.getVariantId() + " không đủ tồn kho");
+					throw new RuntimeException("❌ Sản phẩm " + variant.getVariantId() + " không đủ tồn kho");
 				}
 				variant.setStock(variant.getStock() - detail.getQuantity());
 				variantRepository.save(variant);
 			}
 
 			orderRepository.save(order);
-			return ResponseEntity.ok("Thanh toán thành công");
+			return ResponseEntity.ok("✅ Thanh toán thành công");
 
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi xử lý IPN: " + e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("❌ Lỗi xử lý IPN: " + e.getMessage());
 		}
 	}
 
@@ -198,7 +167,7 @@ public class PaymentController {
 		try {
 			Order createdOrder = orderService.placeOrder(orderRequest);
 			OrderResponse orderResponse = orderService.convertToResponse(createdOrder);
-			sendOrderConfirmationEmail(createdOrder.getEmail(), createdOrder);
+			sendEmail.sendOrderConfirmationEmail(createdOrder.getEmail(), createdOrder);
 			return ResponseEntity.ok(new ApiResponse<>(true, "Đặt hàng thành công", orderResponse));
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
@@ -208,30 +177,63 @@ public class PaymentController {
 		}
 	}
 
-	private void sendOrderConfirmationEmail(String toEmail, Order order) {
-		String subject = "Xác nhận đơn hàng #" + order.getOrderId();
-		StringBuilder body = new StringBuilder();
+	@PostMapping("/create/VietQR")
+	public ResponseEntity<?> createOrderWithVietQR(@Valid @RequestBody OrderRequest orderRequest) {
+		List<String> missingFields = new ArrayList<>();
 
-		body.append("<h2>Cảm ơn bạn đã đặt hàng!</h2>");
-		body.append("<p>Đơn hàng của bạn đã được xác nhận với thông tin sau:</p>");
-		body.append("<ul>");
-		body.append("<li><strong>Mã đơn hàng:</strong> " + order.getOrderId() + "</li>");
-		body.append("<li><strong>Địa chỉ:</strong> " + order.getShippingAddress() + "</li>");
-		body.append("<li><strong>Tổng tiền:</strong> " + order.getTotalAmount() + " VND</li>");
-		body.append("<li><strong>Phí vận chuyển:</strong> " + order.getShippingFee() + " VND</li>");
-		body.append("</ul>");
-		body.append("<h3>Chi tiết sản phẩm:</h3>");
-		body.append("<ul>");
-
-		for (OrderDetail orderDetail : order.getOrderDetails()) {
-			body.append("<li>").append(orderDetail.getVariant().getProduct().getProductName()).append(" - Số lượng: ")
-					.append(orderDetail.getQuantity()).append(" - Màu sắc: ")
-					.append(orderDetail.getVariant().getColor());
+		if (orderRequest.getOrderStatusId() == null) {
+			missingFields.add("orderStatusId");
 		}
-		body.append("</ul>");
-		body.append("<p><strong>Chúng tôi sẽ liên hệ với bạn sớm nhất có thể.</strong></p>");
+		if (orderRequest.getAccountId() == null) {
+			missingFields.add("accountId");
+		}
+		if (orderRequest.getOrderDetails() == null) {
+			missingFields.add("orderDetails");
+		}
 
-		emailService.sendOrderConfirmation(toEmail, subject, body.toString());
+		if (!missingFields.isEmpty()) {
+			String errorMessage = "Dữ liệu đầu vào không hợp lệ. Thiếu: " + String.join(", ", missingFields);
+			return ResponseEntity.badRequest().body(new ApiResponse<>(false, errorMessage, null));
+		}
+
+		try {
+			// 1. Tạo đơn hàng như bình thường (chưa thanh toán)
+			orderRequest.setPaymentMethod("VietQR");
+			orderRequest.setPaymentStatus("Chưa thanh toán");
+			Order createdOrder = orderService.placeOrder(orderRequest);
+
+			// 2. Tạo mã QR VietQR
+			String bankCode = "vpbank"; // Bạn có thể cho phép người dùng chọn ngân hàng
+			String accountNumber = "624032004"; // Số tài khoản nhận tiền
+			String message = "Thanh toan don " + createdOrder.getOrderCode();
+			String qrString = vietQRService.generateQR(bankCode, accountNumber, createdOrder.getTotalAmount(), message,
+					createdOrder.getOrderCode());
+
+			// 3. Convert QR string to base64 image (nếu muốn trả ảnh)
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			QRCodeWriter writer = new QRCodeWriter();
+			BitMatrix bitMatrix = writer.encode(qrString, BarcodeFormat.QR_CODE, 400, 400);
+			BufferedImage qrImage = new BufferedImage(400, 400, BufferedImage.TYPE_INT_RGB);
+			for (int x = 0; x < 400; x++) {
+				for (int y = 0; y < 400; y++) {
+					qrImage.setRGB(x, y, bitMatrix.get(x, y) ? 0xFF000000 : 0xFFFFFFFF);
+				}
+			}
+			ImageIO.write(qrImage, "png", outputStream);
+			String base64Qr = Base64.getEncoder().encodeToString(outputStream.toByteArray());
+
+			// 4. Trả kết quả
+			Map<String, Object> responseData = new HashMap<>();
+			responseData.put("order", orderService.convertToResponse(createdOrder));
+			responseData.put("qrData", qrString);
+			responseData.put("qrBase64Image", "data:image/png;base64," + base64Qr);
+
+			return ResponseEntity.ok(new ApiResponse<>(true, "Tạo đơn hàng VietQR thành công", responseData));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body(new ApiResponse<>(false, "Lỗi hệ thống: " + e.getMessage(), null));
+		}
 	}
 
 }

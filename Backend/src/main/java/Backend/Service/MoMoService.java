@@ -5,10 +5,15 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
@@ -205,4 +210,41 @@ public class MoMoService {
         paymentResponse.setPaymentUrl(payUrl);
         return paymentResponse;
     }
+
+    public String buildRawData(Map<String, String> params) {
+    return "accessKey=" + accessKey
+        + "&amount=" + params.get("amount")
+        + "&extraData=" + params.get("extraData")
+        + "&message=" + params.get("message")
+        + "&orderId=" + params.get("orderId")
+        + "&orderInfo=" + params.get("orderInfo")
+        + "&orderType=" + params.get("orderType")
+        + "&partnerCode=" + params.get("partnerCode")
+        + "&payType=" + params.get("payType")
+        + "&requestId=" + params.get("requestId")
+        + "&responseTime=" + params.get("responseTime")
+        + "&resultCode=" + params.get("resultCode")
+        + "&transId=" + params.get("transId");
+}
+
+public String hmacSHA256(String data, String secretKey) {
+    try {
+        SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(), "HmacSHA256");
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(secretKeySpec);
+        byte[] hash = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+        return bytesToHex(hash);
+    } catch (Exception e) {
+        throw new RuntimeException("HMAC SHA256 Error", e);
+    }
+}
+
+private String bytesToHex(byte[] bytes) {
+    StringBuilder result = new StringBuilder();
+    for (byte b : bytes) {
+        result.append(String.format("%02x", b));
+    }
+    return result.toString();
+}
+
 }

@@ -7,7 +7,7 @@ import {
 } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
-import { Spin} from 'antd';
+import { Spin } from 'antd';
 import { toast } from 'react-hot-toast';
 
 // Pages
@@ -48,7 +48,7 @@ const PrivateRoute: React.FC<{ children: ReactNode; requiredRoles?: string[] }> 
 
   useEffect(() => {
     const checkAccess = async () => {
-     
+
       if (requiredRoles?.includes('ROLE_Admin') || requiredRoles?.includes('ROLE_Super_Admin') || requiredRoles?.includes('ROLE_Manager')) {
         try {
           const res = await axios.get('/api/check-admin', {
@@ -91,7 +91,7 @@ const AppRouterWrapper: React.FC = () => {
           navigate('/admin');
         }
       } catch (error: any) {
-        toast.error(error.response?.data?.message ||' Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại!');
+        toast.error(error.response?.data?.message || ' Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại!');
       }
     }
   }, [navigate]);

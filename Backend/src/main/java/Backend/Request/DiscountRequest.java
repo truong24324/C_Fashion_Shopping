@@ -44,7 +44,7 @@ public class DiscountRequest {
 
     private Double minOrderAmount;
 
-    @Size(min= 6, max = 255, message = "Mô tả không được dưới 6 ký tự và không vượt quá 255 ký tự")
+    @Size( max = 255, message = "Mô tả không được vượt quá 255 ký tự")
     private String description;
 
     private Boolean isActive;

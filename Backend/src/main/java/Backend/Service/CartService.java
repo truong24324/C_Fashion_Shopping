@@ -157,39 +157,4 @@ public class CartService {
 		List<CartDetail> cartDetails = getCartDetails(accountId);
 		return cartDetails.stream().map(CartItemResponse::new).collect(Collectors.toList());
 	}
-
-	// public void addToCarts(Integer accountId, CartDetailRequest request) {
-	// Account account = accountRepository.findById(accountId)
-	// .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
-	//
-	// Cart cart = cartRepository.findByAccount(account).orElseGet(() -> {
-	// Cart newCart = new Cart();
-	// newCart.setAccount(account);
-	// return cartRepository.save(newCart);
-	// });
-	//
-	// Variant variant = variantRepository.findById(request.getVariantId())
-	// .orElseThrow(() -> new RuntimeException("Thực thể không tồn tại"));
-	//
-	// if (variant.getStock() < request.getQuantity()) {
-	// throw new RuntimeException("Sản phẩm không đủ hàng");
-	// }
-	//
-	// CartDetail cartDetail = cartDetailRepository.findByCartAndVariant(cart,
-	// variant)
-	// .map(detail -> {
-	// detail.setQuantity(detail.getQuantity() + request.getQuantity());
-	// return detail;
-	// })
-	// .orElseGet(() -> {
-	// CartDetail detail = new CartDetail();
-	// detail.setCart(cart);
-	// detail.setVariant(variant);
-	// detail.setQuantity(request.getQuantity());
-	// detail.setPrice(request.getPrice());
-	// return detail;
-	// });
-	//
-	// cartDetailRepository.save(cartDetail);
-	// }
 }

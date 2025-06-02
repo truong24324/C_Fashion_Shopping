@@ -40,12 +40,12 @@ const ProductPanel: React.FC<ProductPanelProps> = ({
         className="w-full h-72 sm:h-96 bg-cover bg-center rounded-t-lg shadow-lg"
         style={{
           backgroundImage:
-            "url('https://file.hstatic.net/1000360022/file/thumb_-_1__1_.png')",
+            "url('/images/banner6.webp')",
         }}
       >
         <div className="flex justify-center items-center h-full bg-black bg-opacity-50 rounded-t-lg">
           <h1 className="text-white text-3xl sm:text-5xl font-bold text-center">
-            Welcome to Our Store
+            C WEB - Thế Giới Thời Trang Nam Nữ
           </h1>
         </div>
       </div>

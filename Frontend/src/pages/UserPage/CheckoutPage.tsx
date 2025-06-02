@@ -34,6 +34,13 @@ const CheckoutPage: React.FC = () => {
     const [ward, setWard] = useState<any>(address.ward || "");
     const [paymentMethod, setPaymentMethod] = useState<string>("COD");
     const [note, setNote] = useState<string>(""); // Add state for note
+    const [isPaying, setIsPaying] = useState<boolean>(false);
+    const [isQRModalOpen, setIsQRModalOpen] = useState<boolean>(false);
+    const [qrImage, setQrImage] = useState<string | null>(null);
+    const [orderCode, setOrderCode] = useState<string | null>(null);
+    const [amount, setAmount] = useState<number | null>(null);
+    const [dataOrder, setDataOrder] = useState<any>(null);
+    const [dataOrderDetails ,setDataOrderDetails] = useState<any>(null);
 
     const [provinces, setProvinces] = useState<any[]>([]);
     const [districts, setDistricts] = useState<any[]>([]);
@@ -128,6 +135,8 @@ const CheckoutPage: React.FC = () => {
     }, []);
 
     const handlePayment = async () => {
+        setIsPaying(true);
+
         const orderRequest = {
             address: customerInfo.shippingAddress,
             paymentMethod, // được chọn
@@ -188,18 +197,115 @@ const CheckoutPage: React.FC = () => {
                 // Điều hướng đến trang thành công hoặc reset form
                 const createdOrder = response.data;
                 navigate("/order-success", { state: { order: createdOrder.data } });
+            } else if (paymentMethod === "VietQR") {
+                const response = await axios.post(
+                    "/api/payment/create/VietQR",
+                    orderRequest,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem("token")}`,
+                        },
+                    }
+                );
+                const { qrBase64Image, orderCode, amount, order, orderDetails } = response.data.data;
+
+                setQrImage(qrBase64Image);
+                setOrderCode(orderCode);    // Mã đơn hàng từ backend
+                setAmount(amount);          // Tổng tiền từ backend
+                setIsQRModalOpen(true);
+                setDataOrder(order);
+                setDataOrderDetails(orderDetails);
             }
             else {
                 toast.error("Chưa chọn phương thức thanh toán.");
             }
         } catch (error: any) {
             toast.error(error.response?.data?.message || "Có lỗi xảy ra khi xử lý thanh toán.");
+        } finally {
+            setIsPaying(false);
         }
     };
 
     return (
         <>
             <Navbar />
+            {isQRModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 px-4 backdrop-blur-sm">
+                    <div className="bg-white p-6 rounded-3xl shadow-xl shadow-purple-100 relative w-full max-w-md animate-fade-in-up transition-all duration-300">
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setIsQRModalOpen(false)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl"
+                            aria-label="Đóng"
+                        >
+                            ×
+                        </button>
+
+                        {/* Header */}
+                        <h3 className="text-2xl font-semibold mb-5 text-center text-purple-700">
+                            Thanh toán bằng QR Code
+                        </h3>
+
+                        {/* QR and Info */}
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="border-2 border-dashed border-purple-200 p-2 rounded-xl">
+                                <img
+                                    src={qrImage ?? ""}
+                                    alt="QR Code"
+                                    className="w-52 h-52 rounded-md object-contain"
+                                />
+                            </div>
+
+                            <div className="text-sm text-center text-gray-700 leading-relaxed space-y-1 mt-3">
+                                <p>
+                                    <span className="font-semibold">Người nhận:</span> Nguyễn Minh Trường
+                                </p>
+                                <p>
+                                    <span className="font-semibold">Ngân hàng:</span> VP Bank
+                                </p>
+                                {orderCode && (
+                                    <p>
+                                        <span className="font-semibold">Mã đơn hàng:</span>{" "}
+                                        <span className="text-gray-800">{orderCode}</span>
+                                    </p>
+                                )}
+                                {amount && (
+                                    <p className="text-lg font-bold text-green-600">
+                                        Số tiền: {Number(amount).toLocaleString("vi-VN")}₫
+                                    </p>
+                                )}
+                            </div>
+
+                            <p className="text-sm text-gray-500 mt-3 text-center px-4">
+                                Vui lòng sử dụng ứng dụng ngân hàng hoặc ví MoMo để quét mã và hoàn tất thanh toán.
+                            </p>
+                        </div>
+
+                        {/* Warning & Confirmation */}
+                        <div className="mt-6 px-4 text-xs text-center text-gray-600 italic leading-relaxed">
+                            Đây là mã QR được cung cấp bởi <span className="font-medium text-purple-600">VietQR</span> để hỗ trợ thanh toán nhanh.
+                            Sau khi thanh toán, hãy nhấn <span className="font-semibold">"Tôi đã thanh toán thành công"</span> để chuyển sang trang xác nhận.
+                            <br />
+                            <span className="text-red-500 font-semibold">
+                                Lưu ý: Nếu bạn chưa thanh toán mà bấm xác nhận, đơn hàng sẽ bị hủy tự động.
+                            </span>
+                        </div>
+
+                        {/* Confirm Button */}
+                        <div className="mt-6 flex justify-center">
+                            <button
+                                onClick={() => {
+                                    setIsQRModalOpen(false);
+                                    navigate("/order-success", { state: { order: dataOrder, orderDetails: dataOrderDetails } });
+                                }}
+                                className="bg-purple-600 text-white px-6 py-2 rounded-full font-medium shadow hover:bg-purple-700 transition"
+                            >
+                                Tôi đã thanh toán thành công
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="pt-20 flex flex-col md:flex-row p-4 md:p-8 bg-gray-100">
                 {/* Cột bên trái */}
@@ -353,6 +459,13 @@ const CheckoutPage: React.FC = () => {
                                 color: "pink",
                                 img: "/images/momo.jpg",
                             },
+                            {
+                                key: "VietQR",
+                                label: "Thanh toán qua VietQR",
+                                description: "Quét mã QR để thanh toán",
+                                color: "purple",
+                                img: "/images/vietqr.png",
+                            }
                         ].map((method) => (
                             <label
                                 key={method.key}
@@ -367,7 +480,7 @@ const CheckoutPage: React.FC = () => {
                                     name="paymentMethod"
                                     value={method.key}
                                     checked={paymentMethod === method.key}
-                                    onChange={() => setPaymentMethod(method.key)}
+                                    onChange={() => setPaymentMethod(method.key ?? "")}
                                     className="hidden"
                                 />
                                 <img src={method.img} alt={method.label} className="w-10 h-10 mr-4 rounded-full object-cover" />
@@ -389,11 +502,11 @@ const CheckoutPage: React.FC = () => {
                         </Link>
                         <button
                             onClick={handlePayment}
-                            className="bg-blue-600 text-white px-6 py-2 rounded-lg text-lg"
+                            disabled={isPaying}
+                            className="bg-blue-600 text-white px-6 py-2 rounded-lg text-lg disabled:opacity-50"
                         >
-                            Thanh toán đơn hàng
+                            {isPaying ? "Đang xử lý..." : "Thanh toán đơn hàng"}
                         </button>
-
                     </div>
                 </div>
 

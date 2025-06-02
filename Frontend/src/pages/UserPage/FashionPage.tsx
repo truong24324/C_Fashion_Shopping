@@ -40,6 +40,7 @@ const FashionPage: React.FC = () => {
     supplier: "",
     warrantyPeriod: "",
     brand: "",
+    keyword: "", // ✅ thêm dòng này
   });
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -47,7 +48,7 @@ const FashionPage: React.FC = () => {
   const [error, setError] = useState(false);
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const filterButtonRef = useRef<HTMLDivElement | null>(null);
-const [wishlistProducts, setWishlistProducts] = useState<number[]>([]);
+  const [wishlistProducts, setWishlistProducts] = useState<number[]>([]);
 
   const [uniqueValues, setUniqueValues] = useState({
     colors: [] as ColorOption[],
@@ -113,8 +114,8 @@ const [wishlistProducts, setWishlistProducts] = useState<number[]>([]);
 
   const filteredProducts = products.filter((product) => {
     const match = (field: string, value: string | string[]) => {
-      if (!filters[field as keyof typeof filters]) return true;
       const filterVal = filters[field as keyof typeof filters];
+      if (!filterVal) return true;
       if (Array.isArray(value)) {
         return value.some((v) =>
           field === "color" ? v.startsWith(filterVal) : v === filterVal
@@ -122,6 +123,12 @@ const [wishlistProducts, setWishlistProducts] = useState<number[]>([]);
       }
       return value === filterVal;
     };
+
+    const matchKeyword =
+      !filters.keyword ||
+      product.productName.toLowerCase().includes(filters.keyword) ||
+      product.model.toLowerCase().includes(filters.keyword);
+
     return (
       match("color", product.colorCodes) &&
       match("size", product.sizeNames) &&
@@ -129,22 +136,23 @@ const [wishlistProducts, setWishlistProducts] = useState<number[]>([]);
       match("category", product.categoryName) &&
       match("supplier", product.supplierName) &&
       match("warrantyPeriod", product.warrantyPeriod) &&
-      match("brand", product.brandName)
+      match("brand", product.brandName) &&
+      matchKeyword // ✅ áp dụng keyword lọc
     );
   });
 
   const renderColorFilter = () => (
-    <div className="mb-4">
-      <h3 className="font-semibold mb-2">Màu sắc</h3>
+    <div className="mb-6">
+      <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b pb-1">Màu sắc</h3>
       <div className="flex flex-wrap gap-3">
         {uniqueValues.colors.map(({ code, name }) => (
           <div key={code} className="relative group">
             <button
               className={clsx(
-                "w-8 h-8 rounded-full border-2 transition-all",
+                "w-9 h-9 rounded-full border-2 shadow-sm transition-all duration-200",
                 filters.color === code
-                  ? "ring-2 ring-blue-500 border-blue-500"
-                  : "border-gray-300"
+                  ? "ring-2 ring-offset-2 ring-blue-500 border-blue-500"
+                  : "border-gray-300 hover:ring-2 hover:ring-gray-300"
               )}
               style={{ backgroundColor: code }}
               onClick={() =>
@@ -154,7 +162,7 @@ const [wishlistProducts, setWishlistProducts] = useState<number[]>([]);
                 }))
               }
             />
-            <div className="absolute bottom-full mb-1 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-gray-800 text-white text-xs rounded px-2 py-1 pointer-events-none z-10">
+            <div className="absolute bottom-full mb-1 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-all bg-gray-900 text-white text-xs rounded px-2 py-1 z-10 whitespace-nowrap">
               {name}
             </div>
           </div>
@@ -168,16 +176,16 @@ const [wishlistProducts, setWishlistProducts] = useState<number[]>([]);
     options: string[],
     filterKey: keyof typeof filters
   ) => (
-    <div className="mb-4">
-      <h3 className="font-semibold mb-2">{title}</h3>
-      <div className="flex flex-wrap gap-2">
+    <div className="mb-6">
+      <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b pb-1">{title}</h3>
+      <div className="flex flex-wrap gap-3">
         {options.map((option) => (
           <button
             key={option}
             className={clsx(
-              "px-3 py-2 rounded border text-sm",
+              "px-4 py-2 rounded-full border text-sm transition-all shadow-sm",
               filters[filterKey] === option
-                ? "bg-blue-500 text-white border-blue-500"
+                ? "bg-blue-600 text-white border-blue-600"
                 : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
             )}
             onClick={() =>
@@ -243,9 +251,7 @@ const [wishlistProducts, setWishlistProducts] = useState<number[]>([]);
   return (
     <>
       <Navbar />
-      <div className="pt-20 w-full bg-gray-50 px-4 py-6 max-w-7xl mx-auto">
-        {/* Banner */}
-        {/* Nút nổi giống bong bóng chat với icon */}
+      <div className="pt-20 w-full bg-gray-50 py-6 px-4 sm:px-6 max-w-7xl mx-auto">
         <div
           ref={filterButtonRef}
           className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center cursor-move md:hidden"
@@ -254,22 +260,34 @@ const [wishlistProducts, setWishlistProducts] = useState<number[]>([]);
           <FiFilter className="text-2xl" />
         </div>
 
-        <div
-          className="w-full h-72 sm:h-96 bg-cover bg-center rounded-lg shadow-lg mb-6"
-          style={{
-            backgroundImage:
-              "url('https://file.hstatic.net/1000360022/file/thumb_-_1__1_.png')",
-          }}
-        >
-          <div className="flex justify-center items-center h-full bg-black bg-opacity-50 rounded-lg">
-            <h1 className="text-white text-3xl sm:text-5xl font-bold text-center">
-              Welcome to Our Store
+        <div className="relative h-96 rounded-lg overflow-hidden">
+          <img
+            src="/images/baner5.webp"
+            alt="Banner"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center px-4 text-center space-y-6">
+            <h1 className="text-white text-3xl sm:text-5xl font-bold">
+              Chào mừng bạn đến với shop thời trang C WEB của chúng tôi
             </h1>
+            <div className="w-full max-w-lg">
+              <input
+                type="text"
+                placeholder="Tìm kiếm sản phẩm theo tên..."
+                onChange={(e) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    keyword: e.target.value.trim().toLowerCase(),
+                  }))
+                }
+                className="w-full px-4 py-2 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           </div>
         </div>
 
         <div className="flex gap-6">
-          <div className="hidden md:block w-3/10 lg:w-1/4 bg-white p-4 rounded shadow-md">
+          <div className="hidden md:block w-3/10 lg:w-1/4 bg-white rounded-2xl shadow-lg px-6 py-6 space-y-4 sticky top-24 self-start">
             {renderColorFilter()}
             {renderFilterBox("Kích cỡ", uniqueValues.sizes, "size")}
             {renderFilterBox("Chất liệu", uniqueValues.materials, "material")}
@@ -279,7 +297,6 @@ const [wishlistProducts, setWishlistProducts] = useState<number[]>([]);
             {renderFilterBox("Bảo hành", uniqueValues.warranties, "warrantyPeriod")}
           </div>
 
-          {/* Product grid */}
           <div className="flex-1">
             {loading ? (
               <Loading
@@ -295,7 +312,7 @@ const [wishlistProducts, setWishlistProducts] = useState<number[]>([]);
                 Không tìm thấy sản phẩm phù hợp.
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center">
                 {filteredProducts.map((product) => (
                   <ProductCard
                     key={product.productId}
@@ -308,7 +325,6 @@ const [wishlistProducts, setWishlistProducts] = useState<number[]>([]);
             )}
           </div>
         </div>
-        {/* Overlay background */}
         {showMobileFilter && (
           <div
             className="fixed inset-0 bg-black bg-opacity-50 z-40"
@@ -316,7 +332,6 @@ const [wishlistProducts, setWishlistProducts] = useState<number[]>([]);
           />
         )}
 
-        {/* Sidebar filter mobile */}
         <div
           className={clsx(
             "fixed top-0 left-0 w-3/4 sm:w-2/3 max-w-xs h-full bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out",
