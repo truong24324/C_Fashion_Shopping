@@ -25,16 +25,13 @@ public class DashboardService {
         Long newCustomersToday = accountRepository.countNewAccountsToday();
 
         return new DashboardResponse(
-            revenue,
-            orderCount,
-            topProducts.isEmpty() ? "Không có" : topProducts.get(0),
-            newCustomersToday
-        );
+                revenue,
+                orderCount,
+                topProducts.isEmpty() ? "Không có" : topProducts.get(0),
+                newCustomersToday);
     }
 
     public List<MonthlyRevenueResponse> getMonthlyRevenue() {
-    return orderRepository.getMonthlyRevenue();
+        return orderRepository.getMonthlyRevenue();
+    }
 }
-
-}
-

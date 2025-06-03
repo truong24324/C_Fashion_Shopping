@@ -298,7 +298,9 @@ const ProductCard: React.FC<{
             transition-all duration-300 text-xl`} />
                 </div>
 
-                <div className="relative w-full h-60 overflow-hidden bg-gray-100">
+                <div className="relative w-full h-60 overflow-hidden bg-gray-100"
+                    onClick={() => navigate(`/product/${product.productId}`)}
+                >
                     <img
                         src={product.image[0]}
                         alt={product.productName}

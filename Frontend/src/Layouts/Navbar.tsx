@@ -320,15 +320,34 @@ const Navbar: React.FC = () => {
               <div className="mt-1 w-full">
                 <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Top tìm kiếm</h3>
                 <div className="grid grid-cols-3 gap-1">
-                  {topSuggestions.map((item) => (
-                    <div
-                      key={item.productId}
-                      onClick={() => navigate(`/product/${item.productId}`)}
-                      className="bg-gray-800 text-gray-300 text-xs p-1.5 rounded-md text-center cursor-pointer hover:bg-yellow-400 hover:text-black transition"
-                    >
-                      {item.productName}
-                    </div>
-                  ))}
+                  {topSuggestions
+                    .slice(0, 6) // chỉ hiển thị 6 kết quả top phù hợp nhất
+                    .sort((a, b) => {
+                      const query = searchQuery.toLowerCase();
+                      const aIndex = a.productName.toLowerCase().indexOf(query);
+                      const bIndex = b.productName.toLowerCase().indexOf(query);
+
+                      // Ưu tiên những sản phẩm có vị trí xuất hiện query thấp hơn (tức là khớp sớm hơn)
+                      if (aIndex === -1) return 1;
+                      if (bIndex === -1) return -1;
+                      return aIndex - bIndex;
+                    })
+                    .map((item) => (
+                      <div
+                        key={item.productId}
+                        onClick={() => navigate(`/product/${item.productId}`)}
+                        className="bg-gray-800 text-gray-300 text-xs p-1.5 rounded-md text-center cursor-pointer hover:bg-yellow-400 hover:text-black transition"
+                      >
+                        <span
+                          dangerouslySetInnerHTML={{
+                            __html: item.productName.replace(
+                              new RegExp(`(${searchQuery})`, "gi"),
+                              "<span class='text-yellow-400'>$1</span>"
+                            ),
+                          }}
+                        />
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>

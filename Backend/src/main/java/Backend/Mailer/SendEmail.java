@@ -5,11 +5,13 @@ import org.springframework.stereotype.Service;
 import Backend.Model.Order;
 import Backend.Model.OrderDetail;
 import Backend.Service.EmailService;
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class SendEmail {
 
-	private EmailService emailService; // Make sure to initialize this or inject via constructor
+	private final EmailService emailService;
 
 	public void sendOrderConfirmationEmail(String toEmail, Order order) {
 		String subject = "🎉 Đặt hàng thành công - Mã đơn #" + order.getOrderCode();
@@ -116,5 +118,38 @@ public class SendEmail {
 		emailService.sendOrderConfirmation(toEmail, subject, body.toString());
 	}
 
-}
+	public void sendAccountLockNotification(String toEmail, boolean isLocked) {
+		String subject = isLocked ? "🔒 Tài khoản của bạn đã bị khóa" : "🔓 Tài khoản của bạn đã được mở khóa";
 
+		String body = """
+				<div style="font-family: 'Segoe UI', sans-serif; background-color: #f8f8f8; padding: 40px 0;">
+				  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.05);">
+				    <div style="background-color: #0d6efd; padding: 20px; color: white; text-align: center;">
+				      <h2 style="margin: 0;">%s</h2>
+				    </div>
+				    <div style="padding: 30px;">
+				      <p style="font-size: 16px;">Chào bạn,</p>
+				      <p style="font-size: 15px; line-height: 1.6;">
+				        Tài khoản của bạn %s
+				      </p>
+				      <p style="font-size: 15px;">Nếu bạn cần hỗ trợ thêm, vui lòng liên hệ bộ phận CSKH của chúng tôi.</p>
+				      <div style="margin-top: 30px;">
+				        <a href="http://localhost:3000" style="background-color: #0d6efd; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Quay lại trang chủ</a>
+				      </div>
+				    </div>
+				    <div style="background-color: #f0f0f0; padding: 20px; text-align: center; font-size: 13px; color: #666;">
+				      © 2025 Fashion Store. Mọi quyền được bảo lưu.
+				    </div>
+				  </div>
+				</div>
+				"""
+				.formatted(
+						subject,
+						isLocked
+								? "đã <strong>bị khóa</strong> do vi phạm chính sách hoặc hành vi bất thường. Vui lòng liên hệ với quản trị viên để biết thêm chi tiết."
+								: "đã được <strong>mở khóa</strong>. Bạn có thể đăng nhập và tiếp tục sử dụng dịch vụ như bình thường.");
+
+		emailService.sendOrderConfirmation(toEmail, subject, body);
+	}
+
+}

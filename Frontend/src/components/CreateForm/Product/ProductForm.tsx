@@ -34,7 +34,18 @@ const ProductForm: React.FC<Props> = ({ onSubmit, brands, categories, suppliers,
     const warrantyOptions = ["Không bảo hành", "1 Tháng", "3 Tháng", "6 Tháng", "9 Tháng", "1 Năm"];
 
     return (
-        <Form form={form} onFinish={(values) => { onSubmit(values); form.resetFields(); }} layout="vertical">
+        <Form
+            form={form}
+            onFinish={async (values) => {
+                try {
+                    setLoading(true); // bật loading
+                    await onSubmit(values); // chờ submit xong
+                } finally {
+                    setLoading(false); // tắt loading dù thành công hay thất bại
+                }
+            }}
+            layout="vertical"
+        >
             <Row gutter={16}>
                 <Col md={8} sm={24}>
                     <Form.Item label="Ảnh Sản Phẩm" name="productImages">

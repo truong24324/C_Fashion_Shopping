@@ -23,7 +23,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     List<Account> findByRole_RoleNameIgnoreCase(String roleName);
     boolean existsByRole(Role role);
 
-	 @Query("SELECT COUNT(a) FROM Account a WHERE a.createdAt >= CURRENT_DATE")
+	 @Query("SELECT COUNT(a) FROM Account a")
     Long countNewAccountsToday();
 
 }

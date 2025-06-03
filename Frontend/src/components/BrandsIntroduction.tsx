@@ -107,12 +107,12 @@ const BrandsIntroduction: React.FC = () => {
             >
               {[...brands, ...brands].map((brand, index) => (
                 <div key={`${brand.brandId}-${index}`} className="w-40 sm:w-48 px-2 py-2 flex-shrink-0">
-                  <div className="bg-white shadow-md rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 hover:shadow-lg h-full">
+                  <div className="bg-white shadow-md rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 h-full">
                     <div className="relative w-full" style={{ paddingBottom: "100%" }}>
                       <img
                         src={brand.logo || "/images/placeholder.png"}
                         alt={brand.brandName || "Thương hiệu"}
-                        className="absolute inset-0 w-full h-full object-cover rounded-t-lg transition-transform duration-300 hover:scale-110"
+                        className="absolute inset-0 w-full h-full object-cover rounded-t-lg transition-transform duration-300"
                       />
                     </div>
                     <div className="text-center mt-2">

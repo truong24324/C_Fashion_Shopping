@@ -1,9 +1,6 @@
 package Backend.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.coyote.BadRequestException;
@@ -17,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import Backend.Exception.ResourceNotFoundException;
+import Backend.Mailer.SendEmail;
 import Backend.Model.Account;
 import Backend.Model.Role;
 import Backend.Repository.AccountRepository;
@@ -37,6 +35,9 @@ public class AccountService implements UserDetailsService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private SendEmail sendEmail;
 
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final long LOCK_TIME_DURATION = 30 * 60 * 1000; // 30 phút
@@ -234,8 +235,14 @@ public class AccountService implements UserDetailsService {
             throw new IllegalStateException("Không thể thực hiện thao tác này trên chính tài khoản của bạn!");
         }
 
-        target.setLocked(!target.isLocked());
+        // Lưu trạng thái mới
+        boolean newStatus = !target.isLocked();
+        target.setLocked(newStatus);
+
         accountRepository.save(target);
+
+        // Gửi email thông báo
+        sendEmail.sendAccountLockNotification(target.getEmail(), newStatus);
     }
 
     public void toggleActive(Integer targetId, Account requester) {

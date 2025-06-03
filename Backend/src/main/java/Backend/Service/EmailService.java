@@ -77,28 +77,6 @@ public class EmailService {
         }
     }
 
-    public void sendAccountLockedEmail(String toEmail) {
-        String subject = "Tài khoản của bạn đã bị khóa";
-        String content = "<p>Xin chào,</p>"
-                + "<p>Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá nhiều lần.</p>"
-                + "<p>Vui lòng thử lại sau 30 phút hoặc liên hệ hỗ trợ để mở khóa.</p>";
-
-        sendEmail(toEmail, subject, content);
-    }
-
-    private void sendEmail(String toEmail, String subject, String content) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
-            helper.setTo(toEmail);
-            helper.setSubject(subject);
-            helper.setText(content, true);
-            mailSender.send(message);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void sendOrderConfirmation(String toEmail, String subject, String body) {
         try {
             MimeMessage message = mailSender.createMimeMessage();

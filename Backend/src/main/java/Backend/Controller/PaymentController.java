@@ -228,6 +228,7 @@ public class PaymentController {
 			responseData.put("qrData", qrString);
 			responseData.put("qrBase64Image", "data:image/png;base64," + base64Qr);
 
+			sendEmail.sendOrderConfirmationEmail(orderService.convertToResponse(createdOrder).getEmail(), createdOrder);
 			return ResponseEntity.ok(new ApiResponse<>(true, "Tạo đơn hàng VietQR thành công", responseData));
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));

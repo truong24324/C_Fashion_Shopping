@@ -20,6 +20,7 @@ const VariantForm: React.FC<Props> = ({ variants, setVariants }) => {
     const [colors, setColors] = useState<Color[]>([]);
     const [sizes, setSizes] = useState<Size[]>([]);
     const [materials, setMaterials] = useState<Material[]>([]);
+    const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -48,12 +49,12 @@ const VariantForm: React.FC<Props> = ({ variants, setVariants }) => {
             setVariants(JSON.parse(cachedVariants));
         }
     }, []);
-    
+
     useEffect(() => {
         // Lưu danh sách biến thể vào cache mỗi khi thay đổi
         localStorage.setItem("variants_cache", JSON.stringify(variants));
     }, [variants]);
-    
+
     const handleAddVariant = async (values: Omit<Variant, "key">) => {
         setLoading(true);
         try {
@@ -76,14 +77,14 @@ const VariantForm: React.FC<Props> = ({ variants, setVariants }) => {
             setLoading(false);
         }
     };
-    
+
     const handleDeleteVariant = (key: string) => {
         setVariants((prevVariants) => {
             const updatedVariants = prevVariants.filter((variant) => String(variant.key) !== String(key));
             localStorage.setItem("variants_cache", JSON.stringify(updatedVariants)); // ✅ Cập nhật cache
             return updatedVariants;
         });
-    };    
+    };
 
     return (
         <>
@@ -199,14 +200,28 @@ const VariantForm: React.FC<Props> = ({ variants, setVariants }) => {
                                 {variants.map((variant) => (
                                     <Col key={variant.key} span={12}>
                                         <Card
-                                            className="shadow-md border border-gray-300 rounded-lg p-3 text-center relative"
+                                            onClick={() => {
+                                                setSelectedVariant(variant);
+                                                variantForm.setFieldsValue({
+                                                    color: variant.color,
+                                                    size: variant.size,
+                                                    material: variant.material,
+                                                    stock: variant.stock,
+                                                    price: variant.price,
+                                                });
+                                                setVariantModalVisible(true);
+                                            }}
+                                            className="shadow-md border border-gray-300 rounded-lg p-3 text-center relative cursor-pointer hover:shadow-lg transition"
                                             actions={[
                                                 <DeleteOutlined
                                                     key="delete"
-                                                    onClick={() => handleDeleteVariant(variant.key)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation(); // tránh trigger onClick của card
+                                                        handleDeleteVariant(variant.key);
+                                                    }}
                                                     className={`text-red-500 hover:text-red-700 ${loading ? "cursor-not-allowed opacity-50" : ""}`}
-                                                    style={{ pointerEvents: loading ? "none" : "auto" }} // Không cho click khi đang loading
-                                                />
+                                                    style={{ pointerEvents: loading ? "none" : "auto" }}
+                                                />,
                                             ]}
                                         >
                                             <p><b>Màu:</b> {colors.find(c => c.colorId === variant.color)?.colorName || "N/A"}</p>

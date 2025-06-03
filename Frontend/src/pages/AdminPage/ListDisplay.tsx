@@ -299,13 +299,13 @@ const ListDisplay = () => {
                         </button>
                     ))}
                 </div>
-                <Input
+                {/* <Input
                     prefix={<SearchOutlined className="text-gray-500" />}
                     placeholder="Tìm kiếm..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-72 px-4 py-2 rounded-lg border border-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500 transition-all bg-white shadow-sm focus:shadow-lg"
-                />
+                /> */}
             </div>
 
             <div className="border border-green-300 rounded-lg shadow-md overflow-hidden">
