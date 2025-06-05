@@ -9,6 +9,8 @@ import lombok.Data;
 @Data
 public class OrderResponse {
     private Integer orderId;
+    private String orderCode;
+    private LocalDateTime orderDate;
     private String fullName;
     private String email;
     private String phone;

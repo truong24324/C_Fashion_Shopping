@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Home,
   CreditCard,
@@ -10,9 +10,11 @@ import {
   Edit,
   LogOut,
   ChevronLeft,
-  ChevronRight, Settings
+  ChevronRight,
+  Settings,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { jwtDecode } from "jwt-decode";
 
 const menuSections = [
   {
@@ -20,7 +22,7 @@ const menuSections = [
     items: [
       { icon: Home, label: "Tổng quan" },
       { icon: CreditCard, label: "Giao dịch" },
-      { icon: ListOrderedIcon , label: "Đơn hàng" },
+      { icon: ListOrderedIcon, label: "Đơn hàng" },
     ],
   },
   {
@@ -30,7 +32,6 @@ const menuSections = [
       { icon: FileText, label: "Danh sách" },
       { icon: PlusCircle, label: "Thêm mới" },
       { icon: Edit, label: "Chỉnh sửa" },
-      { icon: Trash, label: "Xóa dữ liệu" },
     ],
   },
   {
@@ -38,16 +39,53 @@ const menuSections = [
     items: [
       { icon: Settings, label: "Cài đặt" },
       { icon: LogOut, label: "Đăng xuất" },
-     
     ],
   },
 ];
 
 const Sidebar = ({ onSelect }: { onSelect: (label: string) => void }) => {
-  const [isExpanded, setIsExpanded] = useState(false); // 👈 Đặt ban đầu là false
-  const [activeLabel, setActiveLabel] = useState("Tổng quan"); // 👈 Mục mặc định
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [activeLabel, setActiveLabel] = useState("Tổng quan");
+  const [user, setUser] = useState<any>(null);
 
   const toggleSidebar = () => setIsExpanded(!isExpanded);
+
+  const fetchProfile = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const decoded: any = jwtDecode(token);
+      const now = Date.now() / 1000;
+      if (decoded.exp <= now) {
+        localStorage.removeItem("user_cache");
+        return;
+      }
+
+      const cached = localStorage.getItem("user_cache");
+      if (cached) {
+        setUser(JSON.parse(cached));
+        return;
+      }
+
+      const response = await fetch("/api/information/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setUser(data.data);
+        localStorage.setItem("user_cache", JSON.stringify(data.data));
+      }
+    } catch (err) {
+      console.error("Lỗi khi lấy profile:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   return (
     <motion.aside
@@ -67,8 +105,35 @@ const Sidebar = ({ onSelect }: { onSelect: (label: string) => void }) => {
         )}
       </button>
 
+      {/* Avatar + User Info */}
+      <div
+        className="flex items-center gap-3 px-3 mb-6 mt-8 cursor-pointer"
+        onClick={() => {
+          setActiveLabel("Chỉnh sửa thông tin");
+          onSelect("Chỉnh sửa thông tin");
+        }}
+      >
+        <img
+          src={user?.avatar || "https://via.placeholder.com/150"}
+          alt="Avatar"
+          className="w-10 h-10 rounded-full border border-white"
+        />
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              className="text-white font-semibold text-sm truncate"
+            >
+              {user?.fullName || "Tài khoản"}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
       {/* Navigation Sections */}
-      <nav className="mt-8 flex flex-col gap-6 w-full">
+      <nav className="flex flex-col gap-6 w-full">
         {menuSections.map((section, index) => (
           <div key={index} className="w-full">
             <AnimatePresence>

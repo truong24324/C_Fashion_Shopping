@@ -67,7 +67,6 @@ const Navbar: React.FC = () => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    // Decode token để lấy thời gian hết hạn
     let decoded: DecodedToken;
     try {
       decoded = jwtDecode(token);
@@ -83,7 +82,6 @@ const Navbar: React.FC = () => {
       return;
     }
 
-    // Kiểm tra cache
     const cached = localStorage.getItem("user_cache");
     if (cached) {
       const parsed = JSON.parse(cached);
@@ -91,7 +89,6 @@ const Navbar: React.FC = () => {
       return;
     }
 
-    // Nếu không có cache thì gọi API
     try {
       const response = await fetch("/api/information/me", {
         method: "GET",
@@ -112,7 +109,6 @@ const Navbar: React.FC = () => {
       toast.error("Lỗi khi lấy thông tin cá nhân");
     }
   };
-
 
   useEffect(() => {
     fetchProfile();

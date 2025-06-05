@@ -1,19 +1,23 @@
 package Backend.Controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.google.zxing.NotFoundException;
+
+import org.springframework.http.HttpStatus;
 
 import Backend.Model.Order;
 import Backend.Model.OrderStatus;
+import Backend.Repository.OrderRepository;
+import Backend.Repository.OrderStatusRepository;
 import Backend.Response.ApiResponse;
 import Backend.Response.OrderResponse;
 import Backend.Service.OrderService;
@@ -27,6 +31,8 @@ import lombok.RequiredArgsConstructor;
 public class OrderController {
 
 	private final OrderService orderService;
+	private final OrderRepository orderRepository;
+	private final OrderStatusRepository orderStatusRepository;
 	private final OrderStatusService orderStatusService;
 
 	@GetMapping("/filter")
@@ -52,15 +58,51 @@ public class OrderController {
 
 	@PatchMapping("/{orderId}/next")
 	public ResponseEntity<ApiResponse<OrderResponse>> updateOrderToNextStep(@PathVariable Integer orderId) {
-	    Order updatedOrder = orderService.updateOrderToNextStep(orderId);
-	    OrderResponse response = orderService.toOrderResponse(updatedOrder);
-	    return ResponseEntity.ok(new ApiResponse<>(true, "Chuyển sang trạng thái kế tiếp thành công", response));
+		Order updatedOrder = orderService.updateOrderToNextStep(orderId);
+		OrderResponse response = orderService.toOrderResponse(updatedOrder);
+		return ResponseEntity.ok(new ApiResponse<>(true, "Chuyển sang trạng thái kế tiếp thành công", response));
 	}
 
 	@PatchMapping("/{orderId}/cancel")
 	public ResponseEntity<ApiResponse<OrderResponse>> cancelOrder(@PathVariable Integer orderId) {
-	    Order updatedOrder = orderService.cancelOrder(orderId);
-	    return ResponseEntity.ok(new ApiResponse<>(true, "Hủy đơn hàng thành công", orderService.toOrderResponse(updatedOrder)));
+		Order updatedOrder = orderService.cancelOrder(orderId);
+		return ResponseEntity
+				.ok(new ApiResponse<>(true, "Hủy đơn hàng thành công", orderService.toOrderResponse(updatedOrder)));
+	}
+
+	@GetMapping("/momo/{orderCode}")
+	@PreAuthorize("hasAnyAuthority('ROLE_Customer')")
+	public ResponseEntity<ApiResponse<OrderResponse>> getOrderByOrderCode(@PathVariable String orderCode) {
+		Order order = orderService.findByOrderCode(orderCode)
+				.orElseThrow(() -> new ResponseStatusException(
+						HttpStatus.NOT_FOUND, "Không tìm thấy đơn hàng với mã: " + orderCode));
+
+		OrderResponse response = orderService.toOrderResponse(order);
+		return ResponseEntity.ok(new ApiResponse<>(true, "Lấy chi tiết đơn hàng thành công", response));
+	}
+
+	@PutMapping("/momo/update-status/{orderCode}")
+	@PreAuthorize("hasAnyAuthority('ROLE_Customer')")
+	public ResponseEntity<?> updateOrderStatusFromMomo(
+			@PathVariable String orderCode,
+			@RequestBody Map<String, String> updateData) {
+		Order order = orderRepository.findByOrderCode(orderCode)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy đơn hàng!"));
+
+		String paymentStatus = updateData.get("paymentStatus");
+		String orderStatusName = updateData.get("orderStatusName");
+
+		order.setPaymentStatus(paymentStatus);
+
+		OrderStatus status = orderStatusRepository.findByStatusName(orderStatusName)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy trạng thái đơn hàng!"));
+
+		order.setOrderStatus(status);
+		order.setUpdatedAt(LocalDateTime.now());
+
+		orderRepository.save(order);
+
+		return ResponseEntity.ok(new ApiResponse<Object>(true, "Cập nhật trạng thái thành công", null));
 	}
 
 }

@@ -129,6 +129,8 @@ public class OrderService {
     public OrderResponse convertToResponse(Order order) {
         OrderResponse response = new OrderResponse();
         response.setOrderId(order.getOrderId());
+        response.setOrderCode(order.getOrderCode());
+        response.setOrderDate(order.getOrderDate());
         response.setFullName(order.getFullName());
         response.setEmail(order.getEmail());
         response.setPhone(order.getPhone());
@@ -400,6 +402,10 @@ public class OrderService {
         }
 
         return responseList;
+    }
+
+    public Optional<Order> findByOrderCode(String orderCode) {
+        return orderRepository.findByOrderCode(orderCode);
     }
 
 }

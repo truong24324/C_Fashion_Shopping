@@ -1,5 +1,8 @@
 import { CheckCircle, Home } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 type OrderDetail = {
   productName: string;
@@ -32,7 +35,64 @@ type Order = {
 const OrderSuccessPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const order = location.state?.order as Order | undefined;
+  const [order, setOrder] = useState<Order | null>(location.state?.order ?? null);
+  const query = new URLSearchParams(location.search);
+  const orderIdParam = query.get('orderId');
+  const [loading, setLoading] = React.useState(false);
+
+useEffect(() => {
+  const resultCode = query.get('resultCode');
+  const isSuccess = resultCode === '0';
+
+  const updateOrderStatusAndFetch = async () => {
+    if (!orderIdParam) return;
+
+    try {
+      await axios.put(
+        `/api/orders/momo/update-status/${orderIdParam}`,
+        {
+          paymentStatus: isSuccess
+            ? 'Thanh toán thành công'
+            : 'Thanh toán thất bại',
+          orderStatusName: isSuccess ? 'Chờ xác nhận' : 'Đã hủy',
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+      toast.success('Cập nhật trạng thái đơn hàng thành công!');
+    } catch (error: any) {
+      toast.error(
+        error.response?.data?.message || 'Cập nhật trạng thái thất bại!'
+      );
+    }
+
+    // Sau khi cập nhật xong, mới gọi fetch
+    await fetchOrder();
+  };
+
+  updateOrderStatusAndFetch();
+}, [orderIdParam]);
+
+const fetchOrder = async () => {
+  if (!order && orderIdParam?.startsWith('ORDER-')) {
+    setLoading(true);
+    try {
+      const response = await axios.get(`/api/orders/momo/${orderIdParam}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      setOrder(response.data.data);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Lỗi khi tải đơn hàng!');
+    } finally {
+      setLoading(false);
+    }
+  }
+};
 
   const formatCurrency = (value?: number) =>
     (value ?? 0).toLocaleString('vi-VN');

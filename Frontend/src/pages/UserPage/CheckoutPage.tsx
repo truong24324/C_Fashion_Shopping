@@ -445,13 +445,13 @@ const CheckoutPage: React.FC = () => {
                                 color: "blue",
                                 img: "/images/shipcod.png",
                             },
-                            {
-                                key: "VNPAY",
-                                label: "Thanh toán online qua VNPAY",
-                                description: "Bảo mật & nhanh chóng",
-                                color: "green",
-                                img: "/images/vnpay.png",
-                            },
+                            // {
+                            //     key: "VNPAY",
+                            //     label: "Thanh toán online qua VNPAY",
+                            //     description: "Bảo mật & nhanh chóng",
+                            //     color: "green",
+                            //     img: "/images/vnpay.png",
+                            // },
                             {
                                 key: "MoMo",
                                 label: "Thanh toán qua Ví MoMo",

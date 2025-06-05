@@ -56,7 +56,7 @@ public class PaymentController {
 
 	@Value("${payment.momo.secretKey}")
 	private String secretKey;
-	
+
 	@PostMapping("/create/vnpay")
 	public ResponseEntity<PaymentResponse> createVnpayPayment(@RequestParam long amount,
 			@RequestParam(required = false) String bankCode, @RequestBody OrderRequest order,
@@ -80,68 +80,6 @@ public class PaymentController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResponseEntity.status(500).body("Lỗi khi tạo thanh toán MoMo");
-		}
-	}
-
-	@PostMapping("/momo/verify")
-	@Transactional
-	public ResponseEntity<String> handleMomoIpn(@RequestBody Map<String, Object> payload) {
-		try {
-			// Ép kiểu sang String
-			Map<String, String> params = new HashMap<>();
-			for (Map.Entry<String, Object> entry : payload.entrySet()) {
-				params.put(entry.getKey(), String.valueOf(entry.getValue()));
-			}
-
-			// 1️⃣ Xác minh chữ ký
-			String signature = params.get("signature");
-			String rawData = momoService.buildRawData(params); // Tạo rawData từ các trường cần thiết
-			String generatedSignature = momoService.hmacSHA256(rawData, secretKey);
-
-			if (!generatedSignature.equals(signature)) {
-				return ResponseEntity.badRequest().body("❌ Sai chữ ký!");
-			}
-
-			// 2️⃣ Xác minh kết quả
-			String resultCode = params.get("resultCode");
-			if (!"0".equals(resultCode)) {
-				return ResponseEntity.ok("🔁 MoMo báo thanh toán thất bại");
-			}
-
-			// 3️⃣ Tìm đơn hàng
-			String orderId = params.get("orderId");
-			Order order = orderRepository.findByOrderCode(orderId)
-					.orElseThrow(() -> new RuntimeException("❌ Không tìm thấy đơn hàng: " + orderId));
-
-			if ("Đã thanh toán".equals(order.getPaymentStatus())) {
-				return ResponseEntity.ok("✅ Đơn đã xử lý trước đó");
-			}
-
-			// 4️⃣ Cập nhật trạng thái
-			order.setPaymentStatus("Đã thanh toán");
-
-			OrderStatus processingStatus = orderStatusRepository.findByStepOrder(2)
-					.orElseThrow(() -> new RuntimeException("❌ Không tìm thấy trạng thái xử lý"));
-
-			order.setOrderStatus(processingStatus);
-
-			// 5️⃣ Giảm tồn kho
-			List<OrderDetail> details = orderDetailRepository.findByOrder(order);
-			for (OrderDetail detail : details) {
-				Variant variant = detail.getVariant();
-				if (variant.getStock() < detail.getQuantity()) {
-					throw new RuntimeException("❌ Sản phẩm " + variant.getVariantId() + " không đủ tồn kho");
-				}
-				variant.setStock(variant.getStock() - detail.getQuantity());
-				variantRepository.save(variant);
-			}
-
-			orderRepository.save(order);
-			return ResponseEntity.ok("✅ Thanh toán thành công");
-
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("❌ Lỗi xử lý IPN: " + e.getMessage());
 		}
 	}
 

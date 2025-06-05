@@ -117,7 +117,6 @@ public class Account implements UserDetails {
 		updatedAt = new Date();
 	}
 
-
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 	    List<GrantedAuthority> authorities = new ArrayList();

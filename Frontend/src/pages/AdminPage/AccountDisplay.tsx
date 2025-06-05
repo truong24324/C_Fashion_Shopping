@@ -240,6 +240,8 @@ const AccountDisplay = () => {
       render: (active: boolean, record: any) => (
         <Switch
           checked={active}
+          checkedChildren="Kích hoạt"
+          unCheckedChildren="Không kích hoạt"
           onChange={() => toggleActive(record.accountId)}
         />
       ),
@@ -250,6 +252,8 @@ const AccountDisplay = () => {
       render: (locked: boolean, record: any) => (
         <Switch
           checked={locked}
+          checkedChildren="Đã khóa"
+          unCheckedChildren="Đang mở khóa"
           onChange={() => toggleLock(record.accountId)}
         />
       ),

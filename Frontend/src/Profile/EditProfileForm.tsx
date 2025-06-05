@@ -160,7 +160,6 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsE
         }
     };
     
-    
     return (
         <>
             <motion.h2

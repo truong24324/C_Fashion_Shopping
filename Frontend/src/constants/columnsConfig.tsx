@@ -1,5 +1,5 @@
 import ImageTypeCell from "../components/ImageTypeCell";
-import { Switch, Button, Popconfirm, Select } from "antd";
+import { Switch, Button, Popconfirm} from "antd";
 import React from "react";
 
 type RenderCellFn = (text: any, record: any, dataIndex: string) => React.ReactElement;
@@ -15,12 +15,6 @@ export const getColumnsConfig = (
     handleImageChange: HandleImageChangeFn,
     handleIdDoubleClick: HandleIdDoubleClickFn,
     handleDelete: HandleDeleteFn,
-    editingKey?: any,
-    editingField?: string,
-    setEditingKey?: (key: any) => void,
-    setEditingField?: (field: string) => void,
-    handleUpdate?: (record: any, field: string, value: any) => void,
-    options?: { brand?: any[]; category?: any[]; supplier?: any[] }
 ) => {
     return {
         product: [
@@ -321,6 +315,7 @@ export const getColumnsConfig = (
                 render: (isActive: boolean, record: any) => (
                     <Switch
                         checked={isActive}
+                        checkedChildren="Hoạt động" unCheckedChildren="Tạm khóa"
                         onChange={() => handleToggleActive(record.discountId, !isActive)}
                     />
                 )
@@ -509,6 +504,8 @@ export const getColumnsConfig = (
                 render: (loginAllowed: boolean, record: any) => (
                     <Switch
                         checked={loginAllowed}
+                        checkedChildren="Cho phép"
+                        unCheckedChildren="Không cho phép"
                         onChange={() => handleToggleActive(record.roleId, !loginAllowed)}
                     />
                 )
@@ -535,8 +532,6 @@ export const getColumnsConfig = (
                 )
             },
         ],
-
-
 
     }[category]
 

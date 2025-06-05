@@ -85,14 +85,11 @@ const ProductCard: React.FC<{
     }, [variantList, selectedColor, selectedSize]);
 
     useEffect(() => {
-        // Lấy dữ liệu từ localStorage
         const cachedData = localStorage.getItem('cached_products_latest');
 
         if (cachedData) {
-            // Nếu có dữ liệu trong localStorage, parse và lấy thông tin cần thiết
             const products = JSON.parse(cachedData);
 
-            // Lọc sản phẩm theo productId thực tế của product đã được truyền vào từ props
             const productVariants = products.find((p: Product) => p.productId === product.productId)?.variants || [];
             setVariantList(productVariants);
         }
@@ -298,18 +295,18 @@ const ProductCard: React.FC<{
             transition-all duration-300 text-xl`} />
                 </div>
 
-                <div className="relative w-full h-60 overflow-hidden bg-gray-100"
-                    onClick={() => navigate(`/product/${product.productId}`)}
-                >
+                <div className="relative w-full h-60 overflow-hidden bg-gray-100">
                     <img
                         src={product.image[0]}
                         alt={product.productName}
+                        onClick={() => navigate(`/product/${product.productId}`)}
                         className={`object-cover w-full h-full transition-all duration-500 ${isHovered ? "opacity-0" : "opacity-100"} absolute top-0 left-0`}
                     />
                     {product.image[1] && (
                         <img
                             src={product.image[1]}
                             alt="Ảnh phụ"
+                            onClick={() => navigate(`/product/${product.productId}`)}
                             className={`object-cover w-full h-full transition-all duration-500 ${isHovered ? "opacity-100" : "opacity-0"} absolute top-0 left-0`}
                         />
                     )}
@@ -318,7 +315,6 @@ const ProductCard: React.FC<{
                         Hàng Mới
                     </div>
 
-                    {/* Hover buttons */}
                     <div
                         className={`absolute bottom-4 left-0 w-full flex justify-center items-center gap-4 transition-all duration-300 z-10 ${isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
                             }`}

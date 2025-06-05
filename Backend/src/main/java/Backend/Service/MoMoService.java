@@ -8,7 +8,6 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -90,7 +89,8 @@ public class MoMoService {
 
         // 3️⃣ Tổng tiền tạm tính từ request
         BigDecimal adjustedPrice = orderRequestDto.getTotalAmount();
-        BigDecimal shippingFee = orderRequestDto.getShippingFee() != null ? orderRequestDto.getShippingFee() : BigDecimal.ZERO;
+        BigDecimal shippingFee = orderRequestDto.getShippingFee() != null ? orderRequestDto.getShippingFee()
+                : BigDecimal.ZERO;
         order.setShippingFee(shippingFee);
 
         // 4️⃣ Áp dụng giảm giá nếu có
@@ -119,7 +119,8 @@ public class MoMoService {
 
                 // Kiểm tra đã dùng chưa
                 List<Order> usedOrders = orderRepository
-                        .findByAccountAccountIdAndDiscountCodeAndPaymentStatus(orderRequestDto.getAccountId(), discountCode, "Đã thanh toán");
+                        .findByAccountAccountIdAndDiscountCodeAndPaymentStatus(orderRequestDto.getAccountId(),
+                                discountCode, "Đã thanh toán");
                 if (!usedOrders.isEmpty()) {
                     throw new RuntimeException("Bạn đã sử dụng mã giảm giá này rồi");
                 }
@@ -161,15 +162,15 @@ public class MoMoService {
         String orderInfo = "Thanh toán đơn hàng #" + order.getOrderId();
 
         String rawSignature = "accessKey=" + accessKey +
-	            "&amount=" + adjustedPrice +
-	            "&extraData=" +
-	            "&ipnUrl=" + ipnUrl +
-	            "&orderId=" + orderId +
-	            "&orderInfo=" + orderInfo +
-	            "&partnerCode=" + partnerCode +
-	            "&redirectUrl=" + returnUrl +
-	            "&requestId=" + requestId +
-	            "&requestType=" + requestType;
+                "&amount=" + adjustedPrice +
+                "&extraData=" +
+                "&ipnUrl=" + ipnUrl +
+                "&orderId=" + orderId +
+                "&orderInfo=" + orderInfo +
+                "&partnerCode=" + partnerCode +
+                "&redirectUrl=" + returnUrl +
+                "&requestId=" + requestId +
+                "&requestType=" + requestType;
 
         String signature = momoUtil.generateSignature(rawSignature, secretKey);
 
@@ -198,53 +199,67 @@ public class MoMoService {
         JSONObject resJson = new JSONObject(response.body());
         System.out.println("MoMo response: " + resJson.toString());
 
-        if (resJson.getInt("resultCode") != 0) {
+        PaymentResponse paymentResponse = new PaymentResponse();
+
+        if (resJson.getInt("resultCode") == 0) {
+            // Nếu thành công, cập nhật trạng thái đơn hàng thành "Chờ xác nhận"
+            OrderStatus waitingConfirmStatus = orderStatusRepository.findByStepOrder(1)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái 'Chờ xác nhận'"));
+
+            order.setOrderStatus(waitingConfirmStatus);
+            order.setPaymentStatus("Chưa thanh toán");
+            orderRepository.save(order);
+            paymentResponse.setCode("00");
+            paymentResponse.setPaymentUrl(resJson.getString("payUrl"));
+        } else {
+            // Nếu thất bại, cập nhật trạng thái đơn hàng thành "Đã hủy"
+            OrderStatus cancelledStatus = orderStatusRepository.findByStepOrder(-1)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái 'Đã hủy'"));
+
+            order.setOrderStatus(cancelledStatus);
+            order.setPaymentStatus("Thanh toán thất bại");
+            orderRepository.save(order);
+
             throw new RuntimeException("MoMo thất bại: " + resJson.getString("message"));
         }
 
-        String payUrl = resJson.getString("payUrl");
-
-        // 9️⃣ Trả kết quả cho FE
-        PaymentResponse paymentResponse = new PaymentResponse();
-        paymentResponse.setCode("00");
-        paymentResponse.setPaymentUrl(payUrl);
         return paymentResponse;
     }
 
-    public String buildRawData(Map<String, String> params) {
-    return "accessKey=" + accessKey
-        + "&amount=" + params.get("amount")
-        + "&extraData=" + params.get("extraData")
-        + "&message=" + params.get("message")
-        + "&orderId=" + params.get("orderId")
-        + "&orderInfo=" + params.get("orderInfo")
-        + "&orderType=" + params.get("orderType")
-        + "&partnerCode=" + params.get("partnerCode")
-        + "&payType=" + params.get("payType")
-        + "&requestId=" + params.get("requestId")
-        + "&responseTime=" + params.get("responseTime")
-        + "&resultCode=" + params.get("resultCode")
-        + "&transId=" + params.get("transId");
-}
-
-public String hmacSHA256(String data, String secretKey) {
-    try {
-        SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(), "HmacSHA256");
-        Mac mac = Mac.getInstance("HmacSHA256");
-        mac.init(secretKeySpec);
-        byte[] hash = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
-        return bytesToHex(hash);
-    } catch (Exception e) {
-        throw new RuntimeException("HMAC SHA256 Error", e);
+    public String buildRawData(java.util.Map<String, String> params) {
+        return "accessKey=" + accessKey
+                + "&amount=" + params.get("amount")
+                + "&extraData=" + params.get("extraData")
+                + "&message=" + params.get("message")
+                + "&orderId=" + params.get("orderId")
+                + "&orderInfo=" + params.get("orderInfo")
+                + "&orderType=" + params.get("orderType")
+                + "&partnerCode=" + params.get("partnerCode")
+                + "&payType=" + params.get("payType")
+                + "&requestId=" + params.get("requestId")
+                + "&responseTime=" + params.get("responseTime")
+                + "&resultCode=" + params.get("resultCode")
+                + "&transId=" + params.get("transId");
     }
-}
 
-private String bytesToHex(byte[] bytes) {
-    StringBuilder result = new StringBuilder();
-    for (byte b : bytes) {
-        result.append(String.format("%02x", b));
+    public String hmacSHA256(String data, String secretKey) {
+        try {
+            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(), "HmacSHA256");
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(secretKeySpec);
+            byte[] hash = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            return bytesToHex(hash);
+        } catch (Exception e) {
+            throw new RuntimeException("HMAC SHA256 Error", e);
+        }
     }
-    return result.toString();
-}
+
+    private String bytesToHex(byte[] bytes) {
+        StringBuilder result = new StringBuilder();
+        for (byte b : bytes) {
+            result.append(String.format("%02x", b));
+        }
+        return result.toString();
+    }
 
 }

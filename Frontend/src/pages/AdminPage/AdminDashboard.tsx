@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import AccountDisplay from "./AccountDisplay";
 import OrderDisplay from "./OrderDisplay";
+import EditDisplay from "./EditDisplay";
 
 const AdminDashboard: React.FC = () => {
   const [selectedMenu, setSelectedMenu] = useState("Tổng quan");
@@ -37,7 +38,11 @@ const AdminDashboard: React.FC = () => {
 
       // Xóa token khỏi localStorage
       localStorage.removeItem("token");
-
+      const keysToClear = [
+        "cachedBrands", "cachedBrandsExpire", "cached_products_latest", "cached_products_latest_expiry",
+        "variants_cache", "wishlist_cache", "accountId", "token"
+      ];
+      keysToClear.forEach(key => localStorage.removeItem(key));
       toast.success("Đăng xuất thành công!");
       navigate("/auth"); // Chuyển hướng về trang đăng nhập
     } catch (error: any) {
@@ -77,13 +82,16 @@ const AdminDashboard: React.FC = () => {
           />
           <StatsCard title="Đơn hàng" value={`${stats.orders}`} color="text-blue-400" />
           <StatsCard title="Sản phẩm bán chạy" value={stats.bestSeller} color="text-yellow-400" />
-          <StatsCard title="Khách hàng mới" value={`${stats.newCustomers}`} color="text-purple-400" />
+          <StatsCard title="Tổng số khách hàng" value={`${stats.newCustomers}`} color="text-purple-400" />
         </div>
         <div className="grid grid-cols-2 gap-8 mt-8">
           <RevenueChart />
         </div>
       </div>
     ),
+    "Chỉnh sửa thông tin": <div>
+      <EditDisplay />
+    </div>,
     "Giao dịch": <div><h2 className="text-3xl font-semibold">Giao Dịch</h2><TransactionChart /></div>,
     "Đơn hàng": <div><h2 className="text-3xl font-semibold">Đơn hàng</h2><OrderDisplay /></div>,
     "Người dùng": <div><h2 className="text-3xl font-semibold">Người Dùng</h2><AccountDisplay /></div>,

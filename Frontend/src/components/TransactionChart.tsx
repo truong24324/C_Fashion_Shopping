@@ -18,49 +18,6 @@ const TransactionChart: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
 
-  const fetchData = () => {
-    setLoading(true);
-    setLoadError(false);
-
-    fetch("/api/admin/dashboard/statistics", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Lỗi khi gọi API");
-        return res.json();
-      })
-      .then((data) => {
-        setTransactionData(data.monthlyOrders || []);
-        setPaymentData(data.paymentMethods || []);
-        setOrderStatusData(data.orderSuccessRates || []);
-        setCancelData(data.cancelReasons || []);
-      })
-      .catch((error) => {
-        console.error("Lỗi thống kê:", error);
-        toast.error("Không thể tải dữ liệu thống kê. Vui lòng thử lại sau.");
-        setLoadError(true);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  if (loading) {
-    return (
-      <Loading
-        text="Đang tải biểu đồ thống kê..."
-        showRetryButton={loadError}
-        onRetry={fetchData}
-        retryText="Thử lại"
-      />
-    );
-  }
 
   return (
     <div className="grid grid-cols-3 gap-6">

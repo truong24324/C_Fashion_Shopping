@@ -38,12 +38,12 @@ public class AccountController {
     }
 
     // ✅ Get account by ID
-    @GetMapping("/{accountId}")
-    @PreAuthorize("hasAuthority('ROLE_Admin')")
-    public ResponseEntity<ApiResponse<Account>> getAccountById(@PathVariable Integer accountId) {
-        return ResponseEntity
-                .ok(new ApiResponse<>(true, "Lấy thông tin tài khoản thành công", accountService.getById(accountId)));
-    }
+    // @GetMapping("/{accountId}")
+    // @PreAuthorize("hasAuthority('ROLE_Admin')")
+    // public ResponseEntity<ApiResponse<Account>> getAccountById(@PathVariable Integer accountId) {
+    //     return ResponseEntity
+    //             .ok(new ApiResponse<>(true, "Lấy thông tin tài khoản thành công", accountService.getById(accountId)));
+    // }
 
     // ✅ Delete account
     @DeleteMapping("/{accountId}")
