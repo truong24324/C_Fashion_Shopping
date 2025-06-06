@@ -79,7 +79,6 @@ public class MoMoService {
         order.setIsActive(true);
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
-        order.setPaymentStatus("Thanh toán thất bại"); // Tránh lỗi nếu DB column chỉ có VARCHAR(10)
         order.setPaymentMethod("MOMO");
 
         // Gán trạng thái mặc định
@@ -89,9 +88,9 @@ public class MoMoService {
 
         // 3️⃣ Tổng tiền tạm tính từ request
         BigDecimal adjustedPrice = orderRequestDto.getTotalAmount();
-        BigDecimal shippingFee = orderRequestDto.getShippingFee() != null ? orderRequestDto.getShippingFee()
-                : BigDecimal.ZERO;
-        order.setShippingFee(shippingFee);
+        // BigDecimal shippingFee = orderRequestDto.getShippingFee() != null ? orderRequestDto.getShippingFee()
+        //         : BigDecimal.ZERO;
+        // order.setShippingFee(shippingFee);
 
         // 4️⃣ Áp dụng giảm giá nếu có
         if (orderRequestDto.getDiscount() != null && !orderRequestDto.getDiscount().isEmpty()) {
@@ -147,8 +146,8 @@ public class MoMoService {
         }
 
         // 5️⃣ Tổng cộng lại: giá sau giảm + phí ship
-        adjustedPrice = adjustedPrice.add(shippingFee);
-        order.setTotalAmount(adjustedPrice);
+        // adjustedPrice = adjustedPrice.add(shippingFee);
+        // order.setTotalAmount(adjustedPrice);
 
         // 6️⃣ Gán mã đơn hàng duy nhất
         String orderId = "ORDER-" + UUID.randomUUID();

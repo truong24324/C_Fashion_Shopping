@@ -10,8 +10,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.google.zxing.NotFoundException;
-
 import org.springframework.http.HttpStatus;
 
 import Backend.Model.Order;
@@ -38,8 +36,10 @@ public class OrderController {
 	@GetMapping("/filter")
 	public ResponseEntity<ApiResponse<Page<OrderResponse>>> getOrdersByStatusWithPaging(
 			@RequestParam(required = false) Integer statusId, @RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size) {
-		Page<OrderResponse> orders = orderService.findByStatusWithPaging(statusId, page, size);
+			@RequestParam(defaultValue = "10") int size,
+			@RequestParam(defaultValue = "createdAt,desc") String sortBy
+			) {
+		Page<OrderResponse> orders = orderService.findByStatusWithPaging(statusId, page, size, sortBy);
 		return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách đơn hàng theo trạng thái thành công", orders));
 	}
 

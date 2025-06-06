@@ -10,7 +10,7 @@ import lombok.Data;
 public class OrderResponse {
     private Integer orderId;
     private String orderCode;
-    private LocalDateTime orderDate;
+    private String orderDate;
     private String fullName;
     private String email;
     private String phone;
@@ -20,7 +20,6 @@ public class OrderResponse {
     private String paymentStatus;
     private String orderStatus;
     private BigDecimal shippingFee;
-    private LocalDateTime createdAt;
     private List<OrderDetailResponse> orderDetails;
 
     @Data

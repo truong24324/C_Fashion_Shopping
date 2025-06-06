@@ -3,6 +3,7 @@ package Backend.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -95,11 +96,6 @@ public class OrderService {
             orderedVariants.add(variant);
         }
 
-        // Tính tổng: tổng sản phẩm + phí ship (nếu có)
-        if (order.getShippingFee() != null) {
-            totalAmount = totalAmount.add(order.getShippingFee());
-        }
-
         order.setTotalAmount(totalAmount);
         order.setOrderDetails(orderDetails);
 
@@ -130,7 +126,9 @@ public class OrderService {
         OrderResponse response = new OrderResponse();
         response.setOrderId(order.getOrderId());
         response.setOrderCode(order.getOrderCode());
-        response.setOrderDate(order.getOrderDate());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedOrderDate = order.getOrderDate() != null ? order.getOrderDate().format(formatter) : null;
+        response.setOrderDate(formattedOrderDate);
         response.setFullName(order.getFullName());
         response.setEmail(order.getEmail());
         response.setPhone(order.getPhone());
@@ -140,7 +138,14 @@ public class OrderService {
         response.setOrderStatus(order.getOrderStatus().getStatusName());
         response.setPaymentStatus(order.getPaymentStatus());
         response.setShippingFee(order.getShippingFee());
-        response.setCreatedAt(order.getCreatedAt());
+        DateTimeFormatter formatters = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        String formattedDate = order.getCreatedAt()
+                .atZone(ZoneId.systemDefault())
+                .withZoneSameInstant(ZoneId.of("Asia/Ho_Chi_Minh"))
+                .format(formatters);
+
+        response.setOrderDate(formattedDate); // String field
 
         List<OrderResponse.OrderDetailResponse> detailResponses = new ArrayList<>();
         for (OrderDetail detail : order.getOrderDetails()) {
@@ -169,8 +174,8 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    public Page<OrderResponse> findByStatusWithPaging(Integer statusId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("orderDate").descending());
+    public Page<OrderResponse> findByStatusWithPaging(Integer statusId, int page, int size, String sortBy) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "orderDate")); // ASC: tăng dần
         Page<Order> orders;
 
         if (statusId != null) {
@@ -262,12 +267,18 @@ public class OrderService {
         response.setPaymentMethod(order.getPaymentMethod());
         response.setOrderStatus(order.getOrderStatus().getStatusName());
 
-        Set<String> successfulStatuses = Set.of("Giao thành công", "Hoàn thành");
         String statusName = order.getOrderStatus().getStatusName();
 
         response.setOrderStatus(statusName);
-        response.setPaymentStatus(
-                successfulStatuses.contains(statusName) ? "Thanh toán thành công" : "Thanh toán thất bại");
+        response.setPaymentStatus(order.getPaymentStatus());
+        response.setShippingFee(order.getShippingFee());
+        response.setOrderCode(order.getOrderCode());
+        // Convert LocalDateTime to String before setting order date
+        LocalDateTime createdAt = order.getCreatedAt();
+        String formattedCreatedAt = createdAt != null
+                ? createdAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                : null;
+        response.setOrderDate(formattedCreatedAt);
 
         List<OrderResponse.OrderDetailResponse> detailResponses = order.getOrderDetails()
                 .stream()

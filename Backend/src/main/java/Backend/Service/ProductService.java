@@ -126,7 +126,9 @@ public class ProductService {
 
 	public List<TopSellingProductResponse> getTop10BestSellingProducts() {
 		// Bước 1: Lấy toàn bộ OrderDetail của đơn đã thanh toán
-		List<OrderDetail> paidOrderDetails = orderDetailRepository.findAllByOrder_PaymentStatus("Đã thanh toán");
+List<OrderDetail> paidOrderDetails = orderDetailRepository.findAllByOrder_PaymentStatusIn(
+    List.of("Đã thanh toán", "Thanh toán thành công")
+);
 
 		// Bước 2: Gom nhóm theo product
 		Map<Product, Integer> productSalesMap = new HashMap<>();

@@ -97,6 +97,48 @@ public class AuthController {
 		}
 	}
 
+	@Operation(summary = "Làm mới token", description = "Tạo lại access token từ refresh token.")
+	@PostMapping("/refresh-token")
+	public ResponseEntity<AuthResponse> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+		String refreshToken = null;
+		for (Cookie cookie : request.getCookies()) {
+			if ("refresh_token".equals(cookie.getName())) {
+				refreshToken = cookie.getValue();
+				break;
+			}
+		}
+
+		if (refreshToken == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body(new AuthResponse("Không tìm thấy refresh token"));
+		}
+
+		try {
+			String username = jwtService.extractUsername(refreshToken);
+			Account account = accountService.findByEmail(username)
+					.orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
+
+			if (!jwtService.isTokenValid(refreshToken, account)) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+						.body(new AuthResponse("Refresh token không hợp lệ"));
+			}
+
+			String newAccessToken = jwtService.generateToken(account);
+
+			Cookie accessCookie = new Cookie("jwt_token", newAccessToken);
+			accessCookie.setHttpOnly(true);
+			accessCookie.setPath("/");
+			accessCookie.setMaxAge(24 * 60 * 60);
+			response.addCookie(accessCookie);
+
+			return ResponseEntity.ok(new AuthResponse("Làm mới token thành công!", newAccessToken));
+
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body(new AuthResponse("Lỗi làm mới token: " + e.getMessage()));
+		}
+	}
+
 	@Operation(summary = "Đăng ký", description = "Tạo tài khoản mới.", responses = {
 			@ApiResponse(responseCode = "200", description = "Đăng ký thành công", content = @Content(schema = @Schema(implementation = AuthResponse.class))),
 			@ApiResponse(responseCode = "400", description = "Email hoặc số điện thoại đã được sử dụng"),
@@ -163,6 +205,10 @@ public class AuthController {
 	}
 
 	@GetMapping("/check-admin")
+	@Operation(summary = "Kiểm tra quyền Admin", description = "Kiểm tra xem người dùng có quyền Admin hay không.", responses = {
+			@ApiResponse(responseCode = "200", description = "Người dùng có quyền Admin", content = @Content(schema = @Schema(type = "boolean"))),
+			@ApiResponse(responseCode = "401", description = "Chưa đăng nhập hoặc tài khoản không hợp lệ"),
+			@ApiResponse(responseCode = "403", description = "Không có quyền truy cập") })
 	public ResponseEntity<?> checkAdminAccess(@AuthenticationPrincipal Account account) {
 		if (account == null || !account.isEnabled()) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");

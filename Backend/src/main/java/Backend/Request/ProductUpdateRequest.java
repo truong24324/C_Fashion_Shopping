@@ -17,7 +17,6 @@ public class ProductUpdateRequest {
 	@Pattern(regexp = "^\\d{8,13}$", message = "Mã vạch phải chứa từ 8 đến 13 chữ số")
 	private String barcode;
 
-	@Size(max = 500, message = "Mô tả không được dài hơn 500 ký tự")
 	private String description;
 
 	@Positive(message = "Thương hiệu không hợp lệ")

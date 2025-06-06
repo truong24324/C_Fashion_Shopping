@@ -3,12 +3,7 @@ package Backend.Request;
 import java.math.BigDecimal;
 import java.util.List;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 @Data
@@ -37,6 +32,8 @@ public class OrderRequest {
     private String paymentMethod;   // Phương thức thanh toán
 
     private String paymentStatus;  // Trạng thái thanh toán (0: chưa thanh toán, 1: đã thanh toán)
+
+    private String orderCode;  // Mã đơn hàng, có thể để trống nếu không cần thiết
 
     @NotEmpty(message = "Danh sách chi tiết đơn hàng không thể để trống")
     private OrderDetailRequest[] orderDetails;
