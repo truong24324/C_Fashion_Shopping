@@ -94,7 +94,14 @@ const ProductForm: React.FC<Props> = ({ onSubmit, brands, categories, suppliers,
                     <Row gutter={16}>
                         <Col span={6}>
                             <Form.Item name="brand" label="Thương Hiệu" rules={[{ required: true }]}>
-                                <Select placeholder="Chọn thương hiệu">
+                                <Select placeholder="Chọn thương hiệu"
+                                    showSearch
+                                    optionFilterProp="children"
+                                    filterOption={(input, option) =>
+                                        typeof option?.children === "string" &&
+                                        (option.children as string).toLowerCase().includes(input.toLowerCase())
+                                    }
+                                >
                                     {brands.map((brand) => (
                                         <Option key={brand.brandId} value={brand.brandId}>{brand.brandName}</Option>
                                     ))}
@@ -103,7 +110,14 @@ const ProductForm: React.FC<Props> = ({ onSubmit, brands, categories, suppliers,
                         </Col>
                         <Col span={6}>
                             <Form.Item name="category" label="Loại Sản Phẩm" rules={[{ required: true }]}>
-                                <Select placeholder="Chọn loại sản phẩm">
+                                <Select placeholder="Chọn loại sản phẩm"
+                                    showSearch
+                                    optionFilterProp="children"
+                                    filterOption={(input, option) =>
+                                        typeof option?.children === "string" &&
+                                        (option.children as string).toLowerCase().includes(input.toLowerCase())
+                                    }
+                                >
                                     {categories.map((category) => (
                                         <Option key={category.categoryId} value={category.categoryId}>{category.categoryName}</Option>
                                     ))}
@@ -112,7 +126,14 @@ const ProductForm: React.FC<Props> = ({ onSubmit, brands, categories, suppliers,
                         </Col>
                         <Col span={6}>
                             <Form.Item name="supplier" label="Nhà Cung Cấp" rules={[{ required: true }]}>
-                                <Select placeholder="Chọn nhà cung cấp">
+                                <Select placeholder="Chọn nhà cung cấp"
+                                    showSearch
+                                    optionFilterProp="children"
+                                    filterOption={(input, option) =>
+                                        typeof option?.children === "string" &&
+                                        (option.children as string).toLowerCase().includes(input.toLowerCase())
+                                    }
+                                >
                                     {suppliers.map((supplier) => (
                                         <Option key={supplier.supplierId} value={supplier.supplierId}>{supplier.supplierName}</Option>
                                     ))}
@@ -121,7 +142,14 @@ const ProductForm: React.FC<Props> = ({ onSubmit, brands, categories, suppliers,
                         </Col>
                         <Col span={6}>
                             <Form.Item name="status" label="Trạng Thái" rules={[{ required: true }]}>
-                                <Select placeholder="Chọn trạng thái">
+                                <Select placeholder="Chọn trạng thái"
+                                showSearch
+                                optionFilterProp="children"
+                                filterOption={(input, option) =>
+                                    typeof option?.children === "string" &&
+                                    (option.children as string).toLowerCase().includes(input.toLowerCase())
+                                }
+                                >
                                     {statuses.map((status) => (
                                         <Option key={status.statusId} value={status.statusId}>{status.statusName}</Option>
                                     ))}

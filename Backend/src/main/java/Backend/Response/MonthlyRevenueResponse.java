@@ -8,8 +8,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MonthlyRevenueResponse {
-    private int year;
     private int month;
+    private int year;
     private BigDecimal revenue;
 
 }

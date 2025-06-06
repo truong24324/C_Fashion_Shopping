@@ -115,7 +115,14 @@ const VariantForm: React.FC<Props> = ({ variants, setVariants }) => {
                     <Row gutter={16}>
                         <Col span={8}>
                             <Form.Item name="color" label="Màu Sắc" rules={[{ required: true, message: "Vui lòng chọn màu sắc!" }]}>
-                                <Select placeholder="Chọn màu">
+                                <Select placeholder="Chọn màu"
+                                    showSearch
+                                    optionFilterProp="children"
+                                    filterOption={(input, option) =>
+                                        typeof option?.children === "string" &&
+                                        (option.children as string).toLowerCase().includes(input.toLowerCase())
+                                    }
+                                >
                                     {colors.map((c) => (
                                         <Select.Option key={c.colorId} value={c.colorId}>
                                             {c.colorName}
@@ -126,7 +133,14 @@ const VariantForm: React.FC<Props> = ({ variants, setVariants }) => {
                         </Col>
                         <Col span={8}>
                             <Form.Item name="size" label="Kích Thước" rules={[{ required: true, message: "Vui lòng chọn kích thước!" }]}>
-                                <Select placeholder="Chọn size">
+                                <Select placeholder="Chọn size"
+                                    showSearch
+                                    optionFilterProp="children"
+                                    filterOption={(input, option) =>
+                                        typeof option?.children === "string" &&
+                                        (option.children as string).toLowerCase().includes(input.toLowerCase())
+                                    }
+                                >
                                     {sizes.map((s) => (
                                         <Select.Option key={s.sizeId} value={s.sizeId}>
                                             {s.sizeName}
@@ -137,7 +151,14 @@ const VariantForm: React.FC<Props> = ({ variants, setVariants }) => {
                         </Col>
                         <Col span={8}>
                             <Form.Item name="material" label="Chất Liệu" rules={[{ required: true, message: "Vui lòng chọn chất liệu!" }]}>
-                                <Select placeholder="Chọn chất liệu">
+                                <Select placeholder="Chọn chất liệu"
+                                    showSearch
+                                    optionFilterProp="children"
+                                    filterOption={(input, option) =>
+                                        typeof option?.children === "string" &&
+                                        (option.children as string).toLowerCase().includes(input.toLowerCase())
+                                    }
+                                >
                                     {materials.map((m) => (
                                         <Select.Option key={m.materialId} value={m.materialId}>
                                             {m.materialName}

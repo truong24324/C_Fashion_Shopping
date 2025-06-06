@@ -98,7 +98,7 @@ const AdminDashboard: React.FC = () => {
     "Người dùng": <div><h2 className="text-3xl font-semibold">Người Dùng</h2><AccountDisplay /></div>,
     "Danh sách": <div><h2 className="text-3xl font-semibold">Danh Sách</h2><ListDisplay /></div>,
     "Thêm mới": <div><h2 className="text-3xl font-semibold">Thêm Mới</h2><CreateDisplay /></div>,
-    "Chỉnh sửa":  <div><h2 className="text-3xl font-semibold">Thêm Mới</h2><UpdateDisplay /></div>,
+    "Chỉnh sửa":  <div><h2 className="text-3xl font-semibold">Chỉnh sửa</h2><UpdateDisplay /></div>,
     "Đăng xuất": (
       <div>
         <h2 className="text-3xl font-semibold">Đăng Xuất</h2>

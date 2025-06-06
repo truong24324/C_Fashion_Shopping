@@ -58,62 +58,7 @@ const Product: React.FC<ProductProps> = ({ variants, setVariants }) => {
             }
         };
         fetchData();
-    }, []);
-
-    // const handleSubmit = async (values: any) => {
-    //     setLoading(true);
-    //     try {
-    //         const token = localStorage.getItem("token");
-    //         const headers = { Authorization: `Bearer ${token}` };
-
-    //         const { data: createdProduct } = await axios.post("/api/products/add", values, { headers });
-    //         toast.success("🟢 Thêm sản phẩm thành công!");
-    //         const productId = createdProduct?.data?.productId;
-    //         if (!productId) throw new Error("Không lấy được ID sản phẩm!");
-
-    //         // 🟢 Lấy variants từ localStorage thay vì state hiện tại
-    //         const cachedVariants = localStorage.getItem("variants_cache");
-    //         const storedVariants: Variant[] = cachedVariants ? JSON.parse(cachedVariants) : [];
-
-    //         console.log("🚀 Variants lấy từ cache trước khi gửi:", storedVariants); // Debugging
-
-    //         if (storedVariants.length > 0) {
-    //             await axios.post("/api/variants/batch-add", storedVariants.map(v => ({ ...v, productId })), { headers });
-    //             toast.success("🟢 Thêm biến thể thành công!");
-    //         } else {
-    //             toast.error("⚠️ Không có biến thể nào được gửi đi!");
-    //         }
-
-    //         // ✅ Chỉ reset state & localStorage khi thêm thành công
-    //         setVariants([]);
-    //         localStorage.removeItem("variants_cache");
-
-    //         const imageUploadPromises = imageList.map((file, index) => {
-    //             if (!file.originFileObj) return Promise.resolve();
-    //             const formData = new FormData();
-    //             formData.append("productId", productId);
-    //             formData.append("image", file.originFileObj);
-
-    //             let imageType = "OTHER";
-    //             if (index === 0) imageType = "MAIN";
-    //             else if (index === 1) imageType = "SECONDARY";
-
-    //             formData.append("imageType", imageType);
-
-    //             return axios.post("/api/products/upload", formData, { headers });
-    //         });            
-
-    //         await Promise.all(imageUploadPromises);
-    //         setImageList([]);
-    //         toast.success("🟢 Tải ảnh thành công!");
-
-    //         toast.success("Thêm sản phẩm thành công!");
-    //     } catch (error: any) {
-    //         toast.error(error.response?.data?.message || "⚠️ Có lỗi xảy ra!");
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };    
+    }, []);  
 
     const handleSubmit = async (values: any) => {
         setLoading(true);

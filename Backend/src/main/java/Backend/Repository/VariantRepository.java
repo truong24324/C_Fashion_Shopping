@@ -47,5 +47,4 @@ public interface VariantRepository extends JpaRepository<Variant, Integer> {
         @Param("material") String material
     );
 
-
 }

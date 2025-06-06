@@ -174,7 +174,7 @@ const EditProfileDisplay: React.FC = () => {
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Form.Item label="Mã người dùng" name="userCode">
-              <Input disabled />
+              <Input  />
             </Form.Item>
 
             <Form.Item label="Email" name="email">
