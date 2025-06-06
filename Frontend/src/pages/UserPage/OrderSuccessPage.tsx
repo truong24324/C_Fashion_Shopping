@@ -1,6 +1,6 @@
 import { CheckCircle, Home } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
@@ -38,61 +38,60 @@ const OrderSuccessPage = () => {
   const [order, setOrder] = useState<Order | null>(location.state?.order ?? null);
   const query = new URLSearchParams(location.search);
   const orderIdParam = query.get('orderId');
-  const [loading, setLoading] = React.useState(false);
+  const [loading, setLoading] = useState(false);
 
-useEffect(() => {
-  const resultCode = query.get('resultCode');
-  const isSuccess = resultCode === '0';
+  useEffect(() => {
+    const resultCode = query.get('resultCode');
+    const isSuccess = resultCode === '0';
 
-  const updateOrderStatusAndFetch = async () => {
-    if (!orderIdParam) return;
+    const updateOrderStatusAndFetch = async () => {
+      if (!orderIdParam) return;
 
-    try {
-      await axios.put(
-        `/api/orders/momo/update-status/${orderIdParam}`,
-        {
-          paymentStatus: isSuccess
-            ? 'Thanh toán thành công'
-            : 'Thanh toán thất bại',
-          orderStatusName: isSuccess ? 'Chờ xác nhận' : 'Đã hủy',
-        },
-        {
+      try {
+        await axios.put(
+          `/api/orders/momo/update-status/${orderIdParam}`,
+          {
+            paymentStatus: isSuccess
+              ? 'Thanh toán thành công'
+              : 'Thanh toán thất bại',
+            orderStatusName: isSuccess ? 'Chờ xác nhận' : 'Đã hủy',
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          }
+        );
+        toast.success('Cập nhật trạng thái đơn hàng thành công!');
+      } catch (error: any) {
+        toast.error(
+          error.response?.data?.message || 'Cập nhật trạng thái thất bại!'
+        );
+      }
+
+      await fetchOrder();
+    };
+
+    updateOrderStatusAndFetch();
+  }, [orderIdParam]);
+
+  const fetchOrder = async () => {
+    if (!order && orderIdParam?.startsWith('ORDER-')) {
+      setLoading(true);
+      try {
+        const response = await axios.get(`/api/orders/momo/${orderIdParam}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
-        }
-      );
-      toast.success('Cập nhật trạng thái đơn hàng thành công!');
-    } catch (error: any) {
-      toast.error(
-        error.response?.data?.message || 'Cập nhật trạng thái thất bại!'
-      );
+        });
+        setOrder(response.data.data);
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || 'Lỗi khi tải đơn hàng!');
+      } finally {
+        setLoading(false);
+      }
     }
-
-    // Sau khi cập nhật xong, mới gọi fetch
-    await fetchOrder();
   };
-
-  updateOrderStatusAndFetch();
-}, [orderIdParam]);
-
-const fetchOrder = async () => {
-  if (!order && orderIdParam?.startsWith('ORDER-')) {
-    setLoading(true);
-    try {
-      const response = await axios.get(`/api/orders/momo/${orderIdParam}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      setOrder(response.data.data);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Lỗi khi tải đơn hàng!');
-    } finally {
-      setLoading(false);
-    }
-  }
-};
 
   const formatCurrency = (value?: number) =>
     (value ?? 0).toLocaleString('vi-VN');
@@ -111,9 +110,10 @@ const fetchOrder = async () => {
     );
   }
 
+  const isOrderCancelled = getOrderStatus(order.orderStatus ?? null) === 'Đã hủy';
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 relative">
-      {/* Nút quay về trang chủ */}
       <button
         onClick={() => navigate('/')}
         className="absolute top-4 left-4 flex items-center text-blue-600 hover:text-blue-800 transition text-sm"
@@ -123,15 +123,28 @@ const fetchOrder = async () => {
       </button>
 
       <div className="text-center mb-6">
-        <CheckCircle size={64} className="text-green-500 mx-auto mb-4" />
-        <h1 className="text-3xl font-bold mb-2">Đặt hàng thành công!</h1>
-        <p className="text-gray-600">
-          Cảm ơn bạn đã mua sắm tại cửa hàng của chúng tôi.
-        </p>
+        {isOrderCancelled ? (
+          <>
+            <CheckCircle size={64} className="text-red-500 mx-auto mb-4" />
+            <h1 className="text-3xl font-bold mb-2 text-red-600">
+              Đặt hàng thất bại!
+            </h1>
+            <p className="text-gray-600">
+              Rất tiếc! Đơn hàng của bạn đã bị hủy do thanh toán không thành công.
+            </p>
+          </>
+        ) : (
+          <>
+            <CheckCircle size={64} className="text-green-500 mx-auto mb-4" />
+            <h1 className="text-3xl font-bold mb-2">Đặt hàng thành công!</h1>
+            <p className="text-gray-600">
+              Cảm ơn bạn đã mua sắm tại cửa hàng của chúng tôi.
+            </p>
+          </>
+        )}
       </div>
 
       <div className="rounded-xl border bg-white text-black shadow p-6 space-y-6">
-        {/* Thông tin đơn hàng */}
         <div>
           <h2 className="text-xl font-semibold mb-2">Thông tin đơn hàng</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
@@ -140,11 +153,10 @@ const fetchOrder = async () => {
               {order.orderCode ?? `#${order.orderId ?? 'Chưa cập nhật'}`}
             </div>
             <div>
-              <strong>Ngày đặt:</strong>{' '}
-              {order.orderDate
-                ? new Date(order.orderDate).toLocaleString('vi-VN')
-                : 'Chưa cập nhật'}
+              <strong>Ngày đặt hàng:</strong>{' '}
+              {(order.orderDate ?? 'Chưa cập nhật')}
             </div>
+          
             <div>
               <strong>Phương thức thanh toán:</strong>{' '}
               {order.paymentMethod ?? 'Chưa cập nhật'}
@@ -174,7 +186,6 @@ const fetchOrder = async () => {
           </div>
         </div>
 
-        {/* Chi tiết sản phẩm */}
         <div>
           <h2 className="text-xl font-semibold mb-4">Chi tiết sản phẩm</h2>
           <div className="divide-y">
@@ -210,7 +221,6 @@ const fetchOrder = async () => {
           </div>
         </div>
 
-        {/* Tổng thanh toán */}
         <div className="text-right text-lg font-semibold text-gray-900">
           Tổng thanh toán:{' '}
           {formatCurrency(

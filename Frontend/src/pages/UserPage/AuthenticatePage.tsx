@@ -64,7 +64,7 @@ const AuthenticatePage: React.FC = () => {
 
     const keysToClear = [
       "cachedBrands", "cachedBrandsExpire", "cached_products_latest", "cached_products_latest_expiry",
-      "variants_cache", "wishlist_cache", "accountId", "token"
+      "variants_cache", "wishlist_cache", "accountId", "token", "user_cache"
     ];
     keysToClear.forEach(key => localStorage.removeItem(key));
     localStorage.setItem("token", data.token);

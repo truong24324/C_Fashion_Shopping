@@ -21,7 +21,7 @@ interface JwtPayload {
   accountId: string;
 }
 
-const EditDisplay: React.FC = () => {
+const EditProfileDisplay: React.FC = () => {
   const [form] = Form.useForm();
   const [loadingData, setLoadingData] = useState(true);      // Loading khi fetch dữ liệu user
   const [loadingSubmit, setLoadingSubmit] = useState(false); // Loading khi submit form
@@ -240,4 +240,4 @@ const EditDisplay: React.FC = () => {
   );
 };
 
-export default EditDisplay;
+export default EditProfileDisplay;
