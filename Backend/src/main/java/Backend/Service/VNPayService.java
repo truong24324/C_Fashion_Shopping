@@ -6,12 +6,12 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import Backend.Configuration.VNPayUtil;
 import Backend.Model.Order;
 import Backend.Model.OrderStatus;
 import Backend.Repository.OrderStatusRepository;
 import Backend.Request.OrderRequest;
 import Backend.Response.PaymentResponse;
+import Backend.Util.VNPayUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 

@@ -20,9 +20,9 @@ public class ProductListController {
 	private final ProductService productService;
 	private final BrandService brandService;
 
-	@GetMapping("/{productId}")
-	public ResponseEntity<ApiResponse<ProductDetailResponse>> getProductDetail(@PathVariable Integer productId) {
-		ProductDetailResponse response = productService.getProductDetail(productId);
+	@GetMapping("/by-name/{productName}")
+	public ResponseEntity<ApiResponse<ProductDetailResponse>> getProductDetailByName(@PathVariable String productName) {
+		ProductDetailResponse response = productService.getProductDetailByName(productName);
 		return ResponseEntity.ok(new ApiResponse<>(true, "Lấy chi tiết sản phẩm thành công!", response));
 	}
 

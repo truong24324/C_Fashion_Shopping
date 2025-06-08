@@ -40,7 +40,7 @@ interface ProductDetail {
 }
 
 const ProductDetailPage: React.FC = () => {
-  const { productId } = useParams();
+  const { productName } = useParams();
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSizeModal, setShowSizeModal] = useState(false);
@@ -48,7 +48,7 @@ const ProductDetailPage: React.FC = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(`/api/views/${productId}`);
+        const res = await axios.get(`/api/views/by-name/${encodeURIComponent(productName || '')}`);
         setProduct(res.data.data);
       } catch (error: any) {
         toast.error(error.response?.data?.message || "⚠️ Có lỗi xảy ra khi tải dữ liệu!");
@@ -58,7 +58,7 @@ const ProductDetailPage: React.FC = () => {
     };
 
     fetchProduct();
-  }, [productId]);
+  }, [productName]);
 
   if (loading) {
     return <div className="text-center mt-10">Đang tải chi tiết sản phẩm...</div>;

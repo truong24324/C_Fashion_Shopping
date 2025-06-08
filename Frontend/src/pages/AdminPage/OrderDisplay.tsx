@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Table, Modal, Button, Spin, Pagination, Tag } from "antd";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -14,6 +14,8 @@ const OrderDisplay = () => {
     const [showModal, setShowModal] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
     const [statuses, setStatuses] = useState<any[]>([]);
+    const [statusPage, setStatusPage] = useState(0);
+    const statusesPerPage = 6;
 
     useEffect(() => {
         fetchStatuses();
@@ -97,9 +99,9 @@ const OrderDisplay = () => {
 
     const columns = [
         { title: "ID", dataIndex: "orderId" },
-        { title: "Tên", dataIndex: "fullName" },
-        { title: "Email", dataIndex: "email" },
-        { title: "Điện thoại", dataIndex: "phone" },
+        { title: "Mã đơn hàng", dataIndex: "orderCode" },
+        { title: "Ngày đặt", dataIndex: "orderDate" },
+        { title: "Trạng thái thanh toán", dataIndex: "paymentStatus" },
         { title: "Tổng tiền", dataIndex: "totalAmount", render: (v: number) => `${v.toLocaleString()} vn₫` },
         { title: "Thanh toán", dataIndex: "paymentMethod" },
         {
@@ -122,7 +124,7 @@ const OrderDisplay = () => {
             }
         },
         {
-            title: "Trạng thái kế tiếp",
+            title: "Thao tác",
             render: (_: any, record: any) => {
                 return (
                     <div className="space-y-2">
@@ -142,31 +144,67 @@ const OrderDisplay = () => {
         setShowModal(true);
     };
 
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    const totalStatusPages = Math.ceil(statuses.length / statusesPerPage);
+
+    const handleNextStatusPage = () => {
+        setStatusPage((prev) => (prev + 1 < totalStatusPages ? prev + 1 : prev));
+    };
+
+    const handlePrevStatusPage = () => {
+        setStatusPage((prev) => (prev > 0 ? prev - 1 : 0));
+    };
+
     return (
         <div className="p-4 rounded-lg shadow-xl">
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="relative w-full mb-4">
+                {/* Nút cuộn trái */}
                 <button
-                    key="all"
-                    onClick={() => handleStatusChange(null)}
-                    className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${statusId === null
-                        ? "bg-gradient-to-r from-green-500 to-green-700 text-white shadow-md"
-                        : "bg-gray-300 text-gray-800 hover:bg-green-500 hover:text-white"
-                        }`}
+                    onClick={handlePrevStatusPage}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 px-2 py-1 bg-white border rounded-full shadow hover:bg-green-500 hover:text-white"
                 >
-                    Tất cả
+                    &lt;
                 </button>
-                {statuses.map((s) => (
-                    <button
-                        key={s.statusId}
-                        onClick={() => handleStatusChange(s.statusId)}
-                        className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${statusId === s.statusId
-                            ? "bg-gradient-to-r from-green-500 to-green-700 text-white shadow-md"
-                            : "bg-gray-300 text-gray-800 hover:bg-green-500 hover:text-white"
-                            }`}
-                    >
-                        {s.statusName}
-                    </button>
-                ))}
+
+                {/* Vùng nút trạng thái */}
+                <div className="mx-6 overflow-hidden">
+                    <div className="flex gap-2 flex-wrap justify-center">
+                        <button
+                            key="all"
+                            onClick={() => handleStatusChange(null)}
+                            className={`min-w-[120px] px-5 py-2 rounded-lg text-sm font-semibold transition-all ${statusId === null
+                                ? "bg-gradient-to-r from-green-500 to-green-700 text-white shadow-md"
+                                : "bg-gray-300 text-gray-800 hover:bg-green-500 hover:text-white"
+                                }`}
+                        >
+                            Tất cả
+                        </button>
+
+                        {statuses
+                            .slice(statusPage * statusesPerPage, (statusPage + 1) * statusesPerPage)
+                            .map((s) => (
+                                <button
+                                    key={s.statusId}
+                                    onClick={() => handleStatusChange(s.statusId)}
+                                    className={`min-w-[120px] px-5 py-2 rounded-lg text-sm font-semibold transition-all ${statusId === s.statusId
+                                        ? "bg-gradient-to-r from-green-500 to-green-700 text-white shadow-md"
+                                        : "bg-gray-300 text-gray-800 hover:bg-green-500 hover:text-white"
+                                        }`}
+                                >
+                                    {s.statusName}
+                                </button>
+                            ))}
+                    </div>
+                </div>
+
+                {/* Nút cuộn phải */}
+                <button
+                    onClick={handleNextStatusPage}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 px-2 py-1 bg-white border rounded-full shadow hover:bg-green-500 hover:text-white"
+                >
+                    &gt;
+                </button>
             </div>
 
             <div className="border rounded-lg shadow-md overflow-hidden">
@@ -197,28 +235,67 @@ const OrderDisplay = () => {
             <Modal
                 open={showModal}
                 onCancel={() => setShowModal(false)}
-                title="Chi tiết đơn hàng"
+                title={<span className="text-xl font-semibold text-gray-800">🧾 Chi tiết đơn hàng</span>}
                 footer={null}
-                width={700}
+                width={800}
             >
                 {selectedOrder ? (
-                    <div className="space-y-2">
-                        <p><strong>Tên:</strong> {selectedOrder.fullName}</p>
-                        <p><strong>Email:</strong> {selectedOrder.email}</p>
-                        <p><strong>Điện thoại:</strong> {selectedOrder.phone}</p>
-                        <p><strong>Địa chỉ:</strong> {selectedOrder.shippingAddress}</p>
-                        <p><strong>Thanh toán:</strong> {selectedOrder.paymentMethod}</p>
-                        <p><strong>Tổng tiền:</strong> {selectedOrder.totalAmount?.toLocaleString()}₫</p>
-                        <p><strong>Chi tiết sản phẩm:</strong></p>
-                        <ul className="list-disc ml-5">
-                            {selectedOrder.orderDetails?.map((item: any, index: number) => (
-                                <li key={index}>
-                                    {item.productName} - {item.colorName}, {item.sizeName}, {item.materialName} × {item.quantity} = {item.totalPrice?.toLocaleString()}₫
-                                </li>
-                            ))}
-                        </ul>
+                    <div className="space-y-6 text-sm text-gray-700">
+
+                        {/* Thông tin khách hàng */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <p className="font-medium text-gray-500">👤 Tên khách hàng</p>
+                                <p className="text-base">{selectedOrder.fullName}</p>
+                            </div>
+                            <div>
+                                <p className="font-medium text-gray-500">📧 Email</p>
+                                <p className="text-base">{selectedOrder.email}</p>
+                            </div>
+                            <div>
+                                <p className="font-medium text-gray-500">📱 Số điện thoại</p>
+                                <p className="text-base">{selectedOrder.phone}</p>
+                            </div>
+                            <div>
+                                <p className="font-medium text-gray-500">🏠 Địa chỉ giao hàng</p>
+                                <p className="text-base">{selectedOrder.shippingAddress}</p>
+                            </div>
+                            <div>
+                                <p className="font-medium text-gray-500">💳 Phương thức thanh toán</p>
+                                <p className="text-base capitalize">{selectedOrder.paymentMethod}</p>
+                            </div>
+                            <div>
+                                <p className="font-medium text-gray-500">💰 Tổng tiền</p>
+                                <p className="text-base font-semibold text-orange-600">
+                                    {selectedOrder.totalAmount?.toLocaleString()}₫
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Chi tiết sản phẩm */}
+                        <div>
+                            <p className="font-medium text-gray-600 mb-2">📦 Sản phẩm đã đặt</p>
+                            <div className="bg-gray-50 border rounded p-3 space-y-2 max-h-60 overflow-y-auto">
+                                {selectedOrder.orderDetails?.map((item: any, index: number) => (
+                                    <div key={index} className="border-b pb-2">
+                                        <p className="font-medium">{item.productName}</p>
+                                        <p className="text-xs text-gray-500">
+                                            Màu: {item.colorName} | Kích cỡ: {item.sizeName} | Chất liệu: {item.materialName}
+                                        </p>
+                                        <p className="text-sm">
+                                            Số lượng: {item.quantity} &nbsp;&nbsp; | &nbsp;&nbsp;
+                                            Thành tiền: <span className="font-semibold text-orange-600">
+                                                {item.totalPrice?.toLocaleString()}₫
+                                            </span>
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
-                ) : <Spin />}
+                ) : (
+                    <div className="flex justify-center py-10"><Spin /></div>
+                )}
             </Modal>
         </div>
     );

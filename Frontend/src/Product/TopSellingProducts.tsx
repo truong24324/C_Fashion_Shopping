@@ -13,9 +13,10 @@ interface VariantSummary {
   stock: number;
 }
 
-interface SpecialProduct {
+interface Product {
   productId: number;
   productName: string;
+  productStatus: string;
   model: string;
   image: string[];
   imageTypes: string[];
@@ -27,7 +28,7 @@ interface SpecialProduct {
 }
 
 const TopSellingProducts: React.FC = () => {
-  const [products, setProducts] = useState<SpecialProduct[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [wishlistProducts, setWishlistProducts] = useState<number[]>([]);
 
@@ -73,7 +74,7 @@ const TopSellingProducts: React.FC = () => {
         </div>
       ) : (
         <div className="max-w-7xl mx-auto px-4 pb-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {products.map((product: SpecialProduct) => (
+          {products.map((product: Product) => (
             <div key={product.productId} className="flex justify-center">
               <ProductCard
                 product={product}

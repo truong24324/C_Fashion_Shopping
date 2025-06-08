@@ -13,7 +13,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import Backend.Model.ImageType;
 import Backend.Model.ProductImage;
 import Backend.Request.ProductImageRequest;
 import Backend.Response.ApiResponse;

@@ -7,7 +7,6 @@ import java.util.*;
 import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,13 +17,6 @@ import com.google.zxing.qrcode.QRCodeWriter;
 
 import Backend.Mailer.SendEmail;
 import Backend.Model.Order;
-import Backend.Model.OrderDetail;
-import Backend.Model.OrderStatus;
-import Backend.Model.Variant;
-import Backend.Repository.OrderDetailRepository;
-import Backend.Repository.OrderRepository;
-import Backend.Repository.OrderStatusRepository;
-import Backend.Repository.VariantRepository;
 import Backend.Request.OrderRequest;
 import Backend.Response.ApiResponse;
 import Backend.Response.OrderResponse;
@@ -34,7 +26,6 @@ import Backend.Service.OrderService;
 import Backend.Service.VNPayService;
 import Backend.Service.VietQRService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -48,10 +39,6 @@ public class PaymentController {
 	private final MoMoService momoService;
 	private final SendEmail sendEmail;
 	private final OrderService orderService;
-	private final OrderRepository orderRepository;
-	private final OrderDetailRepository orderDetailRepository;
-	private final OrderStatusRepository orderStatusRepository;
-	private final VariantRepository variantRepository;
 	private final VietQRService vietQRService;
 
 	@Value("${payment.momo.secretKey}")

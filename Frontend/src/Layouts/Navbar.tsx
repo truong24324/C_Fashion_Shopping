@@ -164,10 +164,9 @@ const Navbar: React.FC = () => {
         item.productName.toLowerCase().includes(searchQuery.toLowerCase())
       );
       if (match) {
-        navigate(`/product/${match.productId}`);
+        navigate(`/product/${match.productName}`);
       } else {
-        // Optional: navigate to search results page
-        navigate(`/search?query=${encodeURIComponent(searchQuery)}`);
+        navigate(`/product/${searchQuery}`);
       }
     }
   };
@@ -204,7 +203,11 @@ const Navbar: React.FC = () => {
                   <div className="flex items-center space-x-2 text-white">
                     <Link to="/profile" className="flex items-center space-x-2 text-white">
                       <img
-                        src={user?.avatar || "https://via.placeholder.com/150"}
+                        src={
+                          user?.avatar
+                            ? `/${user.avatar}` // Thêm "/" để luôn bắt đầu từ root
+                            : "https://via.placeholder.com/150"
+                        }
                         alt="Avatar"
                         className="w-8 h-8 rounded-full"
                       />
@@ -330,8 +333,8 @@ const Navbar: React.FC = () => {
                     })
                     .map((item) => (
                       <div
-                        key={item.productId}
-                        onClick={() => navigate(`/product/${item.productId}`)}
+                        key={item.productName}
+                        onClick={() => navigate(`/product/${item.productName}`)}
                         className="bg-gray-800 text-gray-300 text-xs p-1.5 rounded-md text-center cursor-pointer hover:bg-yellow-400 hover:text-black transition"
                       >
                         <span

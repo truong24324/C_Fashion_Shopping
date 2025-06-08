@@ -13,6 +13,7 @@ public class ProductReviewResponse {
     private String accountName;
     private Integer productId;
     private Integer variantId;
+    private String productStatus;
 
     private Integer rating;
     private String title;

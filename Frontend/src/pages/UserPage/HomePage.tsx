@@ -12,6 +12,7 @@ import TopSellingProducts from "src/Product/TopSellingProducts";
 interface Product {
   productId: number;
   productName: string;
+  productStatus: string;
   model: string;
   image: string[];
   imageTypes: string[];

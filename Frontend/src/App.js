@@ -1,4 +1,3 @@
-import logo from './logo.svg';
 import './App.css';
 import ClientRouter from './clientRouter/ClientRouters';
 import { Toaster } from "react-hot-toast";

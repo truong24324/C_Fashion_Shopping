@@ -13,6 +13,7 @@ interface Product {
   productId: number;
   productName: string;
   model: string;
+  productStatus: string;
   image: string[];
   imageTypes: string[];
   price: number;

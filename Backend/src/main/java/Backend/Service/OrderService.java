@@ -175,7 +175,7 @@ public class OrderService {
     }
 
     public Page<OrderResponse> findByStatusWithPaging(Integer statusId, int page, int size, String sortBy) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "orderDate")); // ASC: tăng dần
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "orderDate")); // ASC: tăng dần
         Page<Order> orders;
 
         if (statusId != null) {

@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { Form, Input, InputNumber, DatePicker, Button, Card, Typography, Spin, Switch, Row, Col, Select,} from "antd";
-import { CheckCircleOutlined, LoadingOutlined } from "@ant-design/icons";
+import { useState } from "react";
+import { Form, Input, InputNumber, DatePicker, Button, Card, Spin, Switch, Row, Col, Select,} from "antd";
+import { CheckCircleOutlined,} from "@ant-design/icons";
 import axios from "axios";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";

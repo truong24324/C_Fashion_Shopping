@@ -37,7 +37,7 @@ public class OrderController {
 	public ResponseEntity<ApiResponse<Page<OrderResponse>>> getOrdersByStatusWithPaging(
 			@RequestParam(required = false) Integer statusId, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size,
-			@RequestParam(defaultValue = "createdAt,desc") String sortBy
+			@RequestParam(defaultValue = "orderDate, desc") String sortBy
 			) {
 		Page<OrderResponse> orders = orderService.findByStatusWithPaging(statusId, page, size, sortBy);
 		return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách đơn hàng theo trạng thái thành công", orders));

@@ -14,14 +14,20 @@ import Backend.Model.Product;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer> {
     Page<Product> findByProductNameContainingIgnoreCase(String keyword, Pageable pageable);
-    List<Product> findTop50ByOrderByCreatedAtDesc();  // Lấy 50 sản phẩm mới nhất
+
+    List<Product> findTop50ByOrderByCreatedAtDesc(); // Lấy 50 sản phẩm mới nhất
+
+    Optional<Product> findByProductName(String productName);
 
     @Query(value = "SELECT TOP 10 * FROM PRODUCTS ORDER BY NEWID()", nativeQuery = true)
     List<Product> findRandomProducts();
 
-	Optional<Product> findByProductId(Integer productId);
+    Optional<Product> findByProductId(Integer productId);
+
     boolean existsBySupplier_SupplierId(Integer supplierId);
+
     boolean existsByBrand_BrandId(Integer brandId);
+
     boolean existsByProductNameIgnoreCase(String productName);
 
 }

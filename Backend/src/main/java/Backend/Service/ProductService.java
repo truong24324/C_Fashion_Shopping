@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -56,6 +57,7 @@ public class ProductService {
 			dto.setProductId(product.getProductId());
 			dto.setProductName(product.getProductName());
 			dto.setModel(product.getModel());
+			dto.setProductStatus(product.getStatus() != null ? product.getStatus().getStatusName() : null);
 
 			// Lấy hình ảnh loại MAIN & SECONDARY
 			List<ProductImage> mainAndSecondaryImages = product.getImages().stream().filter(
@@ -126,9 +128,8 @@ public class ProductService {
 
 	public List<TopSellingProductResponse> getTop10BestSellingProducts() {
 		// Bước 1: Lấy toàn bộ OrderDetail của đơn đã thanh toán
-List<OrderDetail> paidOrderDetails = orderDetailRepository.findAllByOrder_PaymentStatusIn(
-    List.of("Đã thanh toán", "Thanh toán thành công")
-);
+		List<OrderDetail> paidOrderDetails = orderDetailRepository.findAllByOrder_PaymentStatusIn(
+				List.of("Đã thanh toán", "Thanh toán thành công"));
 
 		// Bước 2: Gom nhóm theo product
 		Map<Product, Integer> productSalesMap = new HashMap<>();
@@ -158,6 +159,7 @@ List<OrderDetail> paidOrderDetails = orderDetailRepository.findAllByOrder_Paymen
 			dto.setProductName(product.getProductName());
 			dto.setModel(product.getModel());
 			dto.setTotalSold(totalSold);
+			dto.setProductStatus(product.getStatus() != null ? product.getStatus().getStatusName() : null);
 
 			// Hình ảnh MAIN và SECONDARY
 			List<ProductImage> filteredImages = product.getImages().stream()
@@ -236,6 +238,7 @@ List<OrderDetail> paidOrderDetails = orderDetailRepository.findAllByOrder_Paymen
 			dto.setSupplierName(product.getSupplier().getSupplierName());
 			dto.setBrandName(product.getBrand().getBrandName());
 			dto.setModel(product.getModel());
+			dto.setProductStatus(product.getStatus() != null ? product.getStatus().getStatusName() : null);
 
 			// Lấy ảnh MAIN và SECONDARY
 			List<ProductImage> filteredImages = product.getImages().stream()
@@ -276,6 +279,7 @@ List<OrderDetail> paidOrderDetails = orderDetailRepository.findAllByOrder_Paymen
 			ProductSuggestResponse dto = new ProductSuggestResponse();
 			dto.setProductId(product.getProductId());
 			dto.setProductName(product.getProductName());
+			dto.setProductStatus(product.getStatus() != null ? product.getStatus().getStatusName() : null);
 
 			// Lấy hình ảnh loại MAIN
 			product.getImages().stream().filter(image -> image.getImageType() == ImageType.MAIN).findFirst()
@@ -438,8 +442,88 @@ List<OrderDetail> paidOrderDetails = orderDetailRepository.findAllByOrder_Paymen
 
 	public ProductDetailResponse getProductDetail(Integer productId) {
 		Product product = productRepository.findById(productId)
-				.orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
 
+		ProductDetailResponse response = new ProductDetailResponse();
+		response.setBrandName(product.getBrand().getBrandName());
+		response.setCategoryName(product.getCategory().getCategoryName());
+		response.setProductName(product.getProductName());
+		response.setDescription(product.getDescription());
+		response.setBarcode(product.getBarcode());
+		response.setModel(product.getModel());
+		response.setWarrantyPeriod(product.getWarrantyPeriod());
+		response.setSupplierName(product.getSupplier().getSupplierName());
+
+		// Image
+		List<ProductDetailResponse.ImageDTO> imageDTOs = product.getImages().stream().map(img -> {
+			ProductDetailResponse.ImageDTO dto = new ProductDetailResponse.ImageDTO();
+			dto.setImageUrl(img.getImageUrl());
+			dto.setImageType(img.getImageType().toString());
+			return dto;
+		}).collect(Collectors.toList());
+		response.setImages(imageDTOs);
+
+		// Variant
+		List<ProductDetailResponse.VariantDTO> variantDTOs = new ArrayList<>();
+		Set<String> colorNames = new HashSet<>();
+		Set<String> sizeNames = new HashSet<>();
+		Set<String> materialNames = new HashSet<>();
+
+		for (Variant variant : product.getVariants()) {
+			ProductDetailResponse.VariantDTO dto = new ProductDetailResponse.VariantDTO();
+			dto.setVariantId(variant.getVariantId());
+			dto.setColorName(variant.getColor().getColorName());
+			dto.setColorCode(variant.getColor().getColorCode());
+			dto.setMaterialName(variant.getMaterial().getMaterialName());
+			dto.setSizeName(variant.getSize().getSizeName());
+			dto.setStock(variant.getStock());
+			dto.setPrice(variant.getPrice());
+			variantDTOs.add(dto);
+
+			colorNames.add(variant.getColor().getColorName());
+			sizeNames.add(variant.getSize().getSizeName());
+			materialNames.add(variant.getMaterial().getMaterialName());
+		}
+
+		response.setVariants(variantDTOs);
+		response.setColorNames(new ArrayList<>(colorNames));
+		response.setSizeNames(new ArrayList<>(sizeNames));
+		response.setMaterialNames(new ArrayList<>(materialNames));
+
+		return response;
+	}
+
+	public String simplify(String input) {
+		return Normalizer.normalize(input, Normalizer.Form.NFD)
+				.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+				.toLowerCase()
+				.replaceAll("[^a-z0-9 ]", "") // loại bỏ ký tự đặc biệt nếu cần
+				.trim();
+	}
+
+	public ProductDetailResponse getProductDetailByName(String inputName) {
+		// Thử tìm chính xác trước
+		Optional<Product> exactMatch = productRepository.findByProductName(inputName);
+		if (exactMatch.isPresent()) {
+			return getProductDetailFromEntity(exactMatch.get());
+		}
+
+		// Không có thì mới tìm gần đúng (không dấu, lowercase, etc.)
+		String simplifiedInput = simplify(inputName);
+
+		List<Product> allProducts = productRepository.findAll();
+		for (Product product : allProducts) {
+			String simplifiedProductName = simplify(product.getProductName());
+			if (simplifiedProductName.contains(simplifiedInput)) {
+				return getProductDetailFromEntity(product);
+			}
+		}
+
+		// Nếu không thấy gì cả
+		throw new ResourceNotFoundException("Không tìm thấy sản phẩm với tên hoặc gần giống: " + inputName);
+	}
+
+	private ProductDetailResponse getProductDetailFromEntity(Product product) {
 		ProductDetailResponse response = new ProductDetailResponse();
 		response.setBrandName(product.getBrand().getBrandName());
 		response.setCategoryName(product.getCategory().getCategoryName());
@@ -521,7 +605,7 @@ List<OrderDetail> paidOrderDetails = orderDetailRepository.findAllByOrder_Paymen
 		}
 	}
 
-	 public List<TopSellingProductNameResponse> getTopSellingProductNames() {
-        return orderDetailRepository.findTopSellingProductsByName();
-    }
+	public List<TopSellingProductNameResponse> getTopSellingProductNames() {
+		return orderDetailRepository.findTopSellingProductsByName();
+	}
 }

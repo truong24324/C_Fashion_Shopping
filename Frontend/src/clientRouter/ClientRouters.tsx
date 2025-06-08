@@ -10,7 +10,6 @@ import axios from 'axios';
 import { Spin } from 'antd';
 import { toast } from 'react-hot-toast';
 
-// Pages
 import HomePage from '../pages/UserPage/HomePage';
 import AuthenticatePage from '../pages/UserPage/AuthenticatePage';
 import CartPage from '../pages/UserPage/CartPage';
@@ -105,7 +104,7 @@ const AppRouterWrapper: React.FC = () => {
       <Route path="/store" element={<StoreListPage />} />
       <Route path="/fashion" element={<FashionPage />} />
       <Route path="/contact" element={<ContactPage />} />
-      <Route path="/product/:productId" element={<ProductDetailPage />} />
+      <Route path="/product/:productName" element={<ProductDetailPage />} />
       <Route path="/wishlist" element={<WishlistPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/about" element={<AboutPage />} />

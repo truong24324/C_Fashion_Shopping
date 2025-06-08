@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaEnvelope, FaArrowLeft } from 'react-icons/fa';
+import { FaEnvelope,} from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import toast from "react-hot-toast";
 

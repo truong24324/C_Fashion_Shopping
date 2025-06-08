@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Select, Button, Col, Spin, Row, Card } from 'antd';
+import { Form, Input, Select, Button, Row, Col, Card, Spin, Typography, Divider } from 'antd';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const { Option } = Select;
+const { Title } = Typography;
 
 interface Product {
   id: number;
@@ -25,7 +26,6 @@ interface OptionType {
   supplierName?: string;
   statusId?: number;
   statusName?: string;
-  name?: string;
 }
 
 const UpdateProductForm: React.FC = () => {
@@ -40,18 +40,20 @@ const UpdateProductForm: React.FC = () => {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [dataLoaded, setDataLoaded] = useState(false);
 
-  // Lấy danh sách ban đầu
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
         const token = localStorage.getItem('token');
+        const headers = { Authorization: `Bearer ${token}` };
+
         const [productsRes, brandsRes, categoriesRes, suppliersRes, statusRes] = await Promise.all([
-          axios.get('/api/products/all', { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get('/api/brands/all', { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get('/api/categories/all', { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get('/api/suppliers/all', { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get('/api/product-status/all', { headers: { Authorization: `Bearer ${token}` } })
+          axios.get('/api/products/all', { headers }),
+          axios.get('/api/brands/all', { headers }),
+          axios.get('/api/categories/all', { headers }),
+          axios.get('/api/suppliers/all', { headers }),
+          axios.get('/api/product-status/all', { headers }),
         ]);
+
         setProductList(productsRes.data.content || []);
         setBrands(brandsRes.data.content || []);
         setCategories(categoriesRes.data.content || []);
@@ -66,17 +68,14 @@ const UpdateProductForm: React.FC = () => {
     fetchInitialData();
   }, []);
 
-  // Khi chọn sản phẩm, tải chi tiết
   useEffect(() => {
     const fetchProductDetail = async () => {
       if (!selectedProductId || !dataLoaded) return;
-
       setLoading(true);
       try {
-        const res = await axios.get(`/api/products/${selectedProductId}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        const { data: product } = await axios.get(`/api/products/${selectedProductId}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
-        const product = res.data;
 
         form.setFieldsValue({
           productName: product.productName,
@@ -84,7 +83,7 @@ const UpdateProductForm: React.FC = () => {
           brand: product.brandId,
           category: product.categoryId,
           supplier: product.supplierId,
-          status: product.statusId
+          status: product.statusId,
         });
       } catch (err: any) {
         toast.error(err.response?.data?.message || 'Không thể tải chi tiết sản phẩm');
@@ -97,22 +96,19 @@ const UpdateProductForm: React.FC = () => {
   }, [selectedProductId, dataLoaded]);
 
   const onFinish = async (values: any) => {
-    if (!selectedProductId) {
-      toast.error('Vui lòng chọn sản phẩm');
-      return;
-    }
+    if (!selectedProductId) return toast.error('Vui lòng chọn sản phẩm');
 
     const payload = {
       ...values,
       brandId: values.brand,
       categoryId: values.category,
       supplierId: values.supplier,
-      statusId: values.status
+      statusId: values.status,
     };
 
     try {
       await axios.put(`/api/products/${selectedProductId}`, payload, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       toast.success('Cập nhật sản phẩm thành công');
     } catch (err: any) {
@@ -121,9 +117,11 @@ const UpdateProductForm: React.FC = () => {
   };
 
   return (
-    <Card className="bg-white shadow-lg rounded-2xl p-6 border border-gray-200">
+    <Card className="bg-white shadow-md rounded-xl p-6 border border-gray-200">
+      <Title level={4}>Cập nhật sản phẩm</Title>
+      <Divider />
       <Spin spinning={loading}>
-        <Form layout="vertical" onFinish={onFinish} form={form}>
+        <Form form={form} layout="vertical" onFinish={onFinish}>
           {/* Chọn sản phẩm */}
           <Form.Item label="Chọn sản phẩm để chỉnh sửa">
             <Select
@@ -131,72 +129,78 @@ const UpdateProductForm: React.FC = () => {
               placeholder="Chọn sản phẩm"
               onChange={(value: number) => setSelectedProductId(value)}
               filterOption={(input, option) =>
-                option?.children
+                option && option.children
                   ? option.children.toString().toLowerCase().includes(input.toLowerCase())
                   : false
               }
             >
-              {productList.map(product => (
-                <Option key={product.id} value={product.id}>
-                  {product.productName}
+              {productList.map(p => (
+                <Option key={p.id} value={p.id}>
+                  {p.productName}
                 </Option>
               ))}
             </Select>
           </Form.Item>
 
-          {/* Form chỉnh sửa */}
-          <Form.Item
-            label="Tên sản phẩm"
-            name="productName"
-            rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm' }]}
-          >
-            <Input />
-          </Form.Item>
+          {/* Tên & mô tả */}
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="productName"
+                label="Tên sản phẩm"
+                rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm' }]}
+              >
+                <Input placeholder="Nhập tên sản phẩm" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="description" label="Mô tả">
+                <Input.TextArea rows={2} placeholder="Mô tả ngắn gọn" />
+              </Form.Item>
+            </Col>
+          </Row>
 
-          <Form.Item label="Mô tả" name="description">
-            <Input.TextArea rows={3} />
-          </Form.Item>
-
+          {/* Danh mục, thương hiệu, nhà cung cấp, trạng thái */}
           <Row gutter={16}>
             <Col span={6}>
-              <Form.Item name="brand" label="Thương Hiệu" rules={[{ required: true }]}>
+              <Form.Item name="brand" label="Thương hiệu" rules={[{ required: true }]}>
                 <Select placeholder="Chọn thương hiệu">
-                  {brands.map(brand => (
-                    <Option key={brand.brandId} value={brand.brandId}>
-                      {brand.brandName}
+                  {brands.map(b => (
+                    <Option key={b.brandId} value={b.brandId}>
+                      {b.brandName}
                     </Option>
                   ))}
                 </Select>
               </Form.Item>
             </Col>
             <Col span={6}>
-              <Form.Item name="category" label="Loại Sản Phẩm" rules={[{ required: true }]}>
+              <Form.Item name="category" label="Loại sản phẩm" rules={[{ required: true }]}>
                 <Select placeholder="Chọn loại sản phẩm">
-                  {categories.map(category => (
-                    <Option key={category.categoryId} value={category.categoryId}>
-                      {category.categoryName}
+                  {categories.map(c => (
+                    <Option key={c.categoryId} value={c.categoryId}>
+                      {c.categoryName}
                     </Option>
                   ))}
                 </Select>
               </Form.Item>
             </Col>
             <Col span={6}>
-              <Form.Item name="supplier" label="Nhà Cung Cấp" rules={[{ required: true }]}>
+              <Form.Item name="supplier" label="Nhà cung cấp" rules={[{ required: true }]}>
                 <Select placeholder="Chọn nhà cung cấp">
-                  {suppliers.map(supplier => (
-                    <Option key={supplier.supplierId} value={supplier.supplierId}>
-                      {supplier.supplierName}
+                  {suppliers.map(s => (
+                    <Option key={s.supplierId} value={s.supplierId}>
+                      {s.supplierName}
                     </Option>
                   ))}
                 </Select>
               </Form.Item>
             </Col>
             <Col span={6}>
-              <Form.Item name="status" label="Trạng Thái" rules={[{ required: true }]}>
+              <Form.Item name="status" label="Trạng thái" rules={[{ required: true }]}>
                 <Select placeholder="Chọn trạng thái">
-                  {productStatuses.map(status => (
-                    <Option key={status.statusId} value={status.statusId}>
-                      {status.statusName}
+                  {productStatuses.map(st => (
+                    <Option key={st.statusId} value={st.statusId}>
+                      {st.statusName}
                     </Option>
                   ))}
                 </Select>
@@ -204,8 +208,9 @@ const UpdateProductForm: React.FC = () => {
             </Col>
           </Row>
 
+          {/* Nút cập nhật */}
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="w-full" loading={loading}>
+            <Button type="primary" htmlType="submit" block loading={loading}>
               Cập nhật sản phẩm
             </Button>
           </Form.Item>

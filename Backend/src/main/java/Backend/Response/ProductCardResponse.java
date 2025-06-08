@@ -13,6 +13,7 @@ public class ProductCardResponse {
     private List<String> image;
     private List<String> imageTypes;
     private BigDecimal price;
+    private String productStatus;
 
     private List<String> colorCodes;
     private List<String> sizeNames;

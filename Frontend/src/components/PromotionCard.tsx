@@ -1,4 +1,3 @@
-import React from "react";
 import { FaTag, FaShoppingCart } from "react-icons/fa";
 
 const promotions = [

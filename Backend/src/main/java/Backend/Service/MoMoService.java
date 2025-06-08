@@ -19,7 +19,6 @@ import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import Backend.Configuration.MomoUtil;
 import Backend.Model.Account;
 import Backend.Model.Discount;
 import Backend.Model.DiscountType;
@@ -32,6 +31,7 @@ import Backend.Repository.OrderStatusRepository;
 import Backend.Request.DiscountRequest;
 import Backend.Request.OrderRequest;
 import Backend.Response.PaymentResponse;
+import Backend.Util.MomoUtil;
 import lombok.RequiredArgsConstructor;
 
 @Service

@@ -6,6 +6,7 @@ import ProductCard from "./ProductCard";
 interface Product {
   productId: number;
   productName: string;
+  productStatus: string;
   model: string;
   image: string[];
   imageTypes: string[];

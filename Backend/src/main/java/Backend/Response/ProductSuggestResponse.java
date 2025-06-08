@@ -12,6 +12,7 @@ public class ProductSuggestResponse {
     private String image;
     private String imageTypes;
     private BigDecimal price;
+    private String productStatus;
 
     private List<String> colorCodes;
     private List<String> sizeNames;
@@ -21,7 +22,7 @@ public class ProductSuggestResponse {
 
     @Data
     public static class VariantDTO {
-    	private Integer variantId;
+        private Integer variantId;
         private String colorName;
         private String colorCode;
         private String materialName;

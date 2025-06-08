@@ -178,7 +178,7 @@ const EditProfileDisplay: React.FC = () => {
             </Form.Item>
 
             <Form.Item label="Email" name="email">
-              <Input prefix={<MailOutlined />} disabled />
+              <Input prefix={<MailOutlined />} />
             </Form.Item>
 
             <Form.Item label="Vai trò" name="role">

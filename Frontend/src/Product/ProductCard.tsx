@@ -10,6 +10,7 @@ interface Product {
     productId: number;
     productName: string;
     model: string;
+    productStatus: string;
     image: string[];
     imageTypes: string[];
     price: number;
@@ -277,6 +278,24 @@ const ProductCard: React.FC<{
         fetchWishlist();
     }, []);
 
+    const getColorForStatus = (status?: string): string => {
+        const colorPalette = [
+            '#2b8a3e', '#1c7ed6', '#6741d9', '#e67700', '#c92a2a',
+            '#0ca678', '#6f42c1', '#495057', '#f59f00', '#12b886',
+        ];
+
+        if (!status || typeof status !== 'string') {
+            return '#6c757d'; // fallback color (gray)
+        }
+
+        let hash = 0;
+        for (let i = 0; i < status.length; i++) {
+            hash = status.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const index = Math.abs(hash) % colorPalette.length;
+        return colorPalette[index];
+    };
+
     return (
         <>
             <div
@@ -311,9 +330,14 @@ const ProductCard: React.FC<{
                         />
                     )}
 
-                    <div className="absolute top-2 right-2 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded animate-pulse z-10">
-                        Hàng Mới
-                    </div>
+                    {product?.productStatus && (
+                        <div
+                            className="absolute top-2 right-2 text-white text-xs font-semibold px-2 py-1 rounded z-10 shadow-md"
+                            style={{ backgroundColor: getColorForStatus(product.productStatus) }}
+                        >
+                            {product.productStatus}
+                        </div>
+                    )}
 
                     <div
                         className={`absolute bottom-4 left-0 w-full flex justify-center items-center gap-4 transition-all duration-300 z-10 ${isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
@@ -338,7 +362,7 @@ const ProductCard: React.FC<{
                 <div className="p-4 flex flex-col gap-2">
                     <h3
                         className="text-md font-semibold text-gray-800 cursor-pointer hover:text-blue-500 transition"
-                        onClick={() => navigate(`/product/${product.productId}`)}
+                        onClick={() => navigate(`/product/${product.productName}`)}
                     >
                         {product.productName}
                     </h3>

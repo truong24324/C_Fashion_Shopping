@@ -1,6 +1,5 @@
-// components/ImageTypeCell.tsx
-import React, { useState } from "react";
-import { Select, message } from "antd";
+import { useState } from "react";
+import { Select, } from "antd";
 import axios from "axios";
 import toast from "react-hot-toast";
 
