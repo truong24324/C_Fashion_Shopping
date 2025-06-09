@@ -11,6 +11,8 @@ public class ProductStatusRequest {
     @Size(max = 50, message = "Tên trạng thái sản phẩm không được quá 50 ký tự.")
     private String statusName;
 
+    private Boolean isActive; // Mặc định là true
+
     @Size(max = 255, message = "Mô tả không được quá 255 ký tự.")
     private String description;
 

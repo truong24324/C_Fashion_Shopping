@@ -98,12 +98,24 @@ const OrderDisplay = () => {
     };
 
     const columns = [
-        { title: "ID", dataIndex: "orderId" },
-        { title: "Mã đơn hàng", dataIndex: "orderCode" },
-        { title: "Ngày đặt", dataIndex: "orderDate" },
-        { title: "Trạng thái thanh toán", dataIndex: "paymentStatus" },
-        { title: "Tổng tiền", dataIndex: "totalAmount", render: (v: number) => `${v.toLocaleString()} vn₫` },
-        { title: "Thanh toán", dataIndex: "paymentMethod" },
+        {
+            title: "ID", dataIndex: "orderId", ellipsis: true
+        },
+        {
+            title: "Mã đơn hàng", dataIndex: "orderCode", ellipsis: true
+        },
+        {
+            title: "Ngày đặt", dataIndex: "orderDate", ellipsis: true
+        },
+        {
+            title: "Trạng thái thanh toán", dataIndex: "paymentStatus", ellipsis: true
+        },
+        {
+            title: "Tổng tiền", dataIndex: "totalAmount", render: (v: number) => `${v.toLocaleString()} vn₫`, ellipsis: true
+        },
+        {
+            title: "Thanh toán", dataIndex: "paymentMethod", ellipsis: true
+        },
         {
             title: "Trạng thái",
             dataIndex: "orderStatus",

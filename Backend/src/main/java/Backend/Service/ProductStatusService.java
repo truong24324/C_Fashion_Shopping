@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import Backend.Model.Discount;
 import Backend.Model.ProductStatus;
 import Backend.Repository.ProductStatusRepository;
 import Backend.Request.ProductStatusRequest;
@@ -35,6 +36,7 @@ public class ProductStatusService {
 
         ProductStatus status = new ProductStatus();
         status.setStatusName(request.getStatusName());
+        status.setIsActive(request.getIsActive() != null ? request.getIsActive() : true); 
         status.setDescription(request.getDescription());
 
         return productStatusRepository.save(status);
@@ -64,5 +66,14 @@ public class ProductStatusService {
             throw new IllegalArgumentException("Không tìm thấy trạng thái sản phẩm để xóa!");
         }
         productStatusRepository.deleteById(statusId);
+    }
+
+    // ✅ Cập nhật trạng thái hoạt động của trạng thái sản phẩm
+    public void updateStatus(Integer statusId, boolean isActive) {
+        ProductStatus productStatus = productStatusRepository.findById(statusId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái sản phẩm!"));
+
+        productStatus.setIsActive(isActive);
+        productStatusRepository.save(productStatus);
     }
 }

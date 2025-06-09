@@ -49,7 +49,8 @@ public class ProductService {
 	private final Path productUploadPath = Path.of("uploads/products");
 
 	public List<ProductCardResponse> getLatestProducts() {
-		List<Product> products = productRepository.findTop50ByOrderByCreatedAtDesc();
+		List<Product> products = productRepository.findTop50ByStatus_IsActiveTrueOrderByCreatedAtDesc();
+
 		List<ProductCardResponse> productDTOs = new ArrayList<>();
 
 		for (Product product : products) {
@@ -228,7 +229,7 @@ public class ProductService {
 	}
 
 	public List<ProductOverviewResponse> getAllProductOverviews() {
-		List<Product> products = productRepository.findAll();
+		List<Product> products = productRepository.findAllByStatus_IsActiveTrue();
 
 		return products.stream().map(product -> {
 			ProductOverviewResponse dto = new ProductOverviewResponse();
@@ -272,7 +273,9 @@ public class ProductService {
 	}
 
 	public List<ProductSuggestResponse> getProductsSuggest() {
-		List<Product> products = productRepository.findRandomProducts();
+		List<Product> products = productRepository.findRandomProducts().stream()
+				.filter(p -> p.getStatus() != null && Boolean.TRUE.equals(p.getStatus().getIsActive()))
+				.collect(Collectors.toList());
 		List<ProductSuggestResponse> productDTOs = new ArrayList<>();
 
 		for (Product product : products) {

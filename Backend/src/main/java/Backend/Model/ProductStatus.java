@@ -1,11 +1,6 @@
 package Backend.Model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
@@ -20,6 +15,9 @@ public class ProductStatus {
 
     @Column(name = "STATUS_NAME", nullable = false, length = 50, unique = true)
     private String statusName;  // Tên trạng thái (ví dụ: "CÓ SẴN", "HẾT HÀNG", "NGỪNG BÁN")
+
+    @Column(name = "IS_ACTIVE", nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private Boolean isActive;  // Trạng thái hoạt động của trạng thái sản phẩm (có thể là true hoặc false)
 
     @Column(name = "DESCRIPTION", length = 255)
     private String description;  // Mô tả về trạng thái

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Table, Input, Pagination, Spin, Modal, Form } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { getColumnsConfig } from "src/constants/columnsConfig";

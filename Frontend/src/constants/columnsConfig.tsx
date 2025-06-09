@@ -282,6 +282,19 @@ export const getColumnsConfig = (
                 render: (text: any, record: any) => renderCell(text, record, "statusName"),
             },
             {
+                title: "Hiển thị phía người dùng",
+                dataIndex: "isActive",
+                key: "isActive",
+                render: (isActive: boolean, record: any) => (
+                    <Switch
+                        checked={isActive}
+                        checkedChildren="Hoạt động"
+                        unCheckedChildren="Tạm khóa"
+                        onChange={() => handleToggleActive(record.statusId, !isActive)}
+                    />
+                ),
+            },
+            {
                 title: "Mô tả",
                 dataIndex: "description",
                 key: "description",

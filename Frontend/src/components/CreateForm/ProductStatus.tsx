@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, Input, Button, Card, Typography, Spin } from "antd";
+import { Form, Input, Button, Card, Typography, Spin, Checkbox } from "antd";
 import { CheckCircleOutlined, LoadingOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -62,6 +62,19 @@ const ProductStatus = () => {
                         ]}
                     >
                         <Input placeholder="Nhập tên trạng thái" className="rounded-lg" />
+                    </Form.Item>
+
+                    {/* Checkbox để chọn trạng thái hoạt động */}
+                    <Form.Item
+                        name="isActive"
+                        valuePropName="checked"
+                        initialValue={true}
+                        className="flex items-center"
+
+                        
+                    >
+                        <Checkbox className="mr-2" />
+                        <span className="text-gray-600">Trạng thái hoạt động</span>
                     </Form.Item>
 
                     {/* Nhập mô tả trạng thái sản phẩm */}

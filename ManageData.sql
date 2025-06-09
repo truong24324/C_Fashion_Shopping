@@ -117,6 +117,7 @@ GO
 CREATE TABLE PRODUCT_STATUS (
     STATUS_ID INT IDENTITY PRIMARY KEY,            -- Mã trạng thái, khóa chính
     STATUS_NAME NVARCHAR(50) UNIQUE NOT NULL,      -- Tên trạng thái sản phẩm, duy nhất và không null
+	IS_ACTIVE Bit Default 1,
     DESCRIPTION NVARCHAR(255)                      -- Mô tả chi tiết về trạng thái
 );
 GO

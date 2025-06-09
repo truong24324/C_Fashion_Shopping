@@ -1,10 +1,8 @@
 package Backend.Model;
-import java.math.BigDecimal;
 
+import java.math.BigDecimal;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Data
