@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import axios from "axios";
 import {
   FaUser, FaShoppingCart, FaMapMarkerAlt, FaSearch, FaTimes,
   FaHeart, FaShoppingBag, FaStar, FaSignOutAlt, FaMicrophone
@@ -9,6 +8,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

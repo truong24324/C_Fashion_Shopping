@@ -3,11 +3,11 @@ import { FaTshirt } from "react-icons/fa";
 import ProductCard from "../../Product/ProductCard";
 import Loading from "src/components/common/Loading";
 import { toast } from "react-hot-toast";
-import axios from "axios";
 import clsx from "clsx";
 import Navbar from "src/Layouts/Navbar";
 import Footer from "src/Layouts/Footer";
 import { FiFilter } from "react-icons/fi";
+import axios from "axios";
 
 interface Product {
   productId: number;
@@ -293,7 +293,7 @@ const FashionPage: React.FC = () => {
             {renderFilterBox("Kích cỡ", uniqueValues.sizes, "size")}
             {renderFilterBox("Chất liệu", uniqueValues.materials, "material")}
             {renderFilterBox("Thương hiệu", uniqueValues.brands, "brand")}
-            {renderFilterBox("Danh mục", uniqueValues.categories, "category")}
+            {renderFilterBox("Danh mục sản phẩm", uniqueValues.categories, "category")}
             {renderFilterBox("Nhà cung cấp", uniqueValues.suppliers, "supplier")}
             {renderFilterBox("Bảo hành", uniqueValues.warranties, "warrantyPeriod")}
           </div>
@@ -311,6 +311,12 @@ const FashionPage: React.FC = () => {
             ) : filteredProducts.length === 0 ? (
               <div className="text-center text-gray-600">
                 Không tìm thấy sản phẩm phù hợp.
+                <button
+                  className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                  onClick={fetchProducts}
+                >
+                  Thử lại
+                </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center">

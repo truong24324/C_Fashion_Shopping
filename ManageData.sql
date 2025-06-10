@@ -206,12 +206,13 @@ CREATE TABLE DISCOUNTS (
     MIN_ORDER_AMOUNT INT,                               -- Giá trị đơn hàng tối thiểu để áp dụng mã giảm giá
     START_DATE DATETIME NOT NULL,                        -- Ngày bắt đầu khuyến mãi
     END_DATE DATETIME,                                  -- Ngày kết thúc khuyến mãi
+	APPLY_TYPE VARCHAR(10) NOT NULL DEFAULT 'SUBTOTAL',
     DESCRIPTION NVARCHAR(255),                          -- Mô tả khuyến mãi
     CREATED_AT DATETIME DEFAULT GETDATE(),              -- Thời gian tạo mã giảm giá
     UPDATED_AT DATETIME DEFAULT GETDATE()               -- Thời gian cập nhật mã giảm giá
 );
 GO
-
+alter table DISCOUNTS add APPLY_TYPE VARCHAR(10) NOT NULL DEFAULT 'SUBTOTAL'
 --B?ng yêu thích s?n ph?m
 CREATE TABLE WISHLISTS (
     WISHLIST_ID INT IDENTITY PRIMARY KEY,                  -- Mã yêu thích

@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Table, Button, Space, Tag, Divider } from 'antd';
 import { toast } from 'react-hot-toast';
-import axios from 'axios';
 import Navbar from 'src/Layouts/Navbar';
 import Footer from 'src/Layouts/Footer';
+import axios from 'axios';
 
 const PurchasedProductsPage = () => {
     interface Product {

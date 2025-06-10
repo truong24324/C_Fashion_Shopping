@@ -39,14 +39,14 @@ const RevenueChart: React.FC<{ className?: string }> = ({ className }) => {
 
   useEffect(() => {
     axios
-      .get<RevenueItem[]>("/api/admin/dashboard/monthly-revenue", {
+      .get("/api/admin/dashboard/monthly-revenue", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       })
       .then((res) => {
 
-        const formatted = res.data.map((item) => {
+        const formatted = res.data.map((item: RevenueItem) => {
           // Kiểm tra month hợp lệ 1-12, nếu không thì "Unknown"
           const monthLabel =
             item.month >= 1 && item.month <= 12

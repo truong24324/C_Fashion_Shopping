@@ -1,4 +1,3 @@
-import React from "react";
 import { FaCheckCircle } from "react-icons/fa";
 import Footer from "../../Layouts/Footer";
 import Navbar from "../../Layouts/Navbar";

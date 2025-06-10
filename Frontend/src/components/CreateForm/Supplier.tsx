@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Form, Input, Button, Card, Typography, Row, Col, Spin } from "antd";
 import { CheckCircleOutlined, LoadingOutlined } from "@ant-design/icons";
-import axios from "axios";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 const Supplier = () => {
     const [form] = Form.useForm();

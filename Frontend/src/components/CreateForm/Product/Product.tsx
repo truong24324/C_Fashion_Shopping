@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Card, UploadFile } from "antd";
-import axios from "axios";
 import toast from "react-hot-toast";
 import ProductForm from "./ProductForm";
 import { Brand, Category, Supplier, Status, Color, Size, Material, Variant } from "./types";
+import axios from "axios";
 
 interface ProductProps {
     variants: Variant[];

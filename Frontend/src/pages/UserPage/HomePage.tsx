@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import Footer from "../../Layouts/Footer";
 import BrandsIntroduction from "../../components/BrandsIntroduction";
 import ProductPanel from "../../Product/ProductPanel";
@@ -8,6 +7,7 @@ import Navbar from "../../Layouts/Navbar";
 import Slider from "../../Layouts/Slider";
 import toast from "react-hot-toast";
 import TopSellingProducts from "src/Product/TopSellingProducts";
+import axios from "axios";
 
 interface Product {
   productId: number;

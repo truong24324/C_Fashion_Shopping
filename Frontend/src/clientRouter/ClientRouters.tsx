@@ -6,7 +6,6 @@ import {
   useNavigate,
 } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
-import axios from 'axios';
 import { Spin } from 'antd';
 import { toast } from 'react-hot-toast';
 
@@ -27,6 +26,7 @@ import FashionPage from 'src/pages/UserPage/FashionPage';
 import PurchasedProductsPage from 'src/pages/UserPage/PurchasedProductsPage';
 import ProductReviewPage from 'src/pages/UserPage/ProductReviewPage';
 import OrderSuccessPage from 'src/pages/UserPage/OrderSuccessPage';
+import axios from 'axios';
 
 const isTokenValid = (token: string | null): boolean => {
   if (!token) return false;

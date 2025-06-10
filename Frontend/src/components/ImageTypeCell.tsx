@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Select, } from "antd";
-import axios from "axios";
 import toast from "react-hot-toast";
-
+import axios from "axios";
 const { Option } = Select;
 
 const ImageTypeCell = ({ value, imageId }: { value: string; imageId: number }) => {

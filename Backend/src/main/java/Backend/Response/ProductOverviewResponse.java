@@ -14,6 +14,7 @@ public class ProductOverviewResponse {
     private List<String> imageTypes;
     private BigDecimal price;
     private List<String> colorCodes;
+    private String categoryName;
     private String brandName;
     private List<String> colorNames;
     private List<String> sizeNames;

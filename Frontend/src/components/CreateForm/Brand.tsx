@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Form, Input, Upload, Button, Card, Typography, Spin } from "antd";
 import { UploadOutlined, CheckCircleOutlined, LoadingOutlined } from "@ant-design/icons";
-import axios from "axios";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 const Brand = () => {
     const [form] = Form.useForm();

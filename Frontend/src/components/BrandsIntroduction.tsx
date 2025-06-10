@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { toast } from "react-hot-toast";
-import axios from "axios";
 import Loading from "./common/Loading";
-
+import axios from "axios";
 const CACHE_KEY = "cachedBrands";
 const CACHE_EXPIRE_KEY = "cachedBrandsExpire";
 const CACHE_DURATION = 10 * 60 * 1000; // 10 phút

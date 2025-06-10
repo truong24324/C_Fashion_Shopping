@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Form, Input, InputNumber, DatePicker, Button, Card, Spin, Switch, Row, Col, Select,} from "antd";
 import { CheckCircleOutlined,} from "@ant-design/icons";
-import axios from "axios";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 const Discount = () => {
   const [form] = Form.useForm();
@@ -106,7 +106,7 @@ const Discount = () => {
 
           {/* Hàng 2 */}
           <Row gutter={16}>
-            <Col span={8}>
+            <Col span={6}>
               <Form.Item name="discountType" label="Loại giảm" rules={[{ required: true, message: "⚠️ Vui lòng chọn loại giảm!" }]}>
                 <Select placeholder="Chọn loại giảm">
                   <Select.Option value="PERCENT">Phần trăm (%)</Select.Option>
@@ -115,13 +115,22 @@ const Discount = () => {
               </Form.Item>
             </Col>
 
-            <Col span={8}>
+            <Col span={6}>
               <Form.Item name="isActive" label="Kích hoạt" valuePropName="checked">
                 <Switch />
               </Form.Item>
             </Col>
 
-            <Col span={8}>
+            <Col span={6}>
+              <Form.Item name="discountApplyType" label="Áp dụng giảm giá" rules={[{ required: true, message: "⚠️ Vui lòng chọn cách áp dụng!" }]}>
+                <Select placeholder="Chọn cách áp dụng">
+                  <Select.Option value="SUBTOTAL">Tổng tiền hàng</Select.Option>
+                  <Select.Option value="SHIPPING">Phí vận chuyển</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+
+            <Col span={6}>
               <Form.Item
                 name="startDate"
                 label="Ngày bắt đầu"

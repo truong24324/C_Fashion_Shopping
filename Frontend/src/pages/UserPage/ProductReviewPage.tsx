@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { Rate, Button, Input, Form } from "antd";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-hot-toast";
-import axios from "axios";
 import Navbar from "src/Layouts/Navbar";
 import Footer from "src/Layouts/Footer";
+import axios from "axios";
 
 const { TextArea } = Input;
 

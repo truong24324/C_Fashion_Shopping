@@ -240,6 +240,7 @@ public class ProductService {
 			dto.setBrandName(product.getBrand().getBrandName());
 			dto.setModel(product.getModel());
 			dto.setProductStatus(product.getStatus() != null ? product.getStatus().getStatusName() : null);
+			dto.setCategoryName(product.getCategory().getCategoryName());
 
 			// Lấy ảnh MAIN và SECONDARY
 			List<ProductImage> filteredImages = product.getImages().stream()

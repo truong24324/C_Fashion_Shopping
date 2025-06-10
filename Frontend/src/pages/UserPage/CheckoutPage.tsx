@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
 import Footer from "src/Layouts/Footer";
 import Navbar from "src/Layouts/Navbar";
+import axios from "axios";
 
 interface DecodedToken {
     accountId: string;

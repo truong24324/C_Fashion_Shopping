@@ -1,8 +1,8 @@
 import { CheckCircle, Home } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 type OrderDetail = {
   productName: string;

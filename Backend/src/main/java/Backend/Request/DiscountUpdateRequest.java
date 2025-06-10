@@ -6,7 +6,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import Backend.CustomDeserializer.CustomDoubleDeserializer;
+import Backend.Model.DiscountApplyType;
 import Backend.Model.DiscountType;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -33,9 +35,14 @@ public class DiscountUpdateRequest {
     @Positive(message = "Số lượng phải lớn hơn 0")
     private Integer quantity;
 
+    
     private Integer maxUsagePerUser;
 
     private Double minOrderAmount;
+
+    @NotNull(message = "Loại áp dụng giảm giá không được để trống")
+    @Size(max = 10, message = "Loại áp dụng giảm giá không được vượt quá 10 ký tự")
+    private DiscountApplyType discountApplyType;
 
     private String description;
 

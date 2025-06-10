@@ -7,7 +7,6 @@ import LoginForm from '../../AuthForm/LoginForm';
 import ForgotPassword from '../../AuthForm/ForgotPassword';
 import RegisterForm from '../../AuthForm/RegisterForm';
 import PersonalInfoForm from '../../AuthForm/PersonalInfoForm';
-import axios from "axios";
 
 const AuthenticatePage: React.FC = () => {
   const [step, setStep] = useState<"welcome" | "login" | "register" | "personalInfo" | "forgotpassword">("welcome");
@@ -182,23 +181,23 @@ const AuthenticatePage: React.FC = () => {
     return new File([u8arr], filename, { type: mime });
   };
 
-  axios.interceptors.response.use(
-    response => response,
-    async error => {
-      if (error.response.status === 401 && error.response.data.message === "Token không hợp lệ hoặc đã hết hạn.") {
-        const refreshTokenResponse = await axios.post('/api/refresh-token', {}, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
+  // axios.interceptors.response.use(
+  //   response => response,
+  //   async error => {
+  //     if (error.response.status === 401 && error.response.data.message === "Token không hợp lệ hoặc đã hết hạn.") {
+  //       const refreshTokenResponse = await axios.post('/api/refresh-token', {}, {
+  //         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+  //       });
   
-        if (refreshTokenResponse.status === 200) {
-          localStorage.setItem('token', refreshTokenResponse.data.token);
-          error.config.headers['Authorization'] = `Bearer ${refreshTokenResponse.data.token}`;
-          return axios(error.config); // retry the failed request
-        }
-      }
-      return Promise.reject(error);
-    }
-  );
+  //       if (refreshTokenResponse.status === 200) {
+  //         localStorage.setItem('token', refreshTokenResponse.data.token);
+  //         error.config.headers['Authorization'] = `Bearer ${refreshTokenResponse.data.token}`;
+  //         return axios(error.config); // retry the failed request
+  //       }
+  //     }
+  //     return Promise.reject(error);
+  //   }
+  // );
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-600 p-6 relative overflow-hidden">

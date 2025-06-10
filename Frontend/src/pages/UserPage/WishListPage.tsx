@@ -5,9 +5,9 @@ import Footer from "../../Layouts/Footer";
 import { motion } from "framer-motion";
 import { FaHeart, FaShoppingCart } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
-import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import Loading from "../../components/common/Loading";
+import axios from "axios";
 
 interface Product {
   productId: number;

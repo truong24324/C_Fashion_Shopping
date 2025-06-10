@@ -1,5 +1,4 @@
 import React, { useState, useEffect, } from "react";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
 import Navbar from "../../Layouts/Navbar";
@@ -11,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import CartItem from "src/Cart/CartItem";
 import ShippingAddress from "src/Cart/ShippingAddress";
 import DiscountAndNote from "src/Cart/DiscountAndNote";
-
+import axios from "axios";
 interface CartItemType {
   variantId: number;
   productName: string;

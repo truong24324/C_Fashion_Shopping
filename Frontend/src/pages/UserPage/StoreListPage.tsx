@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FaExchangeAlt, FaShieldAlt, FaGift, FaPhone } from "react-icons/fa";
 import Footer from "../../Layouts/Footer";
 import Navbar from "../../Layouts/Navbar";

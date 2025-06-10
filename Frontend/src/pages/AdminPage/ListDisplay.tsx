@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { Table, Input, Pagination, Spin, Modal, Form } from "antd";
 import toast from "react-hot-toast";
-import axios from "axios";
 import { getColumnsConfig } from "src/constants/columnsConfig";
-
+import axios from "axios";
 const API_URLS = {
     product: "/api/products/all",
     brand: "/api/brands/all",

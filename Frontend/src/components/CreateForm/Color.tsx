@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Form, Input, Button, Card, Typography, Spin } from "antd";
 import { SketchPicker } from "react-color";
 import { CheckCircleOutlined, LoadingOutlined, BgColorsOutlined } from "@ant-design/icons";
-import axios from "axios";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 const Color = () => {
     const [form] = Form.useForm();

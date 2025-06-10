@@ -347,6 +347,13 @@ export const getColumnsConfig = (
                 render: (date: string | null) => date || "Không có",
                 ellipsis: true
             },
+            {
+                title: "Áp dụng giảm giá",
+                dataIndex: "discountApplyType",
+                key: "discountApplyType",
+                render: (type: string) => type === "SUBTOTAL" ? "Tổng tiền hàng" : "Phí vận chuyển",
+                ellipsis: true
+            },
             { title: "Mô tả", dataIndex: "description", key: "description", ellipsis: true, render: (text: any, record: any) => renderCell(text, record, "description") },
             {
                 title: "Hành động",

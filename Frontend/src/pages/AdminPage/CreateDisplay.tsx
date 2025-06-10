@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import CreateBrandForm from "../../components/CreateForm/Brand";
 import Product from "../../components/CreateForm/Product/Product";
 import CreateCategoryForm from "../../components/CreateForm/Category"; // Import form danh mục

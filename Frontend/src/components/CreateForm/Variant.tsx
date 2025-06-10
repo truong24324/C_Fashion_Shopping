@@ -8,10 +8,10 @@ import {
   Typography,
   Spin,
 } from "antd";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 import { CheckCircleOutlined, LoadingOutlined } from "@ant-design/icons";
+import axios from "axios";
 
 const { Option } = Select;
 

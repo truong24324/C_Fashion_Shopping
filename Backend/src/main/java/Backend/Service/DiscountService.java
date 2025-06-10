@@ -134,7 +134,7 @@ public class DiscountService {
             discount.setEndDate(request.getEndDate());
             isUpdated = true;
         }
-
+        
         // Kiểm tra và cập nhật description nếu có thay đổi
         if (request.getDescription() != null && !request.getDescription().equals(discount.getDescription())) {
             discount.setDescription(request.getDescription());

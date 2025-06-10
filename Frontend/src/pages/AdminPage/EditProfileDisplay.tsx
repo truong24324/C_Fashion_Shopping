@@ -10,10 +10,10 @@ import {
   Card,
 } from "antd";
 import { UserOutlined, MailOutlined, PhoneOutlined } from "@ant-design/icons";
-import axios from "axios";
 import {jwtDecode} from "jwt-decode";
 import toast from "react-hot-toast";
 import moment from "moment";
+import axios from "axios";
 
 const { Option } = Select;
 

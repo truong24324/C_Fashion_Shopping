@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 
 const Slider: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -66,19 +65,19 @@ const Slider: React.FC = () => {
   return (
     <div className="relative w-full h-screen bg-cover bg-center transition-all duration-500 ease-in-out"
       style={{ backgroundImage: `url(${slides[currentIndex].image})` }}>
-      <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+      {/* <div className="absolute inset-0 bg-black bg-opacity-50"></div> */}
       <div className="absolute inset-0 flex justify-center items-center z-10 px-8 py-4 text-center text-white">
-        <div>
+        {/* <div>
           <h2 className="text-4xl font-bold sm:text-5xl">{slides[currentIndex].title}</h2>
           <p className="mt-2 text-xl sm:text-2xl">{slides[currentIndex].description}</p>
           <p className="mt-4 text-2xl sm:text-3xl">{slides[currentIndex].price}</p>
           <Link to={slides[currentIndex].link} className="mt-4 inline-block py-2 px-6 bg-yellow-400 text-black font-semibold rounded-md hover:bg-yellow-500">
             Xem sản phẩm
           </Link>
-        </div>
+        </div> */}
       </div>
 
-      {/* Nút Previous */}
+      {/* Nút Previous
       <button
         className="absolute top-1/2 left-4 transform -translate-y-1/2 text-4xl sm:text-5xl text-white hover:text-yellow-400 transition"
         onClick={prevSlide}
@@ -87,12 +86,12 @@ const Slider: React.FC = () => {
       </button>
 
       {/* Nút Next */}
-      <button
+      {/* <button
         className="absolute top-1/2 right-4 transform -translate-y-1/2 text-4xl sm:text-5xl text-white hover:text-yellow-400 transition"
         onClick={nextSlide}
       >
         &#10095;
-      </button>
+      </button>  */}
 
       {/* Chấm tròn có thanh đếm thời gian */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
