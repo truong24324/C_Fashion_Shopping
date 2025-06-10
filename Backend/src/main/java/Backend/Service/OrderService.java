@@ -55,6 +55,7 @@ public class OrderService {
         order.setPaymentMethod(orderRequest.getPaymentMethod());
         order.setPaymentStatus(paymentStatus);
         order.setShippingFee(orderRequest.getShippingFee());
+        order.setDiscountCode(orderRequest.getDiscountCode());
         order.setIsActive(true);
 
         Random random = new Random(); // Khởi tạo

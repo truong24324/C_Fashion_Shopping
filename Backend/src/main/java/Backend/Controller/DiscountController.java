@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import Backend.Model.Discount;
+import Backend.Request.ApplyDiscountRequest;
 import Backend.Request.DiscountRequest;
 import Backend.Request.DiscountUpdateRequest;
 import Backend.Response.ApiResponse;
@@ -28,7 +29,6 @@ public class DiscountController {
 
 	private final DiscountService discountService;
 
-
 	// ✅ API lấy danh sách mã giảm giá (phân trang + sắp xếp)
 	@GetMapping("/all")
 	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
@@ -44,16 +44,16 @@ public class DiscountController {
 	@PreAuthorize("hasAnyAuthority('ROLE_Customer')")
 	@GetMapping("/public")
 	public ResponseEntity<List<DiscountPublicResponse>> getPublicDiscounts() {
-	    List<DiscountResponse> discounts = discountService.getPublicDiscounts();
+		List<DiscountResponse> discounts = discountService.getPublicDiscounts();
 
-	    List<DiscountPublicResponse> publicDiscounts = discounts.stream().map(discount -> {
-	        DiscountPublicResponse res = new DiscountPublicResponse();
-	        res.setDiscountCode(discount.getDiscountCode());
-	        res.setDescription(discount.getDescription());
-	        return res;
-	    }).collect(Collectors.toList());
+		List<DiscountPublicResponse> publicDiscounts = discounts.stream().map(discount -> {
+			DiscountPublicResponse res = new DiscountPublicResponse();
+			res.setDiscountCode(discount.getDiscountCode());
+			res.setDescription(discount.getDescription());
+			return res;
+		}).collect(Collectors.toList());
 
-	    return ResponseEntity.ok(publicDiscounts);
+		return ResponseEntity.ok(publicDiscounts);
 	}
 
 	// ✅ API thêm mã giảm giá
@@ -68,17 +68,28 @@ public class DiscountController {
 		return ResponseEntity.ok(new ApiResponse<>(true, "Thêm mã giảm giá thành công!", created));
 	}
 
+	@PostMapping("/apply")
+	public ResponseEntity<ApiResponse<Double>> applyDiscount(@RequestBody ApplyDiscountRequest request) {
+		Discount discount = discountService.validateAndApplyDiscount(
+				request.getDiscountCode(), request.getSubtotal(), request.getAccountId());
+
+		double discountAmount = discountService.calculateDiscountAmount(
+				discount, request.getSubtotal(), request.getShippingFee());
+		ApiResponse<Double> response = new ApiResponse<>(true, "Áp dụng mã giảm giá thành công!", discountAmount);
+		return ResponseEntity.ok(response);
+	}
+
 	// ✅ API cập nhật mã giảm giá
 	@PutMapping("/{discountId}")
 	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
 	public ResponseEntity<ApiResponse<Discount>> updateDiscount(
-	        @PathVariable Integer discountId,
-	        @RequestBody @Valid DiscountUpdateRequest request) {
+			@PathVariable Integer discountId,
+			@RequestBody @Valid DiscountUpdateRequest request) {
 
-	    request.sanitizeDiscountValue(); // <--- Làm sạch dữ liệu ở đây
+		request.sanitizeDiscountValue(); // <--- Làm sạch dữ liệu ở đây
 
-	    Discount updated = discountService.updateDiscount(discountId, request);
-	    return ResponseEntity.ok(new ApiResponse<>(true, "Cập nhật mã giảm giá thành công!", updated));
+		Discount updated = discountService.updateDiscount(discountId, request);
+		return ResponseEntity.ok(new ApiResponse<>(true, "Cập nhật mã giảm giá thành công!", updated));
 	}
 
 	@PatchMapping("/{discountId}/status")

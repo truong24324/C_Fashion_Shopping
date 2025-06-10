@@ -16,4 +16,6 @@ public interface DiscountRepository extends JpaRepository<Discount, Integer> {
 
 	List<Discount> findByIsActiveTrue();
 
+    Optional<Discount> findByDiscountCodeAndIsActiveTrue(String code);
+
 }

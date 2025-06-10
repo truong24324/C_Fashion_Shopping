@@ -40,7 +40,7 @@ const CheckoutPage: React.FC = () => {
     const [orderCode, setOrderCode] = useState<string | null>(null);
     const [amount, setAmount] = useState<number | null>(null);
     const [dataOrder, setDataOrder] = useState<any>(null);
-    const [dataOrderDetails ,setDataOrderDetails] = useState<any>(null);
+    const [dataOrderDetails, setDataOrderDetails] = useState<any>(null);
 
     const [provinces, setProvinces] = useState<any[]>([]);
     const [districts, setDistricts] = useState<any[]>([]);
@@ -146,6 +146,7 @@ const CheckoutPage: React.FC = () => {
             phone: customerInfo.phone,
             accountId: accountId,
             totalAmount: pricing.total,
+            discountCode: pricing.coupon,
             orderDetails: items.map((item: any) => ({
                 variantId: item.variantId,
                 quantity: item.quantity,

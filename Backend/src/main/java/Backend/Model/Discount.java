@@ -48,7 +48,7 @@ public class Discount {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "APPLY_TYPE", nullable = false)
-    private DiscountApplyType applyType = DiscountApplyType.SUBTOTAL; // mặc định giảm trên subtotal
+    private DiscountApplyType discountApplyType; // mặc định giảm trên subtotal
 
     @Column(name = "DESCRIPTION")
     private String description;

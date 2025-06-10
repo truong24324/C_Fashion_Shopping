@@ -19,6 +19,7 @@ const Discount = () => {
         isActive: values.isActive || false,
         quantity: values.quantity,
         maxUsagePerUser: values.maxUsagePerUser || null,
+        discountApplyType: values.discountApplyType,
         minOrderAmount: values.minOrderAmount || null,
         startDate: values.startDate.format("YYYY-MM-DD HH:mm:ss"),
         endDate: values.endDate?.format("YYYY-MM-DD HH:mm:ss") || null,

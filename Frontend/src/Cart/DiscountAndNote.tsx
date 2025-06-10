@@ -14,6 +14,13 @@ interface DiscountAndNoteProps {
   setInvoice: (value: boolean) => void;
   note: string;
   setNote: (value: string) => void;
+  setDiscount: (value: number) => void;
+  subtotal: number;
+  shippingFee?: number;
+  setShippingFee: (fee: number | null) => void;
+  user?: {
+    accountId: number;
+  };
 }
 
 const DiscountAndNote: React.FC<DiscountAndNoteProps> = ({
@@ -23,29 +30,55 @@ const DiscountAndNote: React.FC<DiscountAndNoteProps> = ({
   setInvoice,
   note,
   setNote,
+  setDiscount,
+  subtotal,
+  shippingFee, // mặc định là 0 nếu không có giá trị
+  user,
+  setShippingFee,
 }) => {
   const [showDiscountPanel, setShowDiscountPanel] = useState(false);
   const [availableCoupons, setAvailableCoupons] = useState<Discount[]>([]);
   const [loading, setLoading] = useState(false);
-
+  
   useEffect(() => {
     if (showDiscountPanel) {
       setLoading(true);
       axios
         .get("/api/discounts/public",
-          {headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          }},
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            }
+          },
         )
         .then((res) => setAvailableCoupons(res.data))
-        .catch((error) => toast.error(error.response?.data?.message ||"Lỗi khi lấy mã giảm giá:"))
+        .catch((error) => toast.error(error.response?.data?.message || "Lỗi khi lấy mã giảm giá:"))
         .finally(() => setLoading(false));
     }
   }, [showDiscountPanel]);
 
-  const handleApplyCoupon = (discountCode: string) => {
-    setCoupon(discountCode);
-    setShowDiscountPanel(false);
+  const handleApplyCoupon = async (discountCode: string) => {
+    try {
+      const res = await axios.post('/api/discounts/apply', {
+        discountCode,
+        subtotal, // truyền vào từ props hoặc global state
+        shippingFee,
+        accountId: user?.accountId, // nếu có
+      },  {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+      setCoupon(discountCode);
+      setDiscount(res.data.data); // cập nhật số tiền giảm
+      toast.success('Áp dụng mã giảm giá thành công!');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Không áp dụng được mã giảm giá');
+      setDiscount(0);
+    } finally {
+      setShowDiscountPanel(false);
+    }
   };
 
   return (

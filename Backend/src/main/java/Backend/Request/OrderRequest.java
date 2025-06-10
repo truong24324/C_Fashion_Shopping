@@ -53,6 +53,7 @@ public class OrderRequest {
         private Integer quantity;
     }
 
+    private String discountCode;
     private List<DiscountRequest> discount;
 
     @Positive(message = "Phí vận chuyển phải lớn hơn 0")

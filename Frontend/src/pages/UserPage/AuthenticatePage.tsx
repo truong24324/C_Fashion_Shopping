@@ -67,6 +67,7 @@ const AuthenticatePage: React.FC = () => {
     ];
     keysToClear.forEach(key => localStorage.removeItem(key));
     localStorage.setItem("token", data.token);
+    localStorage.setItem("refresh_token", data.refreshToken);
 
     if (roles.includes("ROLE_Admin") || roles.includes("ROLE_Super_Admin") || roles.includes("ROLE_Manager")) {
       navigate("/admin");

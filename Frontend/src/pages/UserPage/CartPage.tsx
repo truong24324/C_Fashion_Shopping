@@ -11,6 +11,7 @@ import CartItem from "src/Cart/CartItem";
 import ShippingAddress from "src/Cart/ShippingAddress";
 import DiscountAndNote from "src/Cart/DiscountAndNote";
 import axios from "axios";
+
 interface CartItemType {
   variantId: number;
   productName: string;
@@ -24,7 +25,9 @@ interface CartItemType {
   availableMaterials: string[];
   selected: boolean;
   toggleSelectItem: (variantId: number) => void;
-  weightPerUnit?: number; // Optional property for weight per unit
+  weightPerUnit?: number;
+  setDiscount: (value: number) => void;
+  setShippingFee: (fee: number | null) => void;
 }
 
 interface Variant {
@@ -70,12 +73,14 @@ const CartPage: React.FC = () => {
   const [coupon, setCoupon] = useState("");
   const [invoice, setInvoice] = useState(false);
   const [note, setNote] = useState("");
-  const [shippingFee, setShippingFee] = useState<number | null>(null);
   const [productList, setProductList] = useState<Product[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [estimatedDelivery, setEstimatedDelivery] = useState<string>(""); // Dùng để lưu thời gian giao hàng
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [isCalculatingFee, setIsCalculatingFee] = useState(false);
+  const [discount, setDiscount] = useState(0); // Giả sử không có giảm giá ban đầu
+  const [total, setTotal] = useState<number>(0);
+  const [shippingFee, setShippingFee] = useState<number | null>(null); // Phí vận chuyển, có thể là null nếu chưa tính
 
   const navigate = useNavigate();
 
@@ -398,6 +403,7 @@ const CartPage: React.FC = () => {
         province: province || "",
         district: district || "",
         ward: ward || "",
+
       }, pricing: { subtotal, discount, shippingFee, total, note, coupon, invoice, estimatedDelivery },
     };
 
@@ -408,8 +414,10 @@ const CartPage: React.FC = () => {
     .filter(item => selectedItems.includes(item.variantId))  // Lọc chỉ các sản phẩm đã chọn
     .reduce((sum, item) => sum + item.totalPrice, 0);  // Tính tổng giá trị các sản phẩm đã chọn
 
-  const discount = 0;
-  const total = subtotal - discount + (shippingFee || 0);  // Tính tổng sau khi áp dụng phí vận chuyển
+  useEffect(() => {
+    const computed = (subtotal ?? 0) - (discount ?? 0) + (shippingFee ?? 0);
+    setTotal(computed > 0 ? computed : 0); // Không để âm
+  }, [subtotal, discount, shippingFee]);
 
   return (
     <div>
@@ -488,15 +496,19 @@ const CartPage: React.FC = () => {
             setInvoice={setInvoice}
             note={note}
             setNote={setNote}
+            setDiscount={setDiscount}
+            subtotal={subtotal}
+            shippingFee={shippingFee ?? 0}
+            setShippingFee={setShippingFee}
           />
           <div className="space-y-2 text-sm lg:text-base">
             <div className="flex justify-between">
               <span>Tạm tính:</span>
-              <span>{subtotal.toLocaleString()} vn₫</span>
+              <span>{(subtotal ?? 0).toLocaleString()} vn₫</span>
             </div>
             <div className="flex justify-between">
               <span>Giảm giá:</span>
-              <span>{discount.toLocaleString()} vn₫</span>
+              <span className="text-green-600">- {(discount ?? 0).toLocaleString()} vn₫</span>
             </div>
             <div className="flex justify-between">
               <span>Phí vận chuyển:</span>

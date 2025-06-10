@@ -27,14 +27,14 @@ public class JwtService {
     private long expiration;
 
     @Value("${jwt.refreshExpiration}")
-    private long refreshExpiration;  // Refresh token expiration time
+    private long refreshExpiration; // Refresh token expiration time
 
     // Tạo token từ account
     public String generateToken(Account account) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", account.getEmail()); // Đảm bảo email đúng
         claims.put("accountId", String.valueOf(account.getAccountId()));
-        claims.put("roles", account.getAuthorities());  // Thêm vai trò vào token
+        claims.put("roles", account.getAuthorities()); // Thêm vai trò vào token
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -44,7 +44,6 @@ public class JwtService {
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-
 
     // Kiểm tra token có hợp lệ không
     public boolean isTokenValid(String token, UserDetails userDetails) {
@@ -87,7 +86,7 @@ public class JwtService {
         if (secretKey == null || secretKey.isBlank()) {
             throw new IllegalStateException("Secret Key chưa được cấu hình hoặc bị null!");
         }
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);  // vẫn dùng base64 decode
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey); // vẫn dùng base64 decode
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
@@ -109,9 +108,23 @@ public class JwtService {
             throw new RuntimeException("Không thể giải mã token", e);
         }
     }
+
     public boolean isTokenExpiringSoon(String token, int minutes) {
         Date expiration = extractExpiration(token);
         return expiration != null && expiration.getTime() - System.currentTimeMillis() < minutes * 60 * 1000;
     }
 
+    public String generateRefreshToken(Account account) {
+        // Thường chỉ cần subject, không cần quá nhiều claims
+        return Jwts.builder()
+                .setSubject(account.getEmail())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + refreshExpiration))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public int getRefreshTokenExpirationMillis() {
+        return (int) refreshExpiration;
+    }
 }

@@ -79,7 +79,8 @@ public class DiscountService {
             isUpdated = true;
         }
 
-        // Call sanitizeDiscountValue to process discountValue and set discountType if needed
+        // Call sanitizeDiscountValue to process discountValue and set discountType if
+        // needed
         request.sanitizeDiscountValue();
         Double newValue = request.getDiscountValue();
 
@@ -112,7 +113,8 @@ public class DiscountService {
         }
 
         // Kiểm tra và cập nhật maxUsagePerUser nếu có thay đổi
-        if (request.getMaxUsagePerUser() != null && !request.getMaxUsagePerUser().equals(discount.getMaxUsagePerUser())) {
+        if (request.getMaxUsagePerUser() != null
+                && !request.getMaxUsagePerUser().equals(discount.getMaxUsagePerUser())) {
             discount.setMaxUsagePerUser(request.getMaxUsagePerUser());
             isUpdated = true;
         }
@@ -134,7 +136,7 @@ public class DiscountService {
             discount.setEndDate(request.getEndDate());
             isUpdated = true;
         }
-        
+
         // Kiểm tra và cập nhật description nếu có thay đổi
         if (request.getDescription() != null && !request.getDescription().equals(discount.getDescription())) {
             discount.setDescription(request.getDescription());
@@ -180,6 +182,7 @@ public class DiscountService {
         discount.setStartDate(req.getStartDate());
         discount.setEndDate(req.getEndDate());
         discount.setDescription(req.getDescription());
+        discount.setDiscountApplyType(req.getDiscountApplyType());
     }
 
     public void updateDiscountStatus(Integer discountId, boolean isActive) {
@@ -189,4 +192,44 @@ public class DiscountService {
         discount.setIsActive(isActive);
         discountRepository.save(discount);
     }
+
+    public Discount validateAndApplyDiscount(String code, double subtotal, Integer accountId) {
+        Discount discount = discountRepository.findByDiscountCodeAndIsActiveTrue(code)
+                .orElseThrow(() -> new RuntimeException("Mã giảm giá không hợp lệ hoặc đã hết hạn"));
+
+        if (discount.getStartDate().isAfter(LocalDateTime.now()) ||
+                (discount.getEndDate() != null && discount.getEndDate().isBefore(LocalDateTime.now()))) {
+            throw new RuntimeException("Mã giảm giá đã hết hạn");
+        }
+
+        if (discount.getMinOrderAmount() != null && subtotal < discount.getMinOrderAmount()) {
+            throw new RuntimeException("Đơn hàng không đủ điều kiện áp dụng mã giảm giá");
+        }
+
+        if (discount.getQuantity() <= 0) {
+            throw new RuntimeException("Mã giảm giá đã hết số lượng sử dụng");
+        }
+
+        // Giảm số lượng mã giảm giá
+        discount.setQuantity(discount.getQuantity() - 1);
+       
+        return discount;
+    }
+
+    public double calculateDiscountAmount(Discount discount, double subtotal, double shippingFee) {
+        double value = discount.getDiscountValue();
+        switch (discount.getDiscountApplyType()) {
+            case SUBTOTAL:
+                return discount.getDiscountType() == DiscountType.PERCENT
+                        ? subtotal * (value / 100)
+                        : value;
+            case SHIPPING:
+                return discount.getDiscountType() == DiscountType.PERCENT
+                        ? shippingFee * (value / 100)
+                        : Math.min(value, shippingFee);
+            default:
+                return 0;
+        }
+    }
+
 }

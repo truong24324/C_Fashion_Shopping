@@ -46,7 +46,6 @@ public class DiscountRequest {
     private Double minOrderAmount;
 
     @NotNull(message = "Loại áp dụng giảm giá không được để trống")
-    @Size(max = 10, message = "Loại áp dụng giảm giá không được vượt quá 10 ký tự")
     private DiscountApplyType discountApplyType;
 
     @Size( max = 255, message = "Mô tả không được vượt quá 255 ký tự")

@@ -80,17 +80,24 @@ public class AuthController {
 
 			// Tạo JWT
 			String token = jwtService.generateToken(account);
+			String refreshToken = jwtService.generateRefreshToken(account);
 
 			// Lưu vào cookie
 			Cookie cookie = new Cookie("jwt_token", token);
 			cookie.setHttpOnly(true);
-			cookie.setSecure(false);
+			cookie.setSecure(true);
 			cookie.setPath("/");
 			cookie.setMaxAge(24 * 60 * 60);
 			response.addCookie(cookie);
 
+			Cookie refreshCookie = new Cookie("refresh_token", refreshToken);
+			refreshCookie.setHttpOnly(true);
+			refreshCookie.setPath("/");
+			refreshCookie.setMaxAge((int) (jwtService.getRefreshTokenExpirationMillis() / 1000));
+			response.addCookie(refreshCookie);
+
 			return ResponseEntity.ok().header("Authorization", "Bearer " + token)
-					.body(new AuthResponse("Đăng nhập thành công!", token));
+					.body(new AuthResponse("Đăng nhập thành công!", token, refreshToken));
 
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(401).body(new AuthResponse("Lỗi đăng nhập: " + e.getMessage()));
@@ -131,7 +138,7 @@ public class AuthController {
 			accessCookie.setMaxAge(24 * 60 * 60);
 			response.addCookie(accessCookie);
 
-			return ResponseEntity.ok(new AuthResponse("Làm mới token thành công!", newAccessToken));
+			return ResponseEntity.ok(new AuthResponse("Làm mới token thành công!", newAccessToken, refreshToken));
 
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -173,7 +180,7 @@ public class AuthController {
 			cookie.setMaxAge(24 * 60 * 60);
 			response.addCookie(cookie);
 
-			return ResponseEntity.ok(new AuthResponse("Đăng ký thành công!", token));
+			return ResponseEntity.ok(new AuthResponse("Đăng ký thành công!", token, null));
 
 		} catch (Exception e) {
 			return ResponseEntity.status(500).body(new AuthResponse("Lỗi hệ thống: " + e.getMessage()));

@@ -26,6 +26,7 @@ import FashionPage from 'src/pages/UserPage/FashionPage';
 import PurchasedProductsPage from 'src/pages/UserPage/PurchasedProductsPage';
 import ProductReviewPage from 'src/pages/UserPage/ProductReviewPage';
 import OrderSuccessPage from 'src/pages/UserPage/OrderSuccessPage';
+import { useAxiosInterceptor } from '../Utils/useAxiosInterceptor';
 import axios from 'axios';
 
 const isTokenValid = (token: string | null): boolean => {
@@ -79,6 +80,7 @@ const PrivateRoute: React.FC<{ children: ReactNode; requiredRoles?: string[] }> 
 
 const AppRouterWrapper: React.FC = () => {
   const navigate = useNavigate();
+  useAxiosInterceptor();
 
   useEffect(() => {
     const token = localStorage.getItem('jwt_token');
