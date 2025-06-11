@@ -106,7 +106,8 @@ public class OrderService {
         for (OrderDetail detail : details) {
             Variant variant = detail.getVariant();
             if (variant.getStock() < detail.getQuantity()) {
-                throw new RuntimeException("Sản phẩm " + variant.getVariantId() + " không đủ tồn kho");
+                throw new RuntimeException("Sản phẩm " + variant.getProduct().getProductName() + " không đủ tồn kho. Hiện chỉ con"
+                        + variant.getStock() + " sản phẩm, nhưng bạn đã đặt " + detail.getQuantity() + " sản phẩm.");
             }
             variant.setStock(variant.getStock() - detail.getQuantity());
             variantRepository.save(variant);

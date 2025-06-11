@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, { useState } from 'react';
 import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +7,7 @@ import LoginForm from '../../AuthForm/LoginForm';
 import ForgotPassword from '../../AuthForm/ForgotPassword';
 import RegisterForm from '../../AuthForm/RegisterForm';
 import PersonalInfoForm from '../../AuthForm/PersonalInfoForm';
+import axios from 'axios';
 
 const AuthenticatePage: React.FC = () => {
   const [step, setStep] = useState<"welcome" | "login" | "register" | "personalInfo" | "forgotpassword">("welcome");
@@ -38,48 +39,49 @@ const AuthenticatePage: React.FC = () => {
   const goToLogin = () => setStep("login");
   const goToRegister = () => setStep("register");
   const goToForgotPassword = () => setStep("forgotpassword");
- const handleLogin = async () => {
-  if (loadingLogin) return;
-  setLoadingLogin(true);
-  try {
-    if (!formData.email || !formData.password) {
-      toast.error("Vui lòng nhập đầy đủ thông tin đăng nhập!");
-      return;
+  const handleLogin = async () => {
+    if (loadingLogin) return;
+    setLoadingLogin(true);
+    try {
+      if (!formData.email || !formData.password) {
+        toast.error("Vui lòng nhập đầy đủ thông tin đăng nhập!");
+        return;
+      }
+
+      const response = await fetch("/api/login", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || data.token || 'Đăng nhập thất bại!');
+
+      toast.success("Đăng nhập thành công!");
+      const decoded: any = jwtDecode(data.token);
+      const roles = decoded.roles.map((role: any) => role.authority);
+
+      const keysToClear = [
+        "cachedBrands", "cachedBrandsExpire", "cached_products_latest", "cached_products_latest_expiry",
+        "variants_cache", "wishlist_cache", "accountId", "token", "user_cache"
+      ];
+      keysToClear.forEach(key => localStorage.removeItem(key));
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("refresh_token", data.refreshToken);
+      axios.defaults.headers.common['Authorization'] = 'Bearer ' + data.token;
+
+      if (roles.includes("ROLE_Admin") || roles.includes("ROLE_Super_Admin") || roles.includes("ROLE_Manager")) {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Đăng nhập thất bại!');
+    } finally {
+      setLoadingLogin(false);
     }
-
-    const response = await fetch("/api/login", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.message || data.token || 'Đăng nhập thất bại!');
-
-    toast.success("Đăng nhập thành công!");
-    const decoded: any = jwtDecode(data.token);
-    const roles = decoded.roles.map((role: any) => role.authority);
-
-    const keysToClear = [
-      "cachedBrands", "cachedBrandsExpire", "cached_products_latest", "cached_products_latest_expiry",
-      "variants_cache", "wishlist_cache", "accountId", "token", "user_cache"
-    ];
-    keysToClear.forEach(key => localStorage.removeItem(key));
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("refresh_token", data.refreshToken);
-
-    if (roles.includes("ROLE_Admin") || roles.includes("ROLE_Super_Admin") || roles.includes("ROLE_Manager")) {
-      navigate("/admin");
-    } else {
-      navigate("/");
-    }
-  } catch (error: any) {
-    toast.error(error.response?.data?.message || error.message || 'Đăng nhập thất bại!');
-  } finally {
-    setLoadingLogin(false);
-  }
-};
+  };
 
   const handleRegister = async () => {
     try {
@@ -95,7 +97,7 @@ const AuthenticatePage: React.FC = () => {
       const decoded: any = jwtDecode(data.token);
       const accountId = decoded?.accountId;
       setAccountId(accountId);
-    
+
       localStorage.setItem('token', data.token);
 
       // Sau khi đăng ký thành công, tự động đăng nhập
@@ -111,7 +113,7 @@ const AuthenticatePage: React.FC = () => {
       if (!loginResponse.ok) throw new Error(loginData.message || loginData.token || 'Đăng nhập thất bại!');
 
       // Lưu lại thông tin đăng nhập vào localStorage
-      
+
       localStorage.setItem('token', loginData.token);
 
       toast.success('Đăng ký và đăng nhập thành công! Mời bạn nhập thông tin cá nhân của bạn');
@@ -189,7 +191,7 @@ const AuthenticatePage: React.FC = () => {
   //       const refreshTokenResponse = await axios.post('/api/refresh-token', {}, {
   //         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
   //       });
-  
+
   //       if (refreshTokenResponse.status === 200) {
   //         localStorage.setItem('token', refreshTokenResponse.data.token);
   //         error.config.headers['Authorization'] = `Bearer ${refreshTokenResponse.data.token}`;

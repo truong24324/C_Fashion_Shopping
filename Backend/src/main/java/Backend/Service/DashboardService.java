@@ -34,4 +34,25 @@ public class DashboardService {
     public List<MonthlyRevenueResponse> getMonthlyRevenue() {
         return orderRepository.getMonthlyRevenue();
     }
+
+    public List<Object[]> getMonthlyStats(int year) {
+        return orderRepository.countOrdersByMonth(year);
+    }
+
+    public List<Object[]> getYearlyStats() {
+        return orderRepository.countOrdersByYear();
+    }
+
+    public List<Object[]> getWeeklyStats(int year) {
+        return orderRepository.countOrdersByWeek(year);
+    }
+
+    public List<Object[]> getPaymentMethodStats() {
+        return orderRepository.countOrdersByPaymentMethod();
+    }
+
+    public List<Object[]> getOrderStatusStats() {
+        return orderRepository.getOrderStatusStatistics();
+    }
+
 }

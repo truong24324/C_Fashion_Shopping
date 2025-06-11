@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import Backend.Model.Order;
 import Backend.Response.MonthlyRevenueResponse;
+import io.lettuce.core.dynamic.annotation.Param;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Integer> {
@@ -48,5 +49,34 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
                         "FROM Order o WHERE o.isActive = true GROUP BY MONTH(o.orderDate), YEAR(o.orderDate) " +
                         "ORDER BY YEAR(o.orderDate), MONTH(o.orderDate)")
         List<MonthlyRevenueResponse> getMonthlyRevenue();
+
+        @Query("SELECT FUNCTION('MONTH', o.orderDate) AS month, COUNT(o), SUM(o.totalAmount) " +
+                        "FROM Order o WHERE FUNCTION('YEAR', o.orderDate) = :year " +
+                        "GROUP BY FUNCTION('MONTH', o.orderDate)")
+        List<Object[]> countOrdersByMonth(int year);
+
+        // Thống kê theo năm
+        @Query("SELECT FUNCTION('YEAR', o.orderDate) AS year, COUNT(o), SUM(o.totalAmount) " +
+                        "FROM Order o GROUP BY FUNCTION('YEAR', o.orderDate)")
+        List<Object[]> countOrdersByYear();
+
+        // Thống kê theo tuần (ISO_WEEK)
+        @Query("SELECT FUNCTION('WEEK', o.orderDate) AS week, COUNT(o), SUM(o.totalAmount) " +
+                        "FROM Order o WHERE FUNCTION('YEAR', o.orderDate) = :year " +
+                        "GROUP BY FUNCTION('WEEK', o.orderDate)")
+        List<Object[]> countOrdersByWeek(int year);
+
+        @Query("SELECT o.paymentMethod, COUNT(o), SUM(o.totalAmount) " +
+                        "FROM Order o " +
+                        "GROUP BY o.paymentMethod")
+        List<Object[]> countOrdersByPaymentMethod();
+
+        @Query("""
+                            SELECT o.orderStatus.statusId, o.orderStatus.statusName, COUNT(o), SUM(o.totalAmount)
+                            FROM Order o
+                            WHERE o.orderStatus.statusId IN (7, 8, 9)
+                            GROUP BY o.orderStatus.statusId, o.orderStatus.statusName
+                        """)
+        List<Object[]> getOrderStatusStatistics();
 
 }
