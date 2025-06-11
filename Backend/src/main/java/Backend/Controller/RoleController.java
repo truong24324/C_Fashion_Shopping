@@ -57,7 +57,7 @@ public class RoleController {
     }
 
     // ✅ Xóa Role (chỉ khi chưa gán cho user nào)
-    @DeleteMapping("/{roleId}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> deleteRole(@PathVariable Long id) {
         boolean deleted = roleService.deleteRoleIfUnused(id);
         if (deleted) {
@@ -66,7 +66,7 @@ public class RoleController {
         return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Không thể xóa vai trò đã được sử dụng!", null));
     }
 
- // Cập nhật trạng thái isLoginAllowed của vai trò
+    // ✅ Cập nhật trạng thái đăng nhập cho Role
     @PatchMapping("/{roleId}/status")
     public ResponseEntity<ApiResponse<Role>> updateLoginAllowedStatus(
             @PathVariable Long roleId,

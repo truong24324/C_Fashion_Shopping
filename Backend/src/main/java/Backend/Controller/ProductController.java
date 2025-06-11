@@ -38,29 +38,34 @@ public class ProductController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
         Page<Product> productPage = productService.getAllProducts(pageable);
 
-        List<ProductSimpleResponse> productDTOs = productPage.getContent().stream().map(product ->
-            new ProductSimpleResponse(
-            	product.getProductId(),
-                product.getProductName(),
-                product.getDescription(),
-                product.getBarcode(),
-                product.getBrand().getBrandName(),
-                product.getCategory().getCategoryName(),
-                product.getSupplier().getSupplierName(),
-                product.getModel(),
-                product.getWarrantyPeriod()
-            )
-        ).collect(Collectors.toList());
+        List<ProductSimpleResponse> productDTOs = productPage.getContent().stream()
+                .map(product -> new ProductSimpleResponse(
+                        product.getProductId(),
+                        product.getProductName(),
+                        product.getDescription(),
+                        product.getBarcode(),
+                        product.getBrand().getBrandName(),
+                        product.getCategory().getCategoryName(),
+                        product.getSupplier().getSupplierName(),
+                        product.getModel(),
+                        product.getWarrantyPeriod()))
+                .collect(Collectors.toList());
 
         PaginationResponse<ProductSimpleResponse> response = new PaginationResponse<>(
-            productDTOs,
-            productPage.getNumber(),
-            productPage.getSize(),
-            productPage.getTotalElements(),
-            productPage.getTotalPages()
-        );
+                productDTOs,
+                productPage.getNumber(),
+                productPage.getSize(),
+                productPage.getTotalElements(),
+                productPage.getTotalPages());
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/names")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
+    public ResponseEntity<List<String>> getProductNames() {
+        List<String> productNames = productService.getAllProductNames();
+        return ResponseEntity.ok(productNames);
     }
 
     @GetMapping("/{id}")
@@ -71,28 +76,32 @@ public class ProductController {
 
     // ✅ API thêm mới sản phẩm
     @PostMapping("/add")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<Product>> createProduct(@RequestBody @Valid ProductRequest request) {
         Product createdProduct = productService.createProduct(request);
         return ResponseEntity.ok(new ApiResponse<>(true, "Thêm sản phẩm thành công!", createdProduct));
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadProductImage(
+    public ResponseEntity<ApiResponse<String>> uploadProductImage(
             @RequestParam Integer productId,
             @RequestParam("image") MultipartFile imageFile,
             @RequestParam String imageType) {
         try {
-
             if (imageFile.isEmpty()) {
-                return ResponseEntity.badRequest().body("Ảnh không được để trống!");
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse<>(false, "Ảnh không được để trống!", null));
             }
 
             productService.uploadProductImage(productId, imageFile, imageType);
-            return ResponseEntity.ok("Upload ảnh thành công!");
+            return ResponseEntity.ok(new ApiResponse<>(true, "Upload ảnh thành công!", null));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(false, e.getMessage(), null));
         } catch (Exception e) {
-            e.printStackTrace(); // In lỗi ra console
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Lỗi khi upload ảnh: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(false, "Lỗi khi upload ảnh: " + e.getMessage(), null));
         }
     }
 
@@ -109,14 +118,14 @@ public class ProductController {
 
     // ✅ API xóa sản phẩm
     @DeleteMapping("/{productId}")
-	@PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<String>> deleteProduct(@PathVariable Integer productId) {
         try {
             productService.deleteProduct(productId);
             return ResponseEntity.ok(new ApiResponse<>(true, "Đã xóa sản phẩm thành công", null));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                 .body(new ApiResponse<>(false, e.getMessage(), null));
+                    .body(new ApiResponse<>(false, e.getMessage(), null));
         }
     }
 

@@ -237,7 +237,7 @@ const ListDisplay = () => {
                 toast.success("Xóa thành công!");
                 setData((prevData) => prevData.filter(item => item[idKey] !== record[idKey]));
             } else {
-                toast.error("Lỗi khi xóa!");
+                toast.error(response?.data?.message || "Lỗi khi xóa!");
             }
         } catch (error: any) {
             toast.error(error.response?.data?.message || "⚠️ Lỗi kết nối khi xóa!");

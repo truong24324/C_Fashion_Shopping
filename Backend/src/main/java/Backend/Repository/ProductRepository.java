@@ -38,4 +38,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     List<Product> findAllByStatus_IsActiveTrue();
 
+    @Query("SELECT p.productName FROM Product p")
+    List<String> findAllProductNames();
+
 }

@@ -5,7 +5,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import Backend.Model.Discount;
 import Backend.Model.ProductStatus;
 import Backend.Repository.ProductStatusRepository;
 import Backend.Request.ProductStatusRequest;

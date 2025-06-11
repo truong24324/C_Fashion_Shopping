@@ -66,8 +66,8 @@ public class ProductImageController {
         return productImageService.getByProductId(productId);
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     @PutMapping("/{imageId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<ProductImageResponse>> updateImage(
             @PathVariable Integer imageId,
             @ModelAttribute ProductImageRequest request) {
@@ -101,8 +101,10 @@ public class ProductImageController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Integer id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Integer id) {
         productImageService.delete(id);
+        ApiResponse<Void> response = new ApiResponse<>(true, "Xóa ảnh thành công!", null);
+        return ResponseEntity.ok(response);
     }
 
     public String validateImageFile(MultipartFile file) {

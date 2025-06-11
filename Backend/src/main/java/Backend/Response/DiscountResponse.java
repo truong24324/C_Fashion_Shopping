@@ -1,5 +1,6 @@
 package Backend.Response;
 
+import Backend.Model.DiscountApplyType;
 import lombok.Data;
 
 @Data
@@ -9,6 +10,7 @@ public class DiscountResponse {
     private String discountValue;
     private Boolean isActive;
     private Integer quantity;
+    private DiscountApplyType discountApplyType;
     private Integer maxUsagePerUser;
     private Double minOrderAmount;
     private String startDate;

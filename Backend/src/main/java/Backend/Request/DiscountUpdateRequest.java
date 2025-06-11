@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import Backend.CustomDeserializer.CustomDoubleDeserializer;
 import Backend.Model.DiscountApplyType;
 import Backend.Model.DiscountType;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;

@@ -42,6 +42,7 @@ public class DiscountService {
             dto.setQuantity(discount.getQuantity());
             dto.setMaxUsagePerUser(discount.getMaxUsagePerUser());
             dto.setMinOrderAmount(discount.getMinOrderAmount());
+            dto.setDiscountApplyType(discount.getDiscountApplyType());
 
             dto.setStartDate(discount.getStartDate().format(formatter));
             dto.setEndDate(discount.getEndDate() != null ? discount.getEndDate().format(formatter) : null);

@@ -537,20 +537,20 @@ export const getColumnsConfig = (
                 ellipsis: true,
                 render: (text: any, record: any) => renderCell(text, record, "description")
             },
-            {
-                title: "Hành động",
-                key: "action",
-                render: (text: any, record: any) => (
-                    <Popconfirm
-                        title="Bạn có chắc chắn muốn xóa vai trò này?"
-                        onConfirm={() => handleDelete(record)}
-                        okText="Có"
-                        cancelText="Không"
-                    >
-                        <Button danger>Xóa</Button>
-                    </Popconfirm>
-                )
-            },
+            // {
+            //     title: "Hành động",
+            //     key: "action",
+            //     render: (text: any, record: any) => (
+            //         <Popconfirm
+            //             title="Bạn có chắc chắn muốn xóa vai trò này?"
+            //             onConfirm={() => handleDelete(record)}
+            //             okText="Có"
+            //             cancelText="Không"
+            //         >
+            //             <Button danger>Xóa</Button>
+            //         </Popconfirm>
+            //     )
+            // },
         ],
 
     }[category]

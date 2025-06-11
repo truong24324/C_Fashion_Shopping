@@ -10,6 +10,7 @@ import Size from "../../components/CreateForm/Size";
 import Variants from "../../components/CreateForm/Variant";
 import { Variant } from "../../components/CreateForm/Product/types";
 import Material from "../../components/CreateForm/Material";
+import ImageUpload from "../../components/CreateForm/ImageUpload";
 
 const CreateDisplay = () => {
     const [category, setCategory] = useState("product");
@@ -18,6 +19,7 @@ const CreateDisplay = () => {
     const categories = [
         { label: "Sản phẩm", value: "product" },
         { label: "Biến thể", value: "variants" },
+        { label: "Ảnh sản phẩm", value: "image" },
         { label: "Thương hiệu", value: "brands" },
         { label: "Loại sản phẩm", value: "categories" }, // Thêm danh mục vào lựa chọn
         { label: "Nhà cung cấp", value: "supplier" },
@@ -45,14 +47,15 @@ const CreateDisplay = () => {
                 ))}
             </div>
             {category === "brands" ? <CreateBrandForm /> :
-                category === "supplier" ? <Supplier /> :
-                    category === "categories" ? <CreateCategoryForm /> :
-                        category === "productStatus" ? <ProductStatus /> :
-                            category === "color" ? <Color /> :
-                                category === "size" ? <Size /> :
-                                    category === "variants" ? <Variants /> :
-                                        category === "material" ? <Material /> :
-                                            category === "discount" ? <CreateDiscountForm /> : <Product variants={variants} setVariants={setVariants} />}
+                category === "image" ? <ImageUpload /> :
+                    category === "supplier" ? <Supplier /> :
+                        category === "categories" ? <CreateCategoryForm /> :
+                            category === "productStatus" ? <ProductStatus /> :
+                                category === "color" ? <Color /> :
+                                    category === "size" ? <Size /> :
+                                        category === "variants" ? <Variants /> :
+                                            category === "material" ? <Material /> :
+                                                category === "discount" ? <CreateDiscountForm /> : <Product variants={variants} setVariants={setVariants} />}
         </div>
     );
 };

@@ -116,6 +116,7 @@ public class JwtService {
 
     public String generateRefreshToken(Account account) {
         // Thường chỉ cần subject, không cần quá nhiều claims
+
         return Jwts.builder()
                 .setSubject(account.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
@@ -125,6 +126,7 @@ public class JwtService {
     }
 
     public int getRefreshTokenExpirationMillis() {
+        
         return (int) refreshExpiration;
     }
 }

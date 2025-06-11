@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -397,14 +398,23 @@ public class ProductService {
 		Product product = productRepository.findById(productId)
 				.orElseThrow(() -> new EntityNotFoundException("Không tìm thấy sản phẩm"));
 
+		ImageType type = ImageType.valueOf(imageType.toUpperCase());
+
+		// ✅ Kiểm tra ràng buộc: chỉ 1 ảnh MAIN hoặc SECONDARY cho mỗi sản phẩm
+		if (type == ImageType.MAIN || type == ImageType.SECONDARY) {
+			boolean exists = productImageRepository.existsByProductAndImageType(product, type);
+			if (exists) {
+				throw new IllegalStateException("Mỗi sản phẩm chỉ được có 1 ảnh " + type.name() + ".");
+			}
+		}
+
 		try {
-			// Giả sử bạn lưu ảnh ở thư mục local hoặc cloud storage
-			String imageUrl = saveImage(imageFile);
+			String imageUrl = saveImage(imageFile); // Giả sử lưu vào local hoặc cloud
 
 			ProductImage productImage = new ProductImage();
 			productImage.setProduct(product);
 			productImage.setImageUrl(imageUrl);
-			productImage.setImageType(ImageType.valueOf(imageType.toUpperCase()));
+			productImage.setImageType(type);
 
 			productImageRepository.save(productImage);
 		} catch (Exception e) {
@@ -612,4 +622,29 @@ public class ProductService {
 	public List<TopSellingProductNameResponse> getTopSellingProductNames() {
 		return orderDetailRepository.findTopSellingProductsByName();
 	}
+
+	@Scheduled(cron = "0 0 2 * * *") // mỗi 2h sáng
+	public void autoUpdateAllProductStatus() {
+		List<Product> products = productRepository.findAll();
+
+		for (Product product : products) {
+			boolean hasStock = product.getVariants()
+					.stream()
+					.anyMatch(v -> v.getStock() > 0);
+
+			ProductStatus status = hasStock
+					? productStatusRepository.findByStatusName("Hàng tồn kho")
+					: productStatusRepository.findByStatusName("Hết Hàng");
+
+			product.setStatus(status);
+			product.setUpdatedAt(LocalDateTime.now());
+		}
+
+		productRepository.saveAll(products);
+	}
+
+	public List<String> getAllProductNames() {
+		return productRepository.findAllProductNames();
+	}
+
 }

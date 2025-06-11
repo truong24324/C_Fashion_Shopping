@@ -40,7 +40,7 @@ public class ProductImageService {
         return update(id, newImage, null);
     }
 
-    public ProductImage update(Integer id, MultipartFile newImage, ImageType imageType) {
+    public ProductImage update(Integer id, MultipartFile newImage, String imageType) {
         ProductImage image = imageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy ảnh!"));
 
@@ -50,7 +50,7 @@ public class ProductImageService {
         }
 
         if (imageType != null) {
-            image.setImageType(imageType);
+            image.setImageType(ImageType.valueOf(imageType));
         }
 
         return imageRepository.save(image);

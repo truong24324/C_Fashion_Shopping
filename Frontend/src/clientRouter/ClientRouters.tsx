@@ -25,9 +25,12 @@ import CheckoutPage from 'src/pages/UserPage/CheckoutPage';
 import FashionPage from 'src/pages/UserPage/FashionPage';
 import PurchasedProductsPage from 'src/pages/UserPage/PurchasedProductsPage';
 import ProductReviewPage from 'src/pages/UserPage/ProductReviewPage';
+import ShippingPolicy from 'src/pages/UserPage/ShippingPolixyPage';
 import OrderSuccessPage from 'src/pages/UserPage/OrderSuccessPage';
 import { useAxiosInterceptor } from '../Utils/useAxiosInterceptor';
 import axios from 'axios';
+import FAQ from 'src/pages/UserPage/FAQ';
+import SupportCenterPage from 'src/pages/UserPage/SupportCenterPage';
 
 const isTokenValid = (token: string | null): boolean => {
   if (!token) return false;
@@ -114,6 +117,9 @@ const AppRouterWrapper: React.FC = () => {
       <Route path="/purchased" element={<PurchasedProductsPage />} />
       <Route path="/review" element={<ProductReviewPage />} />
       <Route path="/order-success" element={<OrderSuccessPage />} />
+      <Route path="/shipping" element={<ShippingPolicy />} /> 
+      <Route path='/faq' element={<FAQ/>} />
+      <Route path="/help" element={<SupportCenterPage />} />
       <Route path="*" element={<NotFoundPage />} />
 
       <Route
