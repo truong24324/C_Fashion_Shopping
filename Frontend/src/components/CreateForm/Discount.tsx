@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Form, Input, InputNumber, DatePicker, Button, Card, Spin, Switch, Row, Col, Select,} from "antd";
-import { CheckCircleOutlined,} from "@ant-design/icons";
+import { Form, Input, InputNumber, DatePicker, Button, Card, Spin, Switch, Row, Col, Select, } from "antd";
+import { CheckCircleOutlined, } from "@ant-design/icons";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import axios from "axios";
@@ -87,6 +87,11 @@ const Discount = () => {
                   max={100}
                   className="w-full rounded-lg"
                   placeholder="Nhập giá trị giảm"
+                  formatter={(value) =>
+                    value !== undefined && value !== null
+                      ? value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      : ""
+                  }
                 />
               </Form.Item>
             </Col>
@@ -100,7 +105,12 @@ const Discount = () => {
                   { type: "number", min: 1, message: "⚠️ Số lượng phải lớn hơn 0!" },
                 ]}
               >
-                <InputNumber min={1} className="w-full rounded-lg" placeholder="Nhập số lượng mã" />
+                <InputNumber min={1}
+                  formatter={(value) =>
+                    value !== undefined && value !== null
+                      ? value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      : ""
+                  } className="w-full rounded-lg" placeholder="Nhập số lượng mã" />
               </Form.Item>
             </Col>
           </Row>
@@ -156,7 +166,11 @@ const Discount = () => {
                 label="Số lần dùng tối đa / người"
                 rules={[{ type: "number", min: 1, message: "⚠️ Phải lớn hơn 0!" }]}
               >
-                <InputNumber min={1} className="w-full rounded-lg" placeholder="Không giới hạn nếu để trống" />
+                <InputNumber min={1} formatter={(value) =>
+                  value !== undefined && value !== null
+                    ? value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    : ""
+                } className="w-full rounded-lg" placeholder="Không giới hạn nếu để trống" />
               </Form.Item>
             </Col>
 
@@ -166,7 +180,13 @@ const Discount = () => {
                 label="Giá trị đơn tối thiểu (VNĐ)"
                 rules={[{ type: "number", min: 0, message: "⚠️ Không được âm!" }]}
               >
-                <InputNumber min={0} className="w-full rounded-lg" placeholder="Không bắt buộc" />
+                <InputNumber min={0}
+                  formatter={(value) =>
+                    value !== undefined && value !== null
+                      ? value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      : ""
+                  }
+                  className="w-full rounded-lg" placeholder="Không bắt buộc" />
               </Form.Item>
             </Col>
           </Row>

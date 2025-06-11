@@ -55,7 +55,6 @@ const HomePage: React.FC = () => {
       }
 
       const res = await axios.get("/api/views/latest");
-      console.log("API response:", res.data);
 
       if (res.data && Array.isArray(res.data.data)) {
         setProducts(res.data.data);
