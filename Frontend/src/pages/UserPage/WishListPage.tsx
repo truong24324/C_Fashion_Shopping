@@ -8,23 +8,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
 import Loading from "../../components/common/Loading";
 import axios from "axios";
-
-interface Product {
-  productId: number;
-  productName: string;
-  minPrice?: number;
-  category: string;
-  mainImageUrl: string;
-  subImageUrl?: string; // ảnh phụ nếu có
-}
-
-interface DecodedToken {
-  accountId: string;
-  exp: number;
-  iat: number;
-  email: string;
-  roles: { authority: string }[];
-}
+import { DecodedToken, Product } from "../../components/CreateForm/Product/types";
 
 const WishlistPage: React.FC = () => {
   const [wishlist, setWishlist] = useState<Product[]>([]);

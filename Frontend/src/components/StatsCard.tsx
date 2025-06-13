@@ -1,12 +1,6 @@
 import React from "react";
 import Card from "./UI/Card";
-
-interface StatsCardProps {
-  title: string;
-  value: string;
-  color?: string;
-  change?: string;
-}
+import { StatsCardProps } from "./CreateForm/Product/types";
 
 const StatsCard: React.FC<StatsCardProps> = ({ title, value, color, change }) => {
   return (

@@ -15,7 +15,7 @@ public class MailConfig {
         mailSender.setHost("smtp.gmail.com");
         mailSender.setPort(587);
         mailSender.setUsername("nguyentruong858301@gmail.com");
-        mailSender.setPassword("uwrm yikl ccgx bjbw");  // Thay bằng mật khẩu ứng dụng Gmail
+        mailSender.setPassword("euqz oirc ergd ldfc");  // Thay bằng mật khẩu ứng dụng Gmail
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.smtp.auth", "true");

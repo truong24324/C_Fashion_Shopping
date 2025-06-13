@@ -2,29 +2,7 @@ import React, { useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { motion } from 'framer-motion';
 import toast from "react-hot-toast";
-
-interface User {
-    accountId: string;
-    fullName: string;
-    birthday: string;
-    gender: string;
-    email: string;
-    homeAddress: string;
-    officeAddress: string;
-    nationality: string;
-    avatar: string;
-    avatarFile: File | null;
-}
-
-interface EditProfileFormProps {
-    user: User;
-    setUser: React.Dispatch<React.SetStateAction<User | null>>;
-    setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-interface JwtPayload {
-    accountId: string;
-}
+import { EditProfileFormProps, JwtPayload } from "../components/CreateForm/Product/types";
 
 const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsEditing }) => {
     const [formData, setFormData] = useState({

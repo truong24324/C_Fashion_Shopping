@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { FaEnvelope,} from 'react-icons/fa';
+import { FaEnvelope } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import toast from "react-hot-toast";
+import axios from 'axios';
 
 const ForgotPassword: React.FC<{ goToLogin: () => void }> = ({ goToLogin }) => {
   const [email, setEmail] = useState('');
@@ -22,28 +23,12 @@ const ForgotPassword: React.FC<{ goToLogin: () => void }> = ({ goToLogin }) => {
     setLoading(true);
     e.preventDefault();
     try {
-      const response = await fetch('/api/password/request-reset', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      const message = await response.text();
-      setMessage(message);
-
-      if (response.ok) {
-        setIsOtpSent(true);
-        toast.success("🎉 OTP đã được gửi, vui lòng kiểm tra email!");
-      } else {
-        const errorMessage = message || "⚠️ Gửi OTP thất bại, vui lòng thử lại!";
-        toast.error(errorMessage);
-      }
-
+      const response = await axios.post('/api/password/request-reset', { email });
+      setMessage(response.data?.message || 'OTP sent');
+      setIsOtpSent(true);
+      toast.success("🎉 OTP đã được gửi, vui lòng kiểm tra email!");
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "⚠️ Gửi OTP thất bại, vui lòng thử lại!";
-      toast.error(errorMessage);
+      toast.error(error.response?.data?.message || "⚠️ Gửi OTP thất bại, vui lòng thử lại!");
     } finally {
       setLoading(false);
     }
@@ -53,25 +38,12 @@ const ForgotPassword: React.FC<{ goToLogin: () => void }> = ({ goToLogin }) => {
     setLoading(true);
     e.preventDefault();
     try {
-      const response = await fetch('/api/password/verify-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ otp }),
-      });
-
-      const message = await response.text();
-      setMessage(message);
-
-      if (response.ok) {
-        setIsOtpVerified(true);
-        toast.success("✅ OTP hợp lệ! Hãy đặt lại mật khẩu.");
-      } else {
-        await decreaseOtpAttempts(email); // Giảm số lần nhập OTP nếu sai
-      }
+      const response = await axios.post('/api/password/verify-otp', { otp });
+      setMessage(response.data?.message || 'OTP verified');
+      setIsOtpVerified(true);
+      toast.success("✅ OTP hợp lệ! Hãy đặt lại mật khẩu.");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "⚠️ Có lỗi khi xác nhận OTP, vui lòng thử lại!");
+      await decreaseOtpAttempts(email);
     } finally {
       setLoading(false);
     }
@@ -81,27 +53,15 @@ const ForgotPassword: React.FC<{ goToLogin: () => void }> = ({ goToLogin }) => {
     setLoading(true);
     e.preventDefault();
     try {
-      const response = await fetch('/api/password/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-          otp: otp,
-          newPassword: newPassword
-        }),
+      const response = await axios.post('/api/password/reset-password', {
+        email,
+        otp,
+        newPassword
       });
 
-      const message = await response.json();
-      setMessage(message.message);
-
-      if (response.ok) {
-        toast.success("🔑 Mật khẩu đã được đặt lại thành công! Mời bạn đăng nhập lại với mật khẩu mới");
-        goToLogin(); // Chuyển về trang đăng nhập
-      } else {
-        toast.error(response || "⚠️ Đặt lại mật khẩu thất bại, vui lòng thử lại!");
-      }
+      setMessage(response.data?.message || 'Password reset successful');
+      toast.success("🔑 Mật khẩu đã được đặt lại thành công! Mời bạn đăng nhập lại với mật khẩu mới");
+      goToLogin();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "⚠️ Có lỗi khi thay đổi mật khẩu, vui lòng thử lại!");
     } finally {
@@ -111,19 +71,18 @@ const ForgotPassword: React.FC<{ goToLogin: () => void }> = ({ goToLogin }) => {
 
   const decreaseOtpAttempts = async (email: string) => {
     try {
-      const response = await fetch('/api/password/update-max-attempts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify({ email })
-      });
+      const response = await axios.post('/api/password/update-max-attempts',
+        { email },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+          }
+        });
 
-      const data = await response.json();
-      setRemainingAttempts(data.remainingAttempts); // Cập nhật số lần nhập OTP còn lại
+      const data = response.data;
+      setRemainingAttempts(data.remainingAttempts);
 
-      if (response.ok) {
+      if (response.status === 200) {
         toast.error(`❌ OTP không đúng. Số lần nhập OTP còn lại: ${data.remainingAttempts}`);
       } else if (response.status === 403) {
         toast.error("⚠️ Bạn đã nhập sai quá số lần cho phép. Tài khoản đã bị khóa.");
@@ -172,9 +131,9 @@ const ForgotPassword: React.FC<{ goToLogin: () => void }> = ({ goToLogin }) => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             type="submit"
-            disabled={loading} // Tắt nút khi đang tải
+            disabled={loading}
             className={`w-full px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-lg 
-    ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-indigo-700"} transition-all`}
+            ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-indigo-700"} transition-all`}
           >
             {loading ? "Đang xử lý..." : "Gửi OTP"}
           </motion.button>
@@ -190,24 +149,22 @@ const ForgotPassword: React.FC<{ goToLogin: () => void }> = ({ goToLogin }) => {
         </form>
       ) : !isOtpVerified ? (
         <form onSubmit={handleVerifyOtpSubmit} className="space-y-6">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Nhập OTP"
-              value={otp}
-              onChange={handleOtpChange}
-              className="w-full p-4 border-2 border-gray-300 rounded-lg text-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-              required
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="Nhập OTP"
+            value={otp}
+            onChange={handleOtpChange}
+            className="w-full p-4 border-2 border-gray-300 rounded-lg text-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+            required
+          />
 
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             type="submit"
-            disabled={loading} // Tắt nút khi đang tải
+            disabled={loading}
             className={`w-full px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-lg 
-    ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-indigo-700"} transition-all`}
+            ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-indigo-700"} transition-all`}
           >
             {loading ? "Đang xử lý..." : "Xác nhận OTP"}
           </motion.button>
@@ -236,15 +193,14 @@ const ForgotPassword: React.FC<{ goToLogin: () => void }> = ({ goToLogin }) => {
             <button type="button" onClick={() => setShowPassword(!showPassword)} className="ml-2 text-gray-600">
               {showPassword ? "Ẩn" : "Hiện"}
             </button>
-
           </div>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             type="submit"
-            disabled={loading} // Tắt nút khi đang tải
+            disabled={loading}
             className={`w-full px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-lg 
-    ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-indigo-700"} transition-all`}
+            ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-indigo-700"} transition-all`}
           >
             {loading ? "Đang xử lý..." : "Đặt lại mật khẩu"}
           </motion.button>
@@ -260,7 +216,6 @@ const ForgotPassword: React.FC<{ goToLogin: () => void }> = ({ goToLogin }) => {
           </motion.button>
         </form>
       )}
-
     </motion.div>
   );
 };

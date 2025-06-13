@@ -23,7 +23,6 @@ const ListDisplay = () => {
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
-    const [searchTerm, setSearchTerm] = useState("");
     const [category, setCategory] = useState<"product" | "status" | "variant" | "image" | "color" | "size" | "material" | "supplier" | "role" | "brand" | "category" | "discount">("product");
     const [updateApi, setUpdateApi] = useState<string>("");
     const [editingKey, setEditingKey] = useState<string | null>(null);

@@ -1,21 +1,6 @@
+import { ProfileInfoProps } from "../components/CreateForm/Product/types";
 import React from "react";
 import { useNavigate } from "react-router-dom"; // import hook điều hướng
-
-interface User {
-  avatar: string;
-  fullName: string;
-  email: string;
-  birthday: string;
-  gender: string;
-  homeAddress: string;
-  officeAddress: string;
-  nationality: string;
-}
-
-interface ProfileInfoProps {
-  user: User;
-  setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
-}
 
 const ProfileInfo: React.FC<ProfileInfoProps> = ({ user, setIsEditing }) => {
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString();

@@ -1,14 +1,14 @@
 package Backend.Controller;
 
-import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import Backend.Response.PasswordResetResponse;
 import Backend.Service.PasswordResetService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import Backend.Response.ApiResponse;
+import Backend.Request.PasswordResetRequest;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,78 +18,71 @@ public class PasswordResetController {
     private final PasswordResetService passwordResetService;
 
     @PostMapping("/request-reset")
-    public ResponseEntity<PasswordResetResponse> requestReset(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
+    public ResponseEntity<ApiResponse<Void>> requestReset(@RequestBody @Valid PasswordResetRequest request) {
+        String email = request.getEmail();
         try {
-            // Gọi phương thức gửi OTP
             passwordResetService.sendOtp(email);
-
-            // Trả về phản hồi thành công
-            PasswordResetResponse response = new PasswordResetResponse("Mã OTP đã được gửi đến email của bạn.", HttpStatus.OK.value());
+            ApiResponse<Void> response = new ApiResponse<>(true, "Mã OTP đã được gửi đến email của bạn.", null);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
-            // Xử lý trường hợp email bị thiếu hoặc không hợp lệ
-            PasswordResetResponse response = new PasswordResetResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response); // 400 Bad Request
+            ApiResponse<Void> response = new ApiResponse<>(false, e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (RuntimeException e) {
-            // Xử lý trường hợp email không tồn tại trong hệ thống
-            PasswordResetResponse response = new PasswordResetResponse(e.getMessage(), HttpStatus.NOT_FOUND.value());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response); // 404 Not Found
+            ApiResponse<Void> response = new ApiResponse<>(false, e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
-            // Xử lý các lỗi không mong muốn khác
-            PasswordResetResponse response = new PasswordResetResponse("Đã có lỗi xảy ra, vui lòng thử lại sau.", HttpStatus.INTERNAL_SERVER_ERROR.value());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response); // 500 Internal Server Error
+            ApiResponse<Void> response = new ApiResponse<>(false, "Đã có lỗi xảy ra, vui lòng thử lại sau.", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<PasswordResetResponse> verifyOtp(@RequestBody Map<String, String> request) {
-        String otp = request.get("otp");
+    public ResponseEntity<ApiResponse<Void>> verifyOtp(@RequestBody PasswordResetRequest request) {
+        String otp = request.getOtp();
         boolean isValid = passwordResetService.verifyOtp(otp);
 
-        PasswordResetResponse response;
+        ApiResponse<Void> response;
         if (isValid) {
-            response = new PasswordResetResponse("OTP hợp lệ. Bạn có thể đặt lại mật khẩu.", HttpStatus.OK.value());
+            response = new ApiResponse<>(true, "OTP hợp lệ. Bạn có thể đặt lại mật khẩu.", null);
             return ResponseEntity.ok(response);
         } else {
-            response = new PasswordResetResponse("OTP không hợp lệ, đã hết hạn hoặc bạn đã nhập sai quá số lần cho phép.", HttpStatus.BAD_REQUEST.value());
+            response = new ApiResponse<>(false, "OTP không hợp lệ, đã hết hạn hoặc bạn đã nhập sai quá số lần cho phép.", null);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 
     @PostMapping("/update-max-attempts")
-    public ResponseEntity<PasswordResetResponse> updateMaxAttempts(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
+    public ResponseEntity<ApiResponse<Integer>> updateMaxAttempts(@RequestBody PasswordResetRequest request) {
+        String email = request.getEmail();
         int remainingAttempts = passwordResetService.decreaseOtpAttempts(email);
 
-        PasswordResetResponse response;
+        ApiResponse<Integer> response;
         if (remainingAttempts > 0) {
-            response = new PasswordResetResponse("Số lần nhập OTP còn lại: " + remainingAttempts, HttpStatus.OK.value(), remainingAttempts);
+            response = new ApiResponse<>(true, "Số lần nhập OTP còn lại: " + remainingAttempts, remainingAttempts);
             return ResponseEntity.ok(response);
         } else if (remainingAttempts == 0) {
-            response = new PasswordResetResponse("Bạn đã nhập sai quá số lần cho phép. Tài khoản đã bị khóa.", HttpStatus.FORBIDDEN.value(), 0);
+            response = new ApiResponse<>(false, "Bạn đã nhập sai quá số lần cho phép. Tài khoản đã bị khóa.", 0);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
         } else {
-            response = new PasswordResetResponse("Không thể giảm số lần nhập OTP. OTP có thể đã hết hạn.", HttpStatus.BAD_REQUEST.value(), -1);
+            response = new ApiResponse<>(false, "Không thể giảm số lần nhập OTP. OTP có thể đã hết hạn.", -1);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 
-
     @PostMapping("/reset-password")
-    public ResponseEntity<PasswordResetResponse> resetPassword(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-        String otp = request.get("otp");
-        String newPassword = request.get("newPassword");
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestBody PasswordResetRequest request) {
+        String email = request.getEmail();
+        String otp = request.getOtp();
+        String newPassword = request.getNewPassword();
 
         boolean isSuccess = passwordResetService.resetPassword(email, otp, newPassword);
 
-        PasswordResetResponse response;
+        ApiResponse<Void> response;
         if (isSuccess) {
-            response = new PasswordResetResponse("Mật khẩu đã được thay đổi thành công.", HttpStatus.OK.value());
+            response = new ApiResponse<>(true, "Mật khẩu đã được thay đổi thành công.", null);
             return ResponseEntity.ok(response);
         } else {
-            response = new PasswordResetResponse("OTP không hợp lệ, đã hết hạn hoặc có lỗi trong quá trình thay đổi mật khẩu.", HttpStatus.BAD_REQUEST.value());
+            response = new ApiResponse<>(false, "OTP không hợp lệ, đã hết hạn hoặc có lỗi trong quá trình thay đổi mật khẩu.", null);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }

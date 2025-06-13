@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
-
+import { TopSuggestion, DecodedToken } from "../components/CreateForm/Product/types";
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -17,10 +17,7 @@ const Navbar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [user, setUser] = useState<{ avatar: string; fullName: string } | null>(null);
   const [isListening, setIsListening] = useState(false); // NEW
-  interface TopSuggestion {
-    productId: string;
-    productName: string;
-  }
+
   const [topSuggestions, setTopSuggestions] = useState<TopSuggestion[]>([]);
   const navigate = useNavigate();
 
@@ -55,14 +52,6 @@ const Navbar: React.FC = () => {
       setUser(null);
     }
   };
-
-  interface DecodedToken {
-    accountId: string;
-    exp: number; // thời điểm hết hạn (unix timestamp)
-    iat: number;
-    email: string;
-    roles: { authority: string }[];
-  }
 
   const fetchProfile = async () => {
     const token = localStorage.getItem("token");

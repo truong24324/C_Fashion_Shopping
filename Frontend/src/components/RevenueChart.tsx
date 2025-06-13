@@ -11,11 +11,7 @@ import {
 import Card from "./UI/Card";
 import axios from "axios";
 import toast from "react-hot-toast";
-
-interface RevenueItem {
-  month: number;
-  revenue: number | string;
-}
+import { RevenueItem } from "./CreateForm/Product/types";
 
 const monthNames = [
   "Tháng 1",

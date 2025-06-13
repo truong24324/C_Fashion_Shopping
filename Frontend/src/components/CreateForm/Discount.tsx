@@ -79,12 +79,10 @@ const Discount = () => {
                 label="Giá trị giảm (%)"
                 rules={[
                   { required: true, message: "⚠️ Vui lòng nhập giá trị giảm!" },
-                  { type: "number", min: 1, max: 100, message: "⚠️ Giá trị phải từ 1% đến 100%!" },
                 ]}
               >
                 <InputNumber
                   min={1}
-                  max={100}
                   className="w-full rounded-lg"
                   placeholder="Nhập giá trị giảm"
                   formatter={(value) =>

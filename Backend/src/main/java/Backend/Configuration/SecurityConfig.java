@@ -37,7 +37,6 @@ public class SecurityConfig {
 
                             .requestMatchers("/uploads/**").permitAll()
 
-                            .requestMatchers("/api/**").authenticated()
                             .anyRequest().authenticated();
                 })
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

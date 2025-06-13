@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
+import { DecodedToken } from "../components/CreateForm/Product/types";
 
 interface Variant {
   variantId: number;
@@ -32,19 +33,10 @@ interface ProductSaleProps {
   onCartUpdated?: () => void; // 👈 mới thêm
 }
 
-interface DecodedToken {
-  accountId: string;
-  exp: number;
-  iat: number;
-  email: string;
-  roles: { authority: string }[];
-}
-
 const ProductSale: React.FC<ProductSaleProps> = ({ product, onNext, onPrev, onCartUpdated }) => {
   const [selectedColor, setSelectedColor] = useState<string>(product.colorCodes?.[0] || "");
   const [selectedSize, setSelectedSize] = useState<string>(product.sizeNames?.[0] || "");
   const [selectedMaterial, setSelectedMaterial] = useState<string>(product.materialNames?.[0] || "");
-  const [quantity, setQuantity] = useState<number>(1);
 
   const selectedVariant = product.variants.find(
     (variant) =>

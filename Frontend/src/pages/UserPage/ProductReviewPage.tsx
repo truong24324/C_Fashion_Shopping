@@ -5,36 +5,9 @@ import { toast } from "react-hot-toast";
 import Navbar from "src/Layouts/Navbar";
 import Footer from "src/Layouts/Footer";
 import axios from "axios";
+import { DecodedToken, ProductItem, ReviewFormValues } from "../../components/CreateForm/Product/types";
 
 const { TextArea } = Input;
-
-interface DecodedToken {
-  accountId: string;
-  exp: number;
-  iat: number;
-  email: string;
-  roles: { authority: string }[];
-}
-
-interface ProductItem {
-  orderDetailId: number;
-  productId: number;
-  variantId: number;
-  mainImageUrl: string;
-  productName: string;
-  colorName: string;
-  sizeName: string;
-  materialName: string;
-  quantity: number;
-  reviewed: boolean;
-}
-
-interface ReviewFormValues {
-  rating: number;
-  title: string;
-  content: string;
-  imageUrl?: any;
-}
 
 const getAccountIdFromToken = (): number | null => {
   const token = localStorage.getItem("token");

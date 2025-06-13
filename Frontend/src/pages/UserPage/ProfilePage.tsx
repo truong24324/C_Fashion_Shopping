@@ -4,19 +4,7 @@ import ProfileInfo from "../../Profile/ProfileInfo";
 import Loading from "../../components/common/Loading";
 import { FaUserCircle } from "react-icons/fa"; // Icon đại diện người dùng
 import toast from "react-hot-toast";
-
-interface User {
-  accountId: string;
-  fullName: string;
-  birthday: string;
-  gender: string;
-  email: string;
-  homeAddress: string;
-  officeAddress: string;
-  nationality: string;
-  avatar: string;
-  avatarFile: File | null;
-}
+import { User } from "../../components/CreateForm/Product/types";
 
 const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);

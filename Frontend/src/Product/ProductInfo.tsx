@@ -5,6 +5,7 @@ import PromotionCard from "../components/PromotionCard";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
+import { DecodedToken } from "../components/CreateForm/Product/types";
 
 interface Variant {
   variantId: number;
@@ -40,14 +41,6 @@ interface ProductDetail {
 interface Props {
   product: ProductDetail;
   onSizeSuggest: () => void;
-}
-
-interface DecodedToken {
-  accountId: string;
-  exp: number;
-  iat: number;
-  email: string;
-  roles: { authority: string }[];
 }
 
 const ProductInfo: React.FC<Props> = ({ product, onSizeSuggest }) => {

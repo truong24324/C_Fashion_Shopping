@@ -131,7 +131,7 @@ public class PaymentController {
 			String bankCode = "vpbank"; // Bạn có thể cho phép người dùng chọn ngân hàng
 			String accountNumber = "624032004"; // Số tài khoản nhận tiền
 			String message = "Thanh toan don " + createdOrder.getOrderCode();
-			String qrString = vietQRService.generateQR(bankCode, accountNumber, createdOrder.getTotalAmount(), message,
+			String qrString = vietQRService.generateQR(bankCode, accountNumber, createdOrder.getTotalAmount().add(createdOrder.getShippingFee()), message,
 					createdOrder.getOrderCode());
 
 			// 3. Convert QR string to base64 image (nếu muốn trả ảnh)

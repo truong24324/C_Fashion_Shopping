@@ -4,14 +4,7 @@ import { FaStar } from "react-icons/fa";
 import Loading from "../components/common/Loading";
 import { toast } from "react-hot-toast";
 import ProductCard from "./ProductCard";
-
-interface VariantSummary {
-  colorCode: string;
-  sizeName: string;
-  materialName: string;
-  price: number;
-  stock: number;
-}
+import { VariantSummary } from "../components/CreateForm/Product/types";
 
 interface Product {
   productId: number;

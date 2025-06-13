@@ -2,30 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Form, Input, Select, Button, Row, Col, Card, Spin, Typography, Divider } from 'antd';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import { Product, OptionType } from '../../components/CreateForm/Product/types';
 const { Option } = Select;
 const { Title } = Typography;
-
-interface Product {
-  id: number;
-  productName: string;
-  description: string;
-  brandId: number;
-  categoryId: number;
-  supplierId: number;
-  statusId: number;
-}
-
-interface OptionType {
-  id: number;
-  brandId?: number;
-  brandName?: string;
-  categoryId?: number;
-  categoryName?: string;
-  supplierId?: number;
-  supplierName?: string;
-  statusId?: number;
-  statusName?: string;
-}
 
 const UpdateProductForm: React.FC = () => {
   const [form] = Form.useForm();
@@ -134,7 +113,7 @@ const UpdateProductForm: React.FC = () => {
               }
             >
               {productList.map(p => (
-                <Option key={p.id} value={p.id}>
+                <Option key={p.productId} value={p.productId}>
                   {p.productName}
                 </Option>
               ))}

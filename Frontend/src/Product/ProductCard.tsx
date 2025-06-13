@@ -5,8 +5,9 @@ import { Dialog } from "@headlessui/react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
+import { Variant, DecodedToken } from "../components/CreateForm/Product/types";
 
-interface Product {
+export interface Product {
     productId: number;
     productName: string;
     model: string;
@@ -17,22 +18,6 @@ interface Product {
     colorCodes: string[];
     sizeNames: string[];
     materialNames: string[];
-}
-
-interface DecodedToken {
-    accountId: string;
-    exp: number;
-    iat: number;
-    email: string;
-    roles: { authority: string }[];
-}
-
-interface Variant {
-    colorCode: string;
-    sizeName: string;
-    materialName: string;
-    stock: number;
-    price: number;
 }
 
 const ProductCard: React.FC<{
@@ -318,14 +303,14 @@ const ProductCard: React.FC<{
                     <img
                         src={product.image[0]}
                         alt={product.productName}
-                        onClick={() => navigate(`/product/${product.productId}`)}
+                        onClick={() => navigate(`/product/${product.productName}`)}
                         className={`object-cover w-full h-full transition-all duration-500 ${isHovered ? "opacity-0" : "opacity-100"} absolute top-0 left-0`}
                     />
                     {product.image[1] && (
                         <img
                             src={product.image[1]}
                             alt="Ảnh phụ"
-                            onClick={() => navigate(`/product/${product.productId}`)}
+                            onClick={() => navigate(`/product/${product.productName}`)}
                             className={`object-cover w-full h-full transition-all duration-500 ${isHovered ? "opacity-100" : "opacity-0"} absolute top-0 left-0`}
                         />
                     )}

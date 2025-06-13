@@ -11,24 +11,7 @@ import CartItem from "src/Cart/CartItem";
 import ShippingAddress from "src/Cart/ShippingAddress";
 import DiscountAndNote from "src/Cart/DiscountAndNote";
 import axios from "axios";
-
-interface CartItemType {
-  variantId: number;
-  productName: string;
-  variantDetails: string;
-  quantity: number;
-  price: number;
-  totalPrice: number;
-  productImage: string;
-  availableColors: string[];
-  availableSizes: string[];
-  availableMaterials: string[];
-  selected: boolean;
-  toggleSelectItem: (variantId: number) => void;
-  weightPerUnit?: number;
-  setDiscount: (value: number) => void;
-  setShippingFee: (fee: number | null) => void;
-}
+import { CartItemType, DecodedToken,  } from "../../components/CreateForm/Product/types";
 
 interface Variant {
   variantId: number;
@@ -50,14 +33,6 @@ interface Product {
   sizeNames: string[];
   materialNames: string[];
   variants: Variant[];
-}
-
-interface DecodedToken {
-  accountId: string;
-  exp: number;
-  iat: number;
-  email: string;
-  roles: { authority: string }[];
 }
 
 const CartPage: React.FC = () => {
@@ -507,12 +482,12 @@ const CartPage: React.FC = () => {
               <span>{(subtotal ?? 0).toLocaleString()} vn₫</span>
             </div>
             <div className="flex justify-between">
-              <span>Giảm giá:</span>
-              <span className="text-green-600">- {(discount ?? 0).toLocaleString()} vn₫</span>
-            </div>
-            <div className="flex justify-between">
               <span>Phí vận chuyển:</span>
               <span>{shippingFee !== null ? `${shippingFee.toLocaleString()} vn₫` : "Đang tính..."}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Giảm giá:</span>
+              <span className="text-green-600">- {(discount ?? 0).toLocaleString()} vn₫</span>
             </div>
             <div className="flex justify-between font-bold text-lg text-red-500">
               <span>Tổng cộng:</span>

@@ -1,30 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Form, Select, Upload, Button, message, Typography } from "antd";
-import type { UploadFile } from "antd/es/upload/interface";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Card from "../../components/UI/Card";
+import { FormState, Product } from "./Product/types";
 
 const { Option } = Select;
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 const imageTypes = ["MAIN", "SECONDARY", "OTHER"];
-
-interface Product {
-  productId: number;
-  productName: string;
-}
 
 const ImageUpload: React.FC = () => {
   const [productOptions, setProductOptions] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
-
-  interface FormState {
-    label: string;
-    imageType: string;
-    productId: number | null;
-    fileList: UploadFile[];
-  }
 
   const [formState, setFormState] = useState<FormState>({
     label: "Ảnh sản phẩm",
