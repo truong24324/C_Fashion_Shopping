@@ -54,7 +54,7 @@ const PrivateRoute: React.FC<{ children: ReactNode; requiredRoles?: string[] }> 
 
       if (requiredRoles?.includes('ROLE_Admin') || requiredRoles?.includes('ROLE_Super_Admin') || requiredRoles?.includes('ROLE_Manager')) {
         try {
-          const res = await axios.get('/api/check-admin', {
+          const res = await axios.get('/auth/check-admin', {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`
             }

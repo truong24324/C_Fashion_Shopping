@@ -97,6 +97,8 @@ const EditProfileDisplay: React.FC = () => {
       const formData = new FormData();
 
       formData.append("fullName", values.fullName || "");
+      formData.append("userCode", values.userCode || "");
+      formData.append("email", values.email || "");
       formData.append("phone", values.phone || "");
       formData.append("gender", values.gender || "");
       formData.append(

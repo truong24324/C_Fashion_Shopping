@@ -48,7 +48,7 @@ const AuthenticatePage: React.FC = () => {
         return;
       }
 
-      const response = await fetch("/api/login", {
+      const response = await fetch("/auth/login", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -85,7 +85,7 @@ const AuthenticatePage: React.FC = () => {
 
   const handleRegister = async () => {
     try {
-      const response = await fetch('/api/register', {
+      const response = await fetch('/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -101,7 +101,7 @@ const AuthenticatePage: React.FC = () => {
       localStorage.setItem('token', data.token);
 
       // Sau khi đăng ký thành công, tự động đăng nhập
-      const loginResponse = await fetch('/api/login', {
+      const loginResponse = await fetch('/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaLock, FaEnvelope, FaArrowLeft } from 'react-icons/fa';
+import { LoadingOutlined } from "@ant-design/icons";
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -79,7 +80,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ formData, handleChange, handleLog
               className={`px-5 py-2 rounded-lg transition-all shadow-md text-white ${loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
                 }`}
             >
-              {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+              {loading ? (<><LoadingOutlined /> Đang đăng nhập...</>) : 'Đăng nhập'}
             </motion.button>
           </div>
           <motion.button

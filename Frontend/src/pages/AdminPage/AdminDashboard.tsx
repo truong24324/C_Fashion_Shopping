@@ -27,7 +27,7 @@ const AdminDashboard: React.FC = () => {
   const handleLogout = async () => {
     try {
       await axios.post(
-        "/api/logout",
+        "/auth/logout",
         {},
         {
           withCredentials: true,
