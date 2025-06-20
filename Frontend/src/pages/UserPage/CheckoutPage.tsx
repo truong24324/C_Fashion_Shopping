@@ -193,6 +193,13 @@ const CheckoutPage: React.FC = () => {
             description: "Quét mã QR thanh toán",
             icon: CreditCard,
             color: "purple"
+        },
+        {
+            key: "VNPAY",
+            label: "Thanh toán VNPAY",
+            description: "Thanh toán trực tuyến an toàn",
+            icon: CreditCard,
+            color: "blue"
         }
     ];
 

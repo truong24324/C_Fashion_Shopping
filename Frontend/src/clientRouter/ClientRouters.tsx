@@ -31,6 +31,7 @@ import { useAxiosInterceptor } from '../Utils/useAxiosInterceptor';
 import axios from 'axios';
 import FAQ from 'src/pages/UserPage/FAQ';
 import SupportCenterPage from 'src/pages/UserPage/SupportCenterPage';
+import { LoadingOutlined } from '@ant-design/icons';
 
 const isTokenValid = (token: string | null): boolean => {
   if (!token) return false;
@@ -48,6 +49,7 @@ const PrivateRoute: React.FC<{ children: ReactNode; requiredRoles?: string[] }> 
   const [hasAccess, setHasAccess] = useState(false);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const antIcon = <LoadingOutlined style={{ fontSize: 48 }} spin />;
 
   useEffect(() => {
     const checkAccess = async () => {
@@ -77,8 +79,17 @@ const PrivateRoute: React.FC<{ children: ReactNode; requiredRoles?: string[] }> 
     checkAccess();
   }, [requiredRoles, navigate]);
 
-  if (loading) return <Spin fullscreen />;
+  if (loading) {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center gap-4 bg-white">
+        <Spin indicator={antIcon} />
+        <div className="text-lg text-gray-500">Đang xác thực quyền truy cập...</div>
+      </div>
+    );
+  }
+
   return hasAccess ? <>{children}</> : null;
+
 };
 
 const AppRouterWrapper: React.FC = () => {
@@ -117,8 +128,8 @@ const AppRouterWrapper: React.FC = () => {
       <Route path="/purchased" element={<PurchasedProductsPage />} />
       <Route path="/review" element={<ProductReviewPage />} />
       <Route path="/order-success" element={<OrderSuccessPage />} />
-      <Route path="/shipping" element={<ShippingPolicy />} /> 
-      <Route path='/faq' element={<FAQ/>} />
+      <Route path="/shipping" element={<ShippingPolicy />} />
+      <Route path='/faq' element={<FAQ />} />
       <Route path="/help" element={<SupportCenterPage />} />
       <Route path="*" element={<NotFoundPage />} />
 

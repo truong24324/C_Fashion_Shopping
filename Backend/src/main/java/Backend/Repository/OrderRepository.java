@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 
 import Backend.Model.Order;
 import Backend.Response.MonthlyRevenueResponse;
-import io.lettuce.core.dynamic.annotation.Param;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Integer> {

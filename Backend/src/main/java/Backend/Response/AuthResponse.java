@@ -13,8 +13,7 @@ public class AuthResponse {
 
     public AuthResponse(String message) {
         this.message = message;
-        this.token = this.token;
-        this.refreshToken = this.refreshToken;
+        
     }
 
 }

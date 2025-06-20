@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/auth")
 @Tag(name = "Authentication", description = "APIs liên quan đến xác thực (đăng nhập, đăng ký, đăng xuất)")
 public class AuthController {
 

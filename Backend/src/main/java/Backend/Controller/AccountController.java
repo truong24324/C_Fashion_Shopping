@@ -1,7 +1,6 @@
 package Backend.Controller;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,14 +35,6 @@ public class AccountController {
         List<AccountResponse> accounts = accountService.getAccountsByRole(role);
         return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách tài khoản theo quyền thành công", accounts));
     }
-
-    // ✅ Get account by ID
-    // @GetMapping("/{accountId}")
-    // @PreAuthorize("hasAuthority('ROLE_Admin')")
-    // public ResponseEntity<ApiResponse<Account>> getAccountById(@PathVariable Integer accountId) {
-    //     return ResponseEntity
-    //             .ok(new ApiResponse<>(true, "Lấy thông tin tài khoản thành công", accountService.getById(accountId)));
-    // }
 
     // ✅ Delete account
     @DeleteMapping("/{accountId}")

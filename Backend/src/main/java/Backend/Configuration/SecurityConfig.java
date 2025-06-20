@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(requests -> {
                     requests
-                            .requestMatchers("/api/register", "/api/login", "/api/password/**", "/api/views/**",
+                            .requestMatchers("/auth/login", "/auth/register", "/api/password/**", "/api/views/**",
                                     "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/api/locations/**",
                                     "/api/payment/momo/ipn"
                             )
