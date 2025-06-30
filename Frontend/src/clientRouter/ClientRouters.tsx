@@ -42,7 +42,6 @@ const isTokenValid = (token: string | null): boolean => {
     return false;
   }
 };
-
 const PrivateRoute: React.FC<{ children: ReactNode; requiredRoles?: string[] }> = ({
   children,
   requiredRoles,
@@ -80,7 +79,7 @@ const PrivateRoute: React.FC<{ children: ReactNode; requiredRoles?: string[] }> 
     checkAccess();
   }, [requiredRoles, navigate]);
 
-  if (loading) {
+   if (loading) {
     return (
       <div className="h-screen flex flex-col items-center justify-center gap-4 bg-white">
         <Spin indicator={antIcon} />
@@ -90,7 +89,6 @@ const PrivateRoute: React.FC<{ children: ReactNode; requiredRoles?: string[] }> 
   }
 
   return hasAccess ? <>{children}</> : null;
-
 };
 
 const AppRouterWrapper: React.FC = () => {
@@ -129,8 +127,8 @@ const AppRouterWrapper: React.FC = () => {
       <Route path="/purchased" element={<PurchasedProductsPage />} />
       <Route path="/review" element={<ProductReviewPage />} />
       <Route path="/order-success" element={<OrderSuccessPage />} />
-      <Route path="/shipping" element={<ShippingPolicy />} />
-      <Route path='/faq' element={<FAQ />} />
+      <Route path="/shipping" element={<ShippingPolicy />} /> 
+      <Route path='/faq' element={<FAQ/>} />
       <Route path="/help" element={<SupportCenterPage />} />
       <Route path="*" element={<NotFoundPage />} />
 
