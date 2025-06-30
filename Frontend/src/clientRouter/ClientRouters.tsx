@@ -42,6 +42,7 @@ const isTokenValid = (token: string | null): boolean => {
     return false;
   }
 };
+
 const PrivateRoute: React.FC<{ children: ReactNode; requiredRoles?: string[] }> = ({
   children,
   requiredRoles,
