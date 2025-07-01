@@ -1,4 +1,5 @@
 import React, { useState, useEffect, ReactNode } from 'react';
+import axios from 'axios';
 import {
   BrowserRouter as Router,
   Routes,
@@ -8,6 +9,7 @@ import {
 import { jwtDecode } from 'jwt-decode';
 import { Spin } from 'antd';
 import { toast } from 'react-hot-toast';
+import { LoadingOutlined } from '@ant-design/icons';
 
 import HomePage from '../pages/UserPage/HomePage';
 import AuthenticatePage from '../pages/UserPage/AuthenticatePage';
@@ -28,10 +30,9 @@ import ProductReviewPage from 'src/pages/UserPage/ProductReviewPage';
 import ShippingPolicy from 'src/pages/UserPage/ShippingPolixyPage';
 import OrderSuccessPage from 'src/pages/UserPage/OrderSuccessPage';
 import { useAxiosInterceptor } from '../Utils/useAxiosInterceptor';
-import axios from 'axios';
 import FAQ from 'src/pages/UserPage/FAQ';
 import SupportCenterPage from 'src/pages/UserPage/SupportCenterPage';
-import { LoadingOutlined } from '@ant-design/icons';
+import AshHousePage from 'src/pages/UserPage/AshHousePage';
 
 const isTokenValid = (token: string | null): boolean => {
   if (!token) return false;
@@ -130,6 +131,7 @@ const AppRouterWrapper: React.FC = () => {
       <Route path="/shipping" element={<ShippingPolicy />} /> 
       <Route path='/faq' element={<FAQ/>} />
       <Route path="/help" element={<SupportCenterPage />} />
+      <Route path="/ash-house" element={<AshHousePage/>} />
       <Route path="*" element={<NotFoundPage />} />
 
       <Route

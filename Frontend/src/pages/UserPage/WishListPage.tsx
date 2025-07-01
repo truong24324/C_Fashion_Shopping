@@ -9,6 +9,7 @@ import { jwtDecode } from "jwt-decode";
 import Loading from "../../components/common/Loading";
 import axios from "axios";
 import { DecodedToken, Product } from "../../components/CreateForm/Product/types";
+import MessageAlert from "../../components/common/MessageAlert";
 
 const WishlistPage: React.FC = () => {
   const [wishlist, setWishlist] = useState<Product[]>([]);
@@ -155,7 +156,12 @@ const WishlistPage: React.FC = () => {
 
         {/* Danh sách yêu thích */}
         {wishlist.length === 0 && !loading ? (
-          <p className="text-center text-gray-500">Bạn chưa yêu thích sản phẩm nào.</p>
+          <MessageAlert
+            icon="ℹ️"
+            title="Thông tin"
+            message="Bạn có thể theo dõi sản phẩm để nhận danh sách yêu thích sản phẩm bạn."
+            className="mt-4"
+          />
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {sortedWishlist.map((product) => (

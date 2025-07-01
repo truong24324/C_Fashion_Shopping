@@ -233,6 +233,7 @@ const Navbar: React.FC = () => {
             <nav className="hidden md:flex justify-center space-x-6 py-2 text-base bg-gray-900 bg-opacity-80 shadow-md">
               <Link to="/" className="hover:text-yellow-400 text-white">Trang chủ</Link>
               <Link to="/fashion" className="hover:text-yellow-400 text-white">Thời trang</Link>
+              <Link to="/ash-house" className="hover:text-yellow-400 text-white">Nhà trọ</Link>
               <Link to="/about" className="hover:text-yellow-400 text-white">Giới thiệu</Link>
               <Link to="/contact" className="hover:text-yellow-400 text-white">Liên hệ</Link>
             </nav>
@@ -255,6 +256,7 @@ const Navbar: React.FC = () => {
                 >
                   <Link to="/" className="hover:text-yellow-400 text-white">Trang chủ</Link>
                   <Link to="/fashion" className="hover:text-yellow-400 text-white">Thời trang</Link>
+                  <Link to="/ash-house" className="hover:text-yellow-400 text-white">Nhà trọ</Link>
                   <Link to="/about" className="hover:text-yellow-400 text-white">Giới thiệu</Link>
                   <Link to="/contact" className="hover:text-yellow-400 text-white">Liên hệ</Link>
                 </motion.nav>

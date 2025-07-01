@@ -15,7 +15,7 @@ const PurchasedProductsPage = () => {
     const [lastSyncTime, setLastSyncTime] = useState<Date>(new Date());
 
     const fetchProducts = async (showLoading = true) => {
-        if (showLoading) setLoading(true);
+        setLoading(true);
         try {
             const response = await axios.get('/api/user/orders/purchased-products', {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -25,7 +25,7 @@ const PurchasedProductsPage = () => {
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Lỗi khi tải sản phẩm!');
         } finally {
-            if (showLoading) setLoading(false);
+           setLoading(false);
         }
     };
 

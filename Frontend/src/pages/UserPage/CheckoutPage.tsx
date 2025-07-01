@@ -203,6 +203,14 @@ const CheckoutPage: React.FC = () => {
         }
     ];
 
+    if (!state) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <LoadingOutlined className="text-4xl text-blue-500 animate-spin" />
+            </div>
+        );
+    }
+
     return (
         <>
             <Navbar />
@@ -227,6 +235,14 @@ const CheckoutPage: React.FC = () => {
 
                             {/* QR and Info */}
                             <div className="flex flex-col items-center gap-3">
+                                {/* Logo VPBank */}
+                                <img
+                                    src="/images/vpbank.png"
+                                    alt="VPBank Logo"
+                                    className="h-10 object-contain mb-1"
+                                />
+
+                                {/* QR Code */}
                                 <div className="border-2 border-dashed border-purple-200 p-2 rounded-xl">
                                     <img
                                         src={qrImage ?? ""}
@@ -235,6 +251,21 @@ const CheckoutPage: React.FC = () => {
                                     />
                                 </div>
 
+                                {/* Logo VietQR + Napas 247 */}
+                                <div className="flex items-center justify-center gap-4 mt-2">
+                                    <img
+                                        src="/images/vietqr.png"
+                                        alt="VietQR Logo"
+                                        className="h-8 object-contain"
+                                    />
+                                    <img
+                                        src="/images/napas247.png"
+                                        alt="Napas247 Logo"
+                                        className="h-8 object-contain"
+                                    />
+                                </div>
+
+                                {/* Thông tin */}
                                 <div className="text-sm text-center text-gray-700 leading-relaxed space-y-1 mt-3">
                                     <p>
                                         <span className="font-semibold">Người nhận:</span> Nguyễn Minh Trường
@@ -250,7 +281,7 @@ const CheckoutPage: React.FC = () => {
                                     )}
                                     {amount && (
                                         <p className="text-lg font-bold text-green-600">
-                                            Số tiền: {Number(amount).toLocaleString("vi-VN")}₫
+                                            Số tiền: {Number(amount).toLocaleString("vi-VN")} vn₫
                                         </p>
                                     )}
                                 </div>
@@ -480,7 +511,7 @@ const CheckoutPage: React.FC = () => {
                                                 <div className="flex items-center justify-between mt-1">
                                                     <span className="text-sm text-gray-600">x{item.quantity}</span>
                                                     <span className="font-medium text-gray-900">
-                                                        {item.totalPrice.toLocaleString()} ₫
+                                                        {item.totalPrice.toLocaleString()} vn₫
                                                     </span>
                                                 </div>
                                             </div>

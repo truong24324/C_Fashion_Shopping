@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
+import MessageAlert from "./common/MessageAlert";
 import { toast } from "react-hot-toast";
 import Loading from "./common/Loading";
 import axios from "axios";
+
 const CACHE_KEY = "cachedBrands";
 const CACHE_EXPIRE_KEY = "cachedBrandsExpire";
 const CACHE_DURATION = 10 * 60 * 1000; // 10 phút
@@ -90,9 +92,12 @@ const BrandsIntroduction: React.FC = () => {
         {loading ? (
           <Loading showRetryButton={error} onRetry={handleRetry} />
         ) : brands.length === 0 ? (
-          <div className="text-center text-gray-500 py-4">
-            Không có thương hiệu nào để hiển thị.
-          </div>
+          <MessageAlert
+            icon="ℹ️"
+            title="Thông tin"
+            message=" Không có thương hiệu nào để hiển thị."
+            className="mt-4"
+          />
         ) : (
           <div
             className="relative overflow-hidden"
