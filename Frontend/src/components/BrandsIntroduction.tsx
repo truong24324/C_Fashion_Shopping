@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
-import MessageAlert from "./common/MessageAlert";
 import { toast } from "react-hot-toast";
 import Loading from "./common/Loading";
 import axios from "axios";
+import MessageAlert from "./common/MessageAlert";
 
 const CACHE_KEY = "cachedBrands";
 const CACHE_EXPIRE_KEY = "cachedBrandsExpire";
-const CACHE_DURATION = 10 * 60 * 1000; // 10 phút
+const CACHE_DURATION = 30 * 60 * 1000; // 10 phút
 
 const BrandsIntroduction: React.FC = () => {
   const [brands, setBrands] = useState<any[]>([]);
@@ -94,7 +94,7 @@ const BrandsIntroduction: React.FC = () => {
         ) : brands.length === 0 ? (
           <MessageAlert
             icon="ℹ️"
-            title="Thông tin"
+            title="Thông báo"
             message=" Không có thương hiệu nào để hiển thị."
             className="mt-4"
           />

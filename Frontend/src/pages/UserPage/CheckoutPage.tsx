@@ -106,7 +106,7 @@ const CheckoutPage: React.FC = () => {
             if (paymentMethod === "VNPAY") {
                 // Gửi yêu cầu tạo link thanh toán VNPAY
                 const response = await axios.post(
-                    `/api/payment/create/vnpay?amount=${pricing.total}`, { order: orderRequest },
+                    `/api/payment/create/vnpay?amount=${pricing.total}`, orderRequest ,
                     {
                         headers: {
                             Authorization: `Bearer ${localStorage.getItem("token")}`,  // Thêm Authorization header
@@ -219,6 +219,7 @@ const CheckoutPage: React.FC = () => {
                 {isQRModalOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 px-4 backdrop-blur-sm">
                         <div className="bg-white p-6 rounded-3xl shadow-xl shadow-purple-100 relative w-full max-w-md animate-fade-in-up transition-all duration-300">
+
                             {/* Close Button */}
                             <button
                                 onClick={() => setIsQRModalOpen(false)}
@@ -229,90 +230,62 @@ const CheckoutPage: React.FC = () => {
                             </button>
 
                             {/* Header */}
-                            <h3 className="text-2xl font-semibold mb-5 text-center text-purple-700">
+                            <h3 className="text-2xl font-semibold mb-4 text-center text-purple-700">
                                 Thanh toán bằng QR Code
                             </h3>
 
-                            {/* QR and Info */}
+                            {/* QR Section */}
                             <div className="flex flex-col items-center gap-3">
-                                {/* Logo VPBank */}
-                                <img
-                                    src="/images/vpbank.png"
-                                    alt="VPBank Logo"
-                                    className="h-10 object-contain mb-1"
-                                />
-
-                                {/* QR Code */}
+                                <img src="/images/vpbank.png" alt="VPBank" className="h-10 mb-1" />
                                 <div className="border-2 border-dashed border-purple-200 p-2 rounded-xl">
-                                    <img
-                                        src={qrImage ?? ""}
-                                        alt="QR Code"
-                                        className="w-52 h-52 rounded-md object-contain"
-                                    />
+                                    <img src={qrImage ?? ""} alt="QR Code" className="w-48 h-48 rounded-md object-contain" />
+                                </div>
+                                <div className="flex items-center gap-4 mt-2">
+                                    <img src="/images/vietqr.png" alt="VietQR" className="h-8" />
+                                    <img src="/images/napas247.png" alt="Napas247" className="h-8" />
                                 </div>
 
-                                {/* Logo VietQR + Napas 247 */}
-                                <div className="flex items-center justify-center gap-4 mt-2">
-                                    <img
-                                        src="/images/vietqr.png"
-                                        alt="VietQR Logo"
-                                        className="h-8 object-contain"
-                                    />
-                                    <img
-                                        src="/images/napas247.png"
-                                        alt="Napas247 Logo"
-                                        className="h-8 object-contain"
-                                    />
-                                </div>
-
-                                {/* Thông tin */}
-                                <div className="text-sm text-center text-gray-700 leading-relaxed space-y-1 mt-3">
-                                    <p>
-                                        <span className="font-semibold">Người nhận:</span> Nguyễn Minh Trường
-                                    </p>
-                                    <p>
-                                        <span className="font-semibold">Ngân hàng:</span> VP Bank
-                                    </p>
+                                {/* Payment Info */}
+                                <div className="text-sm text-center text-gray-700 leading-relaxed mt-3 space-y-1">
+                                    <p><span className="font-semibold">Người nhận:</span> Nguyễn Minh Trường</p>
+                                    <p><span className="font-semibold">Ngân hàng:</span> VP Bank</p>
                                     {orderCode && (
-                                        <p>
-                                            <span className="font-semibold">Mã đơn hàng:</span>{" "}
-                                            <span className="text-gray-800">{orderCode}</span>
-                                        </p>
+                                        <p><span className="font-semibold">Mã đơn hàng:</span> <span className="text-gray-800">{orderCode}</span></p>
                                     )}
                                     {amount && (
                                         <p className="text-lg font-bold text-green-600">
-                                            Số tiền: {Number(amount).toLocaleString("vi-VN")} vn₫
+                                            Số tiền: {Number(amount).toLocaleString("vi-VN")} VNĐ
                                         </p>
                                     )}
                                 </div>
 
-                                <p className="text-sm text-gray-500 mt-3 text-center px-4">
-                                    Vui lòng sử dụng ứng dụng ngân hàng hoặc ví MoMo để quét mã và hoàn tất thanh toán.
+                                <p className="text-xs text-gray-500 mt-2 text-center px-4">
+                                    Vui lòng dùng app ngân hàng hoặc MoMo để quét mã và thanh toán.
                                 </p>
                             </div>
 
-                            {/* Warning & Confirmation */}
-                            <div className="mt-6 px-4 text-xs text-center text-gray-600 italic leading-relaxed">
-                                Đây là mã QR được cung cấp bởi <span className="font-medium text-purple-600">VietQR</span> để hỗ trợ thanh toán nhanh.
-                                Sau khi thanh toán, hãy nhấn <span className="font-semibold">"Tôi đã thanh toán thành công"</span> để chuyển sang trang xác nhận.
+                            {/* Warning */}
+                            <div className="mt-5 px-4 text-xs text-center text-gray-600 italic leading-relaxed">
+                                Mã QR do <span className="font-medium text-purple-600">VietQR</span> cung cấp. Sau khi thanh toán, nhấn <span className="font-semibold">"Tôi đã thanh toán thành công"</span> để xác nhận.
                                 <br />
                                 <span className="text-red-500 font-semibold">
-                                    Lưu ý: Nếu bạn chưa thanh toán mà bấm xác nhận, đơn hàng sẽ bị hủy tự động.
+                                    Lưu ý: Nếu chưa thanh toán mà bấm xác nhận, đơn hàng sẽ bị hủy tự động.
                                 </span>
                             </div>
 
                             {/* Confirm Button */}
-                            <div className="mt-6 flex justify-center">
+                            <div className="mt-5 flex justify-center">
                                 <button
                                     onClick={() => {
                                         setIsQRModalOpen(false);
                                         navigate("/order-success", { state: { order: dataOrder, orderDetails: dataOrderDetails } });
                                     }}
-                                    className="bg-purple-600 text-white px-6 py-2 rounded-full font-medium shadow hover:bg-purple-700 transition"
+                                    className="bg-purple-600 text-white px-5 py-2 rounded-full font-medium shadow hover:bg-purple-700 transition"
                                 >
                                     Tôi đã thanh toán thành công
                                 </button>
                             </div>
+
                         </div>
                     </div>
                 )}
@@ -511,7 +484,7 @@ const CheckoutPage: React.FC = () => {
                                                 <div className="flex items-center justify-between mt-1">
                                                     <span className="text-sm text-gray-600">x{item.quantity}</span>
                                                     <span className="font-medium text-gray-900">
-                                                        {item.totalPrice.toLocaleString()} vn₫
+                                                        {item.totalPrice.toLocaleString()} VNĐ
                                                     </span>
                                                 </div>
                                             </div>
@@ -564,20 +537,20 @@ const CheckoutPage: React.FC = () => {
                                 <div className="space-y-3">
                                     <div className="flex justify-between">
                                         <span className="text-gray-600">Tạm tính:</span>
-                                        <span className="font-medium">{pricing.subtotal.toLocaleString()} ₫</span>
+                                        <span className="font-medium">{pricing.subtotal.toLocaleString()} VNĐ</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-gray-600">Phí vận chuyển:</span>
-                                        <span className="font-medium">{pricing.shippingFee.toLocaleString()} ₫</span>
+                                        <span className="font-medium">{pricing.shippingFee.toLocaleString()} VNĐ</span>
                                     </div>
                                     <div className="flex justify-between text-emerald-600">
                                         <span>Giảm giá:</span>
-                                        <span className="font-medium">-{pricing.discount.toLocaleString()} ₫</span>
+                                        <span className="font-medium">-{pricing.discount.toLocaleString()} VNĐ</span>
                                     </div>
                                     <div className="border-t pt-3">
                                         <div className="flex justify-between text-lg font-bold text-gray-900">
                                             <span>Tổng cộng:</span>
-                                            <span>{pricing.total.toLocaleString()} ₫</span>
+                                            <span>{pricing.total.toLocaleString()} VNĐ</span>
                                         </div>
                                     </div>
                                 </div>

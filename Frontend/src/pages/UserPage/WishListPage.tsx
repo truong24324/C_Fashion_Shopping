@@ -158,8 +158,8 @@ const WishlistPage: React.FC = () => {
         {wishlist.length === 0 && !loading ? (
           <MessageAlert
             icon="ℹ️"
-            title="Thông tin"
-            message="Bạn có thể theo dõi sản phẩm để nhận danh sách yêu thích sản phẩm bạn."
+            title="Khuyến nghị"
+            message="Bạn có thể theo dõi sản phẩm để nhận danh sách yêu thích sản phẩm."
             className="mt-4"
           />
         ) : (

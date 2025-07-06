@@ -40,7 +40,7 @@ export const useAxiosInterceptor = () => {
                     isRefreshing = true;
 
                     try {
-                        const res = await axios.post('/api/refresh-token', null, {
+                        const res = await axios.post('/auth/refresh-token', null, {
                             headers: {
                                 Authorization: `Bearer ${localStorage.getItem("refresh_token")}`,
                             },

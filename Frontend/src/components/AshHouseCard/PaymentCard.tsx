@@ -85,13 +85,13 @@ const PaymentCard: React.FC = () => {
             <p className="text-sm text-gray-600 mb-4">Có thắc mắc? Liên hệ ngay với chúng tôi</p>
             <div className="flex gap-3">
               <a
-                href="tel:0123456789"
+                href="tel:0898858301"
                 className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:from-indigo-600 hover:to-purple-700 hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
               >
                 📞 Gọi ngay
               </a>
               <a
-                href="https://zalo.me/0123456789"
+                href="https://zalo.me/0898858301"
                 className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-blue-700 hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
               >
                 💬 Zalo
