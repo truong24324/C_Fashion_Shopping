@@ -88,4 +88,8 @@ public class VNPayUtil {
         return params;
     }
 
+    public static String getExpireDate(int minutes) {
+        java.time.LocalDateTime expireDate = java.time.LocalDateTime.now().plusMinutes(minutes);
+        return expireDate.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+    }
 }
