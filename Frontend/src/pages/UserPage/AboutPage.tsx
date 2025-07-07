@@ -1,7 +1,13 @@
+import {useEffect} from "react"
 import Footer from "../../Layouts/Footer";
 import Navbar from "../../Layouts/Navbar";
 
 const AboutPage = () => {
+
+    useEffect(() => {
+        document.title = `C WEB - Về Chúng Tôi`;
+    }, []);
+
   return (
     <>
       <Navbar />

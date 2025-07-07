@@ -36,6 +36,7 @@ const WishlistPage: React.FC = () => {
     };
 
     fetchWishlist();
+    document.title = 'C WEB - Danh Sách Yêu Thích'
   }, []);
 
   const getAccountIdFromToken = (): number | null => {

@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
 import Navbar from "../../Layouts/Navbar";
 import Footer from "../../Layouts/Footer";
-import ProductSale from "../../Product/ProductSale";
+import ProductSale from "../../components/Product/ProductSale";
 import { FaCartPlus } from "react-icons/fa";
 import Loading from "../../components/common/Loading";
 import { useNavigate } from "react-router-dom";
@@ -11,7 +11,7 @@ import CartItem from "src/Cart/CartItem";
 import ShippingAddress from "src/Cart/ShippingAddress";
 import DiscountAndNote from "src/Cart/DiscountAndNote";
 import axios from "axios";
-import { CartItemType, DecodedToken,  } from "../../components/CreateForm/Product/types";
+import { CartItemType, DecodedToken, } from "../../components/CreateForm/Product/types";
 
 interface Variant {
   variantId: number;
@@ -36,6 +36,10 @@ interface Product {
 }
 
 const CartPage: React.FC = () => {
+  useEffect(() => {
+    document.title = `C WEB - Giỏ Hàng`;
+  }, []);
+
   const [cartItems, setCartItems] = useState<CartItemType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

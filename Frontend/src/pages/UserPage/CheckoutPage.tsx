@@ -17,6 +17,7 @@ const CheckoutPage: React.FC = () => {
         if (!state) {
             navigate("/cart");
         }
+        document.title = `C WEB - Thanh Toán Đơn Hàng`;
     }, [state]);
 
     const {
@@ -106,7 +107,7 @@ const CheckoutPage: React.FC = () => {
             if (paymentMethod === "VNPAY") {
                 // Gửi yêu cầu tạo link thanh toán VNPAY
                 const response = await axios.post(
-                    `/api/payment/create/vnpay?amount=${pricing.total}`, orderRequest ,
+                    `/api/payment/create/vnpay?amount=${pricing.total}`, orderRequest,
                     {
                         headers: {
                             Authorization: `Bearer ${localStorage.getItem("token")}`,  // Thêm Authorization header

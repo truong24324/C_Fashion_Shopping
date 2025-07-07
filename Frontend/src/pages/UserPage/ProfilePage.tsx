@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import EditProfileForm from "../../Profile/EditProfileForm";
-import ProfileInfo from "../../Profile/ProfileInfo";
+import EditProfileForm from "../../components/Profile/EditProfileForm";
+import ProfileInfo from "../../components/Profile/ProfileInfo";
 import Loading from "../../components/common/Loading";
 import { FaUserCircle } from "react-icons/fa"; // Icon đại diện người dùng
 import toast from "react-hot-toast";
@@ -25,6 +25,11 @@ const ProfilePage: React.FC = () => {
         const data = await response.json();
         if (data.success) {
           setUser(data.data);
+          if (data.data && data.data.fullName) {
+            document.title = `C WEB  - ${data.data.fullName}`;
+          } else {
+            document.title = "C WEB - Profile";
+          }
         } else {
           throw new Error(data.message || "Không thể lấy thông tin cá nhân");
         }

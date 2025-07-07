@@ -1,9 +1,13 @@
-import { N } from 'framer-motion/dist/types.d-6pKw1mTI';
+import {useEffect} from "react"
 import { Truck, Clock, MapPin, Shield, Phone, Mail, CheckCircle, AlertCircle } from 'lucide-react';
 import Footer from 'src/Layouts/Footer';
 import Navbar from 'src/Layouts/Navbar';
 
 const ShippingPolixyPage = () => {
+    useEffect(() => {
+        document.title = 'C WEB - Chính Sách Giao Hàng';
+    }, []);
+
     const shippingZones = [
         { zone: 'Nội thành TP.HCM', time: '2-4 giờ', fee: '15.000đ', icon: MapPin },
         { zone: 'Ngoại thành TP.HCM', time: '4-8 giờ', fee: '25.000đ', icon: MapPin },

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { FaTshirt } from "react-icons/fa";
-import ProductCard from "../../Product/ProductCard";
+import ProductCard from "../../components/Product/ProductCard";
 import Loading from "src/components/common/Loading";
 import { toast } from "react-hot-toast";
 import clsx from "clsx";
@@ -111,6 +111,7 @@ const FashionPage: React.FC = () => {
 
   useEffect(() => {
     fetchProducts();
+    document.title = 'C WEB - Thời Trang';
   }, []);
 
   const filteredProducts = products.filter((product) => {

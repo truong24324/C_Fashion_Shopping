@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Search, ShoppingBag, Truck, CreditCard, RefreshCw, Shield, Heart, MessageCircle, Phone, Mail, Star } from 'lucide-react';
 import Navbar from 'src/Layouts/Navbar';
 import Footer from 'src/Layouts/Footer';
 
 const FAQ = () => {
+       useEffect(() => {
+            document.title = `C WEB - Câu Hỏi Thường Gặp`;
+        }, []);
+
     const [searchTerm, setSearchTerm] = useState('');
     const [openItem, setOpenItem] = useState<string | null>(null);
 

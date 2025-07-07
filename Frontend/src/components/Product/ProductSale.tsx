@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
-import { DecodedToken } from "../components/CreateForm/Product/types";
+import { DecodedToken } from "../CreateForm/Product/types";
 
 interface Variant {
   variantId: number;

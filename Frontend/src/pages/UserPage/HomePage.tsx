@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Footer from "../../Layouts/Footer";
 import BrandsIntroduction from "../../components/BrandsIntroduction";
-import ProductPanel from "../../Product/ProductPanel";
+import ProductPanel from "../../components/Product/ProductPanel";
 import News from "../../components/News";
 import Navbar from "../../Layouts/Navbar";
 import Slider from "../../Layouts/Slider";
 import toast from "react-hot-toast";
-import TopSellingProducts from "src/Product/TopSellingProducts";
+import TopSellingProducts from "../../components/Product/TopSellingProducts";
 import axios from "axios";
 
 interface Product {
@@ -77,6 +77,7 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     fetchProducts();
+    document.title = 'C WEB - Trang Chủ'
   }, []);
 
   const filteredProducts = products

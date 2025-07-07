@@ -5,7 +5,7 @@ import { Dialog } from "@headlessui/react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
-import { Variant, DecodedToken } from "../components/CreateForm/Product/types";
+import { Variant, DecodedToken } from "../CreateForm/Product/types";
 
 export interface Product {
     productId: number;

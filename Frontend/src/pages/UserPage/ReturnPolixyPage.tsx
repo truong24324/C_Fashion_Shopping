@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RefreshCw, Shield, AlertCircle, CheckCircle, Clock, DollarSign, ArrowRight, Phone, Mail, Package, Truck, Star, Heart } from 'lucide-react';
 import Footer from 'src/Layouts/Footer';
 import Navbar from 'src/Layouts/Navbar';
 
  const ReturnPolixyPage = () => {
+  useEffect(() => {
+    document.title = 'C WEB - Chính Sách Đổi Trả';
+  }, []);
   const [activeTab, setActiveTab] = useState('return');
 
   const warrantyData = [

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaStar } from "react-icons/fa";
-import Loading from "../components/common/Loading";
+import Loading from "../common/Loading";
 import { toast } from "react-hot-toast";
 import ProductCard from "./ProductCard";
-import { VariantSummary } from "../components/CreateForm/Product/types";
+import { VariantSummary } from "../CreateForm/Product/types";
 
 interface Product {
   productId: number;

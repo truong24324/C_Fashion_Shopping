@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { FaCartPlus, FaShoppingBag, FaRulerVertical } from "react-icons/fa";
-import PromotionCard from "../components/PromotionCard";
+import PromotionCard from "../PromotionCard";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
-import { DecodedToken } from "../components/CreateForm/Product/types";
+import { DecodedToken } from "../CreateForm/Product/types";
 
 interface Variant {
   variantId: number;

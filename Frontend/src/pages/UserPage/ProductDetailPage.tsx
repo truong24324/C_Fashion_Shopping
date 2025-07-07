@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "../../Layouts/Navbar";
 import Footer from "../../Layouts/Footer";
-import ProductImageGallery from "../../Product/ProductImageGallery";
-import ProductInfo from "../../Product/ProductInfo";
+import ProductImageGallery from "../../components/Product/ProductImageGallery";
+import ProductInfo from "../../components/Product/ProductInfo";
 import SizeSuggestionModal from "../../components/SizeSuggestionModal";
 import toast from "react-hot-toast";
 import axios from "axios";
@@ -62,6 +62,7 @@ const ProductDetailPage: React.FC = () => {
 
   useEffect(() => {
     fetchProduct();
+    document.title = 'C WEB - ${productName}'
   }, [productName]);
 
   if (loading) {

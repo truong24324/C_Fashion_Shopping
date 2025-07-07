@@ -73,6 +73,7 @@ const OrderSuccessPage = () => {
     };
 
     updateOrderStatusAndFetch();
+    document.title = 'C WEB - Hóa Đơn'
   }, [orderIdParam]);
 
   const fetchOrder = async () => {

@@ -30,6 +30,7 @@ const PurchasedProductsPage = () => {
     };
 
     useEffect(() => {
+        document.title = 'C WEB - Thông Tin Đơn Hàng'
         fetchProducts();
     }, []);
 

@@ -1,9 +1,13 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { FaPhone, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
 import Navbar from "../../Layouts/Navbar";
 import Footer from "../../Layouts/Footer";
 
 const ContactPage: React.FC = () => {
+     useEffect(() => {
+          document.title = `C WEB - Liên Hệ Chúng Tôi`;
+      }, []);
+
   return (
     <div className="pt-5">
     <Navbar/>

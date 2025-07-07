@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, MessageCircle, FileText, Settings, Phone, Mail, Clock, ChevronRight, Star, Users, BookOpen, Zap } from 'lucide-react';
 import Footer from 'src/Layouts/Footer';
 import Navbar from 'src/Layouts/Navbar';
 
 const SupportCenterPage = () => {
+  useEffect(() => {
+    document.title = 'C WEB - Hỗ Trợ Khách Hàng';
+  }, []);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
 

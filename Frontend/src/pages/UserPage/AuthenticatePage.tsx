@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +10,10 @@ import PersonalInfoForm from '../../AuthForm/PersonalInfoForm';
 import axios from 'axios';
 
 const AuthenticatePage: React.FC = () => {
+  useEffect(() => {
+    document.title = `C WEB - Đăng Nhập`;
+  }, []);
+
   const [step, setStep] = useState<"welcome" | "login" | "register" | "personalInfo" | "forgotpassword">("welcome");
   const [formData, setFormData] = useState({
     userCode: "", email: "", phone: "", password: "", confirmPassword: "",

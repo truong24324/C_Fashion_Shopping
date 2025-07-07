@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaExchangeAlt, FaShieldAlt, FaGift, FaPhone } from "react-icons/fa";
 import Footer from "../../Layouts/Footer";
 import Navbar from "../../Layouts/Navbar";
@@ -36,6 +36,9 @@ const infoItems = [
 ];
 
 const StoreListPage = () => {
+    useEffect(() => {
+        document.title = 'C WEB - Danh Sách Cửa Hàng';
+    }, []);
     const [city, setCity] = useState("");
     const [district, setDistrict] = useState("");
 

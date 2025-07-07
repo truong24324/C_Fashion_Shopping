@@ -1,4 +1,4 @@
-import { ProfileInfoProps } from "../components/CreateForm/Product/types";
+import { ProfileInfoProps } from "../CreateForm/Product/types";
 import React from "react";
 import { useNavigate } from "react-router-dom"; // import hook điều hướng
 

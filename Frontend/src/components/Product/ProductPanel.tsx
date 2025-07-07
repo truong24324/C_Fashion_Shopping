@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Loading from "../components/common/Loading";
+import Loading from "../common/Loading";
 import { FaTshirt } from "react-icons/fa";
 import ProductCard from "./ProductCard";
 

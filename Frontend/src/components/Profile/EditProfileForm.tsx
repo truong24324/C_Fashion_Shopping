@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { motion } from 'framer-motion';
 import toast from "react-hot-toast";
-import { EditProfileFormProps, JwtPayload } from "../components/CreateForm/Product/types";
+import { EditProfileFormProps, JwtPayload } from "../CreateForm/Product/types";
+import { Form, DatePicker } from "antd";
 
 const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsEditing }) => {
     const [formData, setFormData] = useState({
@@ -72,7 +73,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsE
 
     const handleSave = async () => {
         if (!validateForm()) return;
-    
+
         const formDataToSend = new FormData();
         formDataToSend.append("fullName", formData.fullName);
         formDataToSend.append("birthday", formData.birthday);
@@ -80,7 +81,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsE
         formDataToSend.append("homeAddress", formData.homeAddress);
         formDataToSend.append("officeAddress", formData.officeAddress);
         formDataToSend.append("nationality", formData.nationality);
-    
+
         // Chỉ gửi tệp tin thật sự (avatarFile) khi có sự thay đổi
         if (formData.avatarFile) {
             formDataToSend.append("avatarFile", formData.avatarFile);
@@ -88,7 +89,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsE
             // Trường hợp không có avatarFile, giữ lại avatar cũ
             formDataToSend.append("avatar", user.avatar);
         }
-    
+
         try {
             const response = await fetch(`/api/information/${accountId}`, {
                 method: "PUT",
@@ -97,7 +98,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsE
                 },
                 body: formDataToSend,
             });
-    
+
             let data;
             try {
                 data = await response.json();
@@ -115,10 +116,10 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsE
                 setIsEditing(false);
                 return;
             }
-    
+
             if (response.ok && data?.success) {
                 toast.success("Cập nhật thông tin thành công!");
-    
+
                 setUser((prevUser) => {
                     if (!prevUser) return null;
                     return {
@@ -127,7 +128,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsE
                         avatar: formData.avatarFile ? URL.createObjectURL(formData.avatarFile) : prevUser.avatar,
                     };
                 });
-    
+
                 setIsEditing(false);
             } else {
                 throw new Error(data?.message || "Cập nhật thất bại!");
@@ -137,7 +138,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsE
             toast.error(error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại!");
         }
     };
-    
+
     return (
         <>
             <motion.h2
@@ -148,7 +149,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsE
             >
                 Chỉnh sửa thông tin
             </motion.h2>
-    
+
             <motion.div
                 className="space-y-4 mt-6"
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -172,7 +173,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsE
                         />
                         <input type="file" name="avatarFile" onChange={handleFileChange} id="avatarFileInput" className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer" />
                     </div>
-    
+
                     <div className="ml-6 flex-1">
                         <label className="block">
                             <span className="text-gray-400">Họ và tên:</span>
@@ -186,7 +187,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsE
                             />
                             {errors.fullName && <p className="text-red-500 text-sm">{errors.fullName}</p>}
                         </label>
-    
+
                         <label className="block mt-4">
                             <span className="text-gray-400">Ngày sinh:</span>
                             <motion.input
@@ -201,7 +202,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsE
                         </label>
                     </div>
                 </motion.div>
-    
+
                 {/* Giới tính & Quốc tịch */}
                 <motion.div className="flex space-x-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
                     <label className="flex-1">
@@ -219,7 +220,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsE
                         </motion.select>
                         {errors.gender && <p className="text-red-500 text-sm">{errors.gender}</p>}
                     </label>
-    
+
                     <label className="flex-1">
                         <span className="text-gray-400">Quốc tịch:</span>
                         <motion.select
@@ -238,7 +239,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsE
                         {errors.nationality && <p className="text-red-500 text-sm">{errors.nationality}</p>}
                     </label>
                 </motion.div>
-    
+
                 {/* Địa chỉ */}
                 <label className="block">
                     <span className="text-gray-400">Địa chỉ nhà:</span>
@@ -251,7 +252,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsE
                         whileFocus={{ scale: 1.05 }}
                     />
                 </label>
-    
+
                 <label className="block">
                     <span className="text-gray-400">Địa chỉ công ty:</span>
                     <motion.input
@@ -264,7 +265,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsE
                     />
                 </label>
             </motion.div>
-    
+
             {/* Nút Lưu và Hủy */}
             <motion.div className="mt-6 flex justify-center space-x-4">
                 <motion.button
@@ -286,7 +287,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ user, setUser, setIsE
             </motion.div>
         </>
     );
-    
+
 };
 
 export default EditProfileForm;

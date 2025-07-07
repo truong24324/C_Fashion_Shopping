@@ -30,6 +30,7 @@ const ProductReviewPage = () => {
   const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
 
   useEffect(() => {
+    document.title = 'C WEB - Đánh Giá Sản Phẩm';
     if (!accountId) return;
     axios
       .get(`/api/reviews/completed?accountId=${accountId}`,
