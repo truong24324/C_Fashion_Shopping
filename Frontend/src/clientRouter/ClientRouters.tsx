@@ -33,6 +33,8 @@ import { useAxiosInterceptor } from '../Utils/useAxiosInterceptor';
 import FAQ from 'src/pages/UserPage/FAQ';
 import SupportCenterPage from 'src/pages/UserPage/SupportCenterPage';
 import AshHousePage from 'src/pages/UserPage/AshHousePage';
+import ChangePasswordForm from '../components/Profile/ChangePasswordForm';
+import EditProfileForm from '../components/Profile/EditProfileForm';
 
 const isTokenValid = (token: string | null): boolean => {
   if (!token) return false;
@@ -80,7 +82,7 @@ const PrivateRoute: React.FC<{ children: ReactNode; requiredRoles?: string[] }> 
     checkAccess();
   }, [requiredRoles, navigate]);
 
-   if (loading) {
+  if (loading) {
     return (
       <div className="h-screen flex flex-col items-center justify-center gap-4 bg-white">
         <Spin indicator={antIcon} />
@@ -128,10 +130,10 @@ const AppRouterWrapper: React.FC = () => {
       <Route path="/purchased" element={<PurchasedProductsPage />} />
       <Route path="/review" element={<ProductReviewPage />} />
       <Route path="/order-success" element={<OrderSuccessPage />} />
-      <Route path="/shipping" element={<ShippingPolicy />} /> 
-      <Route path='/faq' element={<FAQ/>} />
+      <Route path="/shipping" element={<ShippingPolicy />} />
+      <Route path='/faq' element={<FAQ />} />
       <Route path="/help" element={<SupportCenterPage />} />
-      <Route path="/ash-house" element={<AshHousePage/>} />
+      <Route path="/ash-house" element={<AshHousePage />} />
       <Route path="*" element={<NotFoundPage />} />
 
       <Route

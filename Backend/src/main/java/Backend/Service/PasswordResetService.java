@@ -82,48 +82,8 @@ public class PasswordResetService {
 			return false;
 		}
 
-		// resetRepository.deleteByAccount(request.getAccount());
 		return true;
 	}
-
-//	@Transactional
-//	public boolean decreaseOtpAttempts(String email) {
-//		Optional<Account> accountOpt = accountRepository.findByEmail(email);
-//		if (accountOpt.isEmpty()) {
-//			return false;
-//		}
-//
-//		Account account = accountOpt.get();
-//		Optional<PasswordResetRequest> requestOpt = resetRepository
-//				.findTopByAccountAndIsUsedFalseOrderByRequestedAtDesc(account);
-//		if (requestOpt.isEmpty()) {
-//			return false;
-//		}
-//
-//		PasswordResetRequest request = requestOpt.get();
-//
-//		if (request.getExpiresAt().isBefore(LocalDateTime.now()) || request.isUsed()) {
-//			resetRepository.deleteByAccount(account);
-//			return false;
-//		}
-//
-//		int remainingAttempts = request.getMaxAttempts();
-//		if (remainingAttempts > 1) {
-//			request.setMaxAttempts(remainingAttempts - 1);
-//			resetRepository.save(request);
-//
-//			account.increaseFailedAttempts();
-//			accountRepository.save(account);
-//			return true;
-//		}
-//
-//		account.setLocked(true);
-//		account.setLockUntil(new Date(System.currentTimeMillis() + 30 * 60 * 1000));
-//		accountRepository.save(account);
-//
-//		resetRepository.deleteByAccount(account);
-//		return false;
-//	}
 
 	@Transactional
 	public int decreaseOtpAttempts(String email) {
@@ -203,4 +163,25 @@ public class PasswordResetService {
 		return true; // Mật khẩu đã được thay đổi
 	}
 
+	@Transactional
+	public void updatePassword(String email, String currentPassword, String newPassword) {
+		Optional<Account> accountOpt = accountRepository.findByEmail(email);
+		if (accountOpt.isEmpty()) {
+			throw new RuntimeException("Tài khoản không tồn tại");
+		}
+
+		Account account = accountOpt.get();
+		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+		// Kiểm tra mật khẩu hiện tại
+		if (!encoder.matches(currentPassword, account.getPassword())) {
+			throw new RuntimeException("Mật khẩu hiện tại không đúng");
+		}
+
+		// Cập nhật mật khẩu mới
+		String encodedNewPassword = encoder.encode(newPassword);
+		account.setPassword(encodedNewPassword);
+		account.setPasswordChangedAt(new Date());
+		accountRepository.save(account);
+	}
 }

@@ -30,10 +30,11 @@ public class InformationController {
     // ✅ Lấy thông tin cá nhân theo ID tài khoản
     @GetMapping("/me")
     @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Customer', 'ROLE_Super_Admin')")
-    public ResponseEntity<ApiResponse<AccountInfoResponse>> getMyInformation(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<ApiResponse<AccountInfoResponse>> getMyInformation(
+            @AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
         Account account = accountRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản!"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản!"));
 
         Information information = informationService.getInformationByAccountId(account.getAccountId());
         if (information == null) {
@@ -92,49 +93,51 @@ public class InformationController {
             avatarPath = informationService.storeFile(request.getAvatarFile());
         }
 
-        Information createInfo = informationService.createInformation( request, avatarPath);
-    	InformationResponse response = new InformationResponse(
-    			createInfo.getFullName(),
-    			createInfo.getBirthday(),
-    			createInfo.getGender(),
-    			createInfo.getHomeAddress(),
-    			createInfo.getOfficeAddress(),
-    			createInfo.getNationality(),
-    			createInfo.getAvatar()
-    	);
-    	return ResponseEntity.ok(new ApiResponse<>(true, "Thêm thông tin thành công", response)); // ✅
+        Information createInfo = informationService.createInformation(request, avatarPath);
+        InformationResponse response = new InformationResponse(
+                createInfo.getFullName(),
+                createInfo.getBirthday(),
+                createInfo.getGender(),
+                createInfo.getHomeAddress(),
+                createInfo.getOfficeAddress(),
+                createInfo.getNationality(),
+                createInfo.getAvatar());
+        return ResponseEntity.ok(new ApiResponse<>(true, "Thêm thông tin thành công", response)); // ✅
     }
 
     // ✅ Cập nhật thông tin cá nhân
-    @PutMapping("/{accountId}")
+    @PutMapping("/me")
     @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Customer', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<InformationResponse>> updateInformation(
-            @PathVariable Long accountId,
-            @ModelAttribute @Valid InformationRequest request) {
+            @ModelAttribute @Valid InformationRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
 
-    	String avatarPath = request.getAvatar(); // Ban đầu gán lại ảnh cũ
+        String avatarPath = request.getAvatar(); // Ban đầu gán lại ảnh cũ
+        String email = userDetails.getUsername();
+        Account account = accountRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản!"));
+        Long accountId = account.getAccountId();
 
-    	if (request.getAvatarFile() != null && !request.getAvatarFile().isEmpty()) {
-    	    String validationMessage = validateImageFile(request.getAvatarFile());
-    	    if (validationMessage != null) {
-    	        return ResponseEntity.badRequest().body(new ApiResponse<>(false, validationMessage, null));
-    	    }
+        if (request.getAvatarFile() != null && !request.getAvatarFile().isEmpty()) {
+            String validationMessage = validateImageFile(request.getAvatarFile());
+            if (validationMessage != null) {
+                return ResponseEntity.badRequest().body(new ApiResponse<>(false, validationMessage, null));
+            }
 
-    	    // Nếu có ảnh mới => ghi đè avatarPath
-    	    avatarPath = informationService.storeFile(request.getAvatarFile());
-    	}
+            // Nếu có ảnh mới => ghi đè avatarPath
+            avatarPath = informationService.storeFile(request.getAvatarFile());
+        }
 
-    	Information updatedInfo = informationService.updateInformation(accountId, request, avatarPath);
-    	InformationResponse response = new InformationResponse(
-    	    updatedInfo.getFullName(),
-    	    updatedInfo.getBirthday(),
-    	    updatedInfo.getGender(),
-    	    updatedInfo.getHomeAddress(),
-    	    updatedInfo.getOfficeAddress(),
-    	    updatedInfo.getNationality(),
-    	    updatedInfo.getAvatar()
-    	);
-    	return ResponseEntity.ok(new ApiResponse<>(true, "Cập nhật thành công", response));
+        Information updatedInfo = informationService.updateInformation(accountId, request, avatarPath);
+        InformationResponse response = new InformationResponse(
+                updatedInfo.getFullName(),
+                updatedInfo.getBirthday(),
+                updatedInfo.getGender(),
+                updatedInfo.getHomeAddress(),
+                updatedInfo.getOfficeAddress(),
+                updatedInfo.getNationality(),
+                updatedInfo.getAvatar());
+        return ResponseEntity.ok(new ApiResponse<>(true, "Cập nhật thành công", response));
 
     }
 
@@ -143,7 +146,8 @@ public class InformationController {
     @PreAuthorize("hasAnyAuthority('ROLE_Admin', 'ROLE_Manager', 'ROLE_Super_Admin')")
     public ResponseEntity<ApiResponse<String>> deleteInformation(@PathVariable Long accountId) {
         informationService.deleteInformation(accountId);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Xóa thông tin thành công", "Đã xóa thông tin của accountId = " + accountId));
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Xóa thông tin thành công", "Đã xóa thông tin của accountId = " + accountId));
     }
 
     private String validateImageFile(MultipartFile file) {

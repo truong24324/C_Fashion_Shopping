@@ -20,7 +20,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class InformationRequest {
 
-    @NotNull(message = "ID tài khoản không được để trống")
     private Long accountId;
 
     @NotBlank(message = "Họ và tên không được để trống")

@@ -102,9 +102,9 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ formData, avatarPre
                 <FaTransgender className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500" />
                 <select name="gender" value={formData.gender} onChange={handleChange} className="w-full pl-10 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 shadow-md">
                   <option value="">Chọn giới tính</option>
-                  <option value="male">Nam</option>
-                  <option value="female">Nữ</option>
-                  <option value="other">Khác</option>
+                  <option value="Nam">Nam</option>
+                  <option value="Nữ">Nữ</option>
+                  <option value="Khác">Khác</option>
                 </select>
                 {errors.gender && <p className="text-red-500 text-sm mt-1">{errors.gender}</p>}
               </div>

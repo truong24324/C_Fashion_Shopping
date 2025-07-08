@@ -2,6 +2,8 @@ package Backend.Controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import Backend.Service.PasswordResetService;
@@ -46,7 +48,8 @@ public class PasswordResetController {
             response = new ApiResponse<>(true, "OTP hợp lệ. Bạn có thể đặt lại mật khẩu.", null);
             return ResponseEntity.ok(response);
         } else {
-            response = new ApiResponse<>(false, "OTP không hợp lệ, đã hết hạn hoặc bạn đã nhập sai quá số lần cho phép.", null);
+            response = new ApiResponse<>(false,
+                    "OTP không hợp lệ, đã hết hạn hoặc bạn đã nhập sai quá số lần cho phép.", null);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
@@ -82,8 +85,33 @@ public class PasswordResetController {
             response = new ApiResponse<>(true, "Mật khẩu đã được thay đổi thành công.", null);
             return ResponseEntity.ok(response);
         } else {
-            response = new ApiResponse<>(false, "OTP không hợp lệ, đã hết hạn hoặc có lỗi trong quá trình thay đổi mật khẩu.", null);
+            response = new ApiResponse<>(false,
+                    "OTP không hợp lệ, đã hết hạn hoặc có lỗi trong quá trình thay đổi mật khẩu.", null);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse<Void>> updatePassword(@RequestBody @Valid PasswordResetRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        // Lấy email từ token xác thực (Authentication)
+        String email = userDetails.getUsername();
+        String currentPassword = request.getCurrentPassword();
+        String newPassword = request.getNewPassword();
+
+        try {
+            passwordResetService.updatePassword(email, currentPassword, newPassword);
+            ApiResponse<Void> response = new ApiResponse<>(true, "Mật khẩu đã được cập nhật thành công.", null);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            ApiResponse<Void> response = new ApiResponse<>(false, e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        } catch (RuntimeException e) {
+            ApiResponse<Void> response = new ApiResponse<>(false, e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ApiResponse<Void> response = new ApiResponse<>(false, "Đã có lỗi xảy ra, vui lòng thử lại sau.", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 }

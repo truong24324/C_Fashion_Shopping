@@ -12,15 +12,28 @@ export interface ColorOption { code: string; name: string }
 export interface Image { imageUrl: string; imageType: string }
 export interface User {
     accountId: string;
+    userCode: string;
     fullName: string;
     birthday: string;
     gender: string;
     email: string;
+    phone: string;
     homeAddress: string;
     officeAddress: string;
     nationality: string;
     avatar: string;
+    createdAt?: string;
+    updatedAt?: string;
+    passwordChangedAt?: string;
+    loginTime?: string;
     avatarFile: File | null;
+}
+
+export interface EditProfileFormProps {
+    user: User;
+    setUser: (user: User | null | ((prevUser: User | null) => User | null)) => void;
+    setIsEditing: (editing: boolean) => void;
+    setIsChangePassword: (changePassword: boolean) => void;
 }
 
 // Variant (đóng gói luôn color, size, material, price, stock...)
@@ -160,12 +173,6 @@ export interface JwtPayload {
 
 export interface ProfileInfoProps {
     user: User;
-    setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-export interface EditProfileFormProps {
-    user: User;
-    setUser: React.Dispatch<React.SetStateAction<User | null>>;
     setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
