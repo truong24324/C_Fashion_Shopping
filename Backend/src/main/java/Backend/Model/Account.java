@@ -67,20 +67,20 @@ public class Account implements UserDetails {
 	private Date updatedAt;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "PASSWORD_CHANGED_AT")
+	@Column(name = "PASSWORD_CHANGED_AT") 
 	private Date passwordChangedAt;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "LOCK_UNTIL")
+	@Column(name = "LOCK_UNTIL") //
 	private Date lockUntil;
 
-	@Column(name = "IS_LOCKED", nullable = false)
+	@Column(name = "IS_LOCKED", nullable = false) // Thêm trường để đánh dấu tài khoản có bị khóa hay không
 	private boolean isLocked = false;
 
-	@Column(name = "IS_ACTIVE", nullable = false)
+	@Column(name = "IS_ACTIVE", nullable = false) // Thêm trường để đánh dấu tài khoản có hoạt động hay không
 	private boolean isActive = true;
 
-	@Column(name = "IS_PROTECTED", nullable = false)
+	@Column(name = "IS_PROTECTED", nullable = false) // Thêm trường để đánh dấu tài khoản có được bảo vệ hay không
 	private boolean isProtected = false;
 
 	public void increaseFailedAttempts() {

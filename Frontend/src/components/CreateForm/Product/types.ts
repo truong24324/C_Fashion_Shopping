@@ -203,4 +203,11 @@ export interface Props {
     onSizeSuggest?: () => void;
 }
 
+export interface PointHistory {
+  id: number;
+  point: number;
+  reason: string;
+  timestamp: string;
+}
+
 export { };
