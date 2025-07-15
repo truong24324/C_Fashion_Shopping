@@ -13,10 +13,6 @@ interface CartItemProps {
   availableMaterials: string[];
   updateQuantity: (variantId: number, amount: number) => void;
   removeItem: (variantId: number) => void;
-  updateVariant: (
-    variantId: number,
-    newVariant: { color: string; size: string; material: string }
-  ) => void;
   selected: boolean;
   toggleSelectItem: (variantId: number) => void;
 }

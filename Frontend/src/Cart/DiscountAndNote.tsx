@@ -34,7 +34,6 @@ const DiscountAndNote: React.FC<DiscountAndNoteProps> = ({
   subtotal,
   shippingFee, // mặc định là 0 nếu không có giá trị
   user,
-  setShippingFee,
 }) => {
   const [showDiscountPanel, setShowDiscountPanel] = useState(false);
   const [availableCoupons, setAvailableCoupons] = useState<Discount[]>([]);

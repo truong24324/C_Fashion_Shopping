@@ -12,6 +12,8 @@ import ShippingAddress from "src/Cart/ShippingAddress";
 import DiscountAndNote from "src/Cart/DiscountAndNote";
 import axios from "axios";
 import { CartItemType, DecodedToken, } from "../../components/CreateForm/Product/types";
+import MessageAlert from "../../components/common/MessageAlert";
+import UsePointsSection from "src/Cart/UsePointsSection";
 
 interface Variant {
   variantId: number;
@@ -58,8 +60,11 @@ const CartPage: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [isCalculatingFee, setIsCalculatingFee] = useState(false);
   const [discount, setDiscount] = useState(0); // Giả sử không có giảm giá ban đầu
+  const [discountFromCoupon, setDiscountFromCoupon] = useState<number>(0); // Thêm biến cho mã giảm giá
+  const [usedPoints, setUsedPoints] = useState<number>(0); // Thêm biến cho điểm đã dùng
   const [total, setTotal] = useState<number>(0);
   const [shippingFee, setShippingFee] = useState<number | null>(null); // Phí vận chuyển, có thể là null nếu chưa tính
+  const [currentPoints, setCurrentPoints] = useState<number>(0);
 
   const navigate = useNavigate();
 
@@ -114,6 +119,7 @@ const CartPage: React.FC = () => {
       .catch((error: any) => {
         toast.error(error.response?.data?.message || "Lỗi khi tải sản phẩm gợi ý.");
       });
+    fetchCurrentPoints();
   }, []);
 
   // ✅ Tải tỉnh khi mở trang
@@ -233,11 +239,6 @@ const CartPage: React.FC = () => {
       setError("Lỗi khi xóa sản phẩm.");
       toast.error(error.response?.data?.message || "Lỗi khi xóa sản phẩm khỏi giỏ hàng.");
     }
-  };
-
-  // 📌 Giữ nguyên cập nhật biến thể
-  const handleUpdateVariant = (variantId: number, newVariant: { color: string; size: string; material: string }) => {
-    console.log("User selected new variant", variantId, newVariant);
   };
 
   const defaultWeights = {
@@ -389,14 +390,30 @@ const CartPage: React.FC = () => {
     navigate("/checkout", { state: checkoutData });
   };
 
+  const fetchCurrentPoints = async () => {
+    try {
+      const res = await axios.get("/api/points/current/me", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      setCurrentPoints(res.data.data || 0);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Không thể tải điểm hiện tại.");
+    }
+  };
+
   const subtotal = cartItems
     .filter(item => selectedItems.includes(item.variantId))  // Lọc chỉ các sản phẩm đã chọn
     .reduce((sum, item) => sum + item.totalPrice, 0);  // Tính tổng giá trị các sản phẩm đã chọn
 
   useEffect(() => {
-    const computed = (subtotal ?? 0) - (discount ?? 0) + (shippingFee ?? 0);
-    setTotal(computed > 0 ? computed : 0); // Không để âm
-  }, [subtotal, discount, shippingFee]);
+    const newDiscount = discountFromCoupon + usedPoints;
+    setDiscount(newDiscount);
+
+    const computedTotal = Math.max((subtotal ?? 0) - newDiscount + (shippingFee ?? 0), 0);
+    setTotal(computedTotal);
+  }, [discountFromCoupon, usedPoints, subtotal, shippingFee]);
 
   return (
     <div>
@@ -424,7 +441,12 @@ const CartPage: React.FC = () => {
           ) : error ? (
             <p className="text-center text-red-500">{error}</p>
           ) : cartItems.length === 0 ? (
-            <p className="text-center text-gray-500">Giỏ hàng của bạn đang trống.</p>
+            <MessageAlert
+              icon="ℹ️"
+              title="Thông báo"
+              message=" Giỏ hàng của bạn đang trống."
+              className="mt-4"
+            />
           ) : (
             cartItems.map((item) => (
               <CartItem
@@ -434,7 +456,6 @@ const CartPage: React.FC = () => {
                 toggleSelectItem={handleToggleSelectItem}
                 updateQuantity={handleUpdateQuantity}
                 removeItem={handleRemoveItem}
-                updateVariant={handleUpdateVariant}
               />
             ))
           )}
@@ -467,7 +488,6 @@ const CartPage: React.FC = () => {
             setWard={setWard}
             estimatedDelivery={estimatedDelivery}
           />
-
           <DiscountAndNote
             coupon={coupon}
             setCoupon={setCoupon}
@@ -475,11 +495,18 @@ const CartPage: React.FC = () => {
             setInvoice={setInvoice}
             note={note}
             setNote={setNote}
-            setDiscount={setDiscount}
+            setDiscount={setDiscountFromCoupon} // riêng mã giảm giá
             subtotal={subtotal}
             shippingFee={shippingFee ?? 0}
             setShippingFee={setShippingFee}
           />
+          
+          <UsePointsSection
+            currentPoints={currentPoints}
+            onUsePoints={setUsedPoints}
+            subtotal={subtotal}
+          />
+
           <div className="space-y-2 text-sm lg:text-base">
             <div className="flex justify-between">
               <span>Tạm tính:</span>

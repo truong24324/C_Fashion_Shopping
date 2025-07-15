@@ -47,7 +47,6 @@ const HomePage: React.FC = () => {
           setProducts(data);
           setRetryVisible(data.length === 0);
         } else {
-          console.warn("Cached products is not an array", data);
           setProducts([]);
           setRetryVisible(true);
         }
@@ -68,7 +67,6 @@ const HomePage: React.FC = () => {
         setRetryVisible(true);
       }
     } catch (error: any) {
-      console.error("Lỗi khi lấy sản phẩm:", error);
       toast.error(error.response?.data?.message || "Lỗi khi lấy sản phẩm. Vui lòng thử lại sau.");
       setRetryVisible(true);
     } finally {

@@ -64,9 +64,8 @@ const CheckoutPage: React.FC = () => {
                     phone: userCache.phone || "",
                     shippingAddress: userCache.homeAddress || "", // mapping homeAddress to shippingAddress
                 });
-            } catch (error) {
-                console.error("Failed to parse user_cache from localStorage", error);
-                toast.error("Lỗi khi tải dữ liệu người dùng");
+            } catch (error: any) {
+                toast.error(error.response?.data?.message || "Lỗi khi tải dữ liệu người dùng");
             }
         }
     }, []);
@@ -163,7 +162,7 @@ const CheckoutPage: React.FC = () => {
                 setDataOrderDetails(orderDetails);
             }
             else {
-                toast.error("Chưa chọn phương thức thanh toán.");
+                toast.error("Bạn chưa chọn phương thức thanh toán.");
             }
         } catch (error: any) {
             toast.error(error.response?.data?.message || "Có lỗi xảy ra khi xử lý thanh toán.");
