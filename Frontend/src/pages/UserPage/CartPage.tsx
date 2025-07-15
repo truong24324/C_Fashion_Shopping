@@ -384,7 +384,7 @@ const CartPage: React.FC = () => {
         district: district || "",
         ward: ward || "",
 
-      }, pricing: { subtotal, discount, shippingFee, total, note, coupon, invoice, estimatedDelivery },
+      }, pricing: { subtotal, discount, shippingFee, total, note, coupon, invoice, estimatedDelivery, usedPoints },
     };
 
     navigate("/checkout", { state: checkoutData });
@@ -500,7 +500,7 @@ const CartPage: React.FC = () => {
             shippingFee={shippingFee ?? 0}
             setShippingFee={setShippingFee}
           />
-          
+
           <UsePointsSection
             currentPoints={currentPoints}
             onUsePoints={setUsedPoints}

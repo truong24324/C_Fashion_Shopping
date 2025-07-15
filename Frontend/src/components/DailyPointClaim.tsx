@@ -18,33 +18,6 @@ const DailyPointClaim: React.FC = () => {
         return 100;
     };
 
-    const fetchCurrentPoints = async () => {
-        try {
-            const res = await axios.get("/api/points/current/me", {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
-            setCurrentPoints(res.data.data || 0);
-            fetchStreak();
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "Không thể tải điểm hiện tại.");
-        }
-    };
-
-    const fetchPointHistory = async () => {
-        try {
-            const res = await axios.get("/api/points/history/me", {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
-            setHistory(res.data.data || []);
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "Không thể tải lịch sử nhận xu.");
-        }
-    };
-
     const handleClaimPoints = async () => {
         setLoading(true);
         const reward = calculateReward(streak);
@@ -60,9 +33,8 @@ const DailyPointClaim: React.FC = () => {
             setShowAddPoint(true);
             setTimeout(() => setShowAddPoint(false), 2000);
 
-            await fetchCurrentPoints();
-            await fetchPointHistory();
-            await fetchStreak();
+            await fetchUserPointInfo();
+
         } catch (error: any) {
             toast.error(error.response?.data?.message || "Bạn đã nhận xu hôm nay rồi!");
         } finally {
@@ -70,23 +42,25 @@ const DailyPointClaim: React.FC = () => {
         }
     };
 
-    const fetchStreak = async () => {
+    const fetchUserPointInfo = async () => {
         try {
-            const res = await axios.get("/api/points/streak", {
+            const res = await axios.get("/api/points/me", {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
-            setStreak(res.data.data || 0);
+
+            const { currentPoints, history, streak } = res.data.data || {};
+            setCurrentPoints(currentPoints || 0);
+            setHistory(history || []);
+            setStreak(streak || 0);
         } catch (error: any) {
-            toast.error(error.response?.data?.message || "Không thể lấy chuỗi điểm danh");
+            toast.error(error.response?.data?.message || "Không thể tải dữ liệu điểm xu.");
         }
     };
 
     useEffect(() => {
-        fetchCurrentPoints();
-        fetchPointHistory();
-        fetchStreak();
+        fetchUserPointInfo();
     }, []);
 
     const renderCalendar = () => {
@@ -162,11 +136,10 @@ const DailyPointClaim: React.FC = () => {
                     <button
                         onClick={handleClaimPoints}
                         disabled={loading}
-                        className={`w-full sm:w-auto px-6 py-3 text-sm sm:text-lg rounded-full font-semibold shadow-md transition-all ${
-                            loading
+                        className={`w-full sm:w-auto px-6 py-3 text-sm sm:text-lg rounded-full font-semibold shadow-md transition-all ${loading
                                 ? "bg-gray-400 cursor-not-allowed text-white"
                                 : "bg-gradient-to-r from-red-400 to-yellow-400 hover:shadow-lg hover:-translate-y-1 text-white"
-                        }`}
+                            }`}
                     >
                         {loading
                             ? "Đang nhận..."

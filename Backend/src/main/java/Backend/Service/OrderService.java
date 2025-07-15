@@ -32,6 +32,8 @@ public class OrderService {
     private final CartDetailRepository cartDetailRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final ProductReviewRepository productReviewRepository;
+    private final UserPointsRepository userPointsRepository;
+    private final UserPointTransactionRepository userPointTransactionRepository;
 
     @Transactional
     public Order placeOrder(OrderRequest orderRequest) {
@@ -99,6 +101,36 @@ public class OrderService {
 
         order.setTotalAmount(totalAmount);
         order.setOrderDetails(orderDetails);
+        
+        Integer usedPoints = orderRequest.getUsedPoints(); // Lấy từ FE gửi lên
+
+        if (usedPoints != null && usedPoints > 0) {
+            UserPoints userPoints = userPointsRepository.findByAccount(account)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin điểm của tài khoản"));
+
+            if (userPoints.getCurrentPoints() < usedPoints) {
+                throw new RuntimeException(
+                        "Không đủ xu để thanh toán. Bạn chỉ có " + userPoints.getCurrentPoints() + " xu.");
+            }
+
+            // Trừ xu
+            userPoints.setCurrentPoints(userPoints.getCurrentPoints() - usedPoints);
+            userPoints.setUpdateAt(LocalDateTime.now());
+            userPointsRepository.save(userPoints);
+
+            // Lưu transaction
+            UserPointTransaction transaction = new UserPointTransaction();
+            transaction.setAccount(account);
+            transaction.setPointsChanged(-usedPoints);
+            transaction.setActionType(PointActionType.REDEEM);
+            transaction.setDescription("Dùng xu để thanh toán đơn hàng " + order.getOrderCode());
+            transaction.setCreatedAt(LocalDateTime.now());
+            userPointTransactionRepository.save(transaction);
+
+            // Trừ vào totalAmount nếu xu dùng tính theo tiền
+            BigDecimal usedPointsAsMoney = BigDecimal.valueOf(usedPoints); // giả sử 1 xu = 1 VNĐ
+            order.setTotalAmount(totalAmount.subtract(usedPointsAsMoney));
+        }
 
         Order savedOrder = orderRepository.save(order);
 
@@ -106,7 +138,8 @@ public class OrderService {
         for (OrderDetail detail : details) {
             Variant variant = detail.getVariant();
             if (variant.getStock() < detail.getQuantity()) {
-                throw new RuntimeException("Sản phẩm " + variant.getProduct().getProductName() + " không đủ tồn kho. Hiện chỉ con"
+                throw new RuntimeException("Sản phẩm " + variant.getProduct().getProductName()
+                        + " không đủ tồn kho. Hiện chỉ con"
                         + variant.getStock() + " sản phẩm, nhưng bạn đã đặt " + detail.getQuantity() + " sản phẩm.");
             }
             variant.setStock(variant.getStock() - detail.getQuantity());

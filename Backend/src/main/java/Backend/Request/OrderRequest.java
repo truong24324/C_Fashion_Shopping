@@ -59,6 +59,9 @@ public class OrderRequest {
     @Positive(message = "Phí vận chuyển phải lớn hơn 0")
     private BigDecimal shippingFee;
 
+    @Positive(message = "Số điểm sử dụng phải lớn hơn hoặc bằng 0")
+    private Integer usedPoints;
+
 //    // Kiểm tra tổng số tiền có khớp với giá trị của các sản phẩm trong đơn hàng
 //    public void validateTotalAmount() {
 //        BigDecimal calculatedTotal = BigDecimal.ZERO;

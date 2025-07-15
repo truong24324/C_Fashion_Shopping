@@ -62,7 +62,7 @@ const CheckoutPage: React.FC = () => {
                     fullName: userCache.fullName || "",
                     email: userCache.email || "",
                     phone: userCache.phone || "",
-                    shippingAddress: userCache.homeAddress || "", // mapping homeAddress to shippingAddress
+                    shippingAddress: userCache.homeAddress || "",
                 });
             } catch (error: any) {
                 toast.error(error.response?.data?.message || "Lỗi khi tải dữ liệu người dùng");
@@ -91,6 +91,7 @@ const CheckoutPage: React.FC = () => {
             accountId: accountId,
             totalAmount: pricing.total,
             discountCode: pricing.coupon,
+            usedPoints: pricing.usedPoints,
             orderDetails: items.map((item: any) => ({
                 variantId: item.variantId,
                 quantity: item.quantity,
@@ -139,7 +140,6 @@ const CheckoutPage: React.FC = () => {
                     }
                 );
                 toast.success("Đặt hàng thành công!");  // hoặc chuyển trang
-                // Điều hướng đến trang thành công hoặc reset form
                 const createdOrder = response.data;
                 navigate("/order-success", { state: { order: createdOrder.data } });
             } else if (paymentMethod === "VietQR") {
@@ -215,12 +215,10 @@ const CheckoutPage: React.FC = () => {
         <>
             <Navbar />
             <div className="pt-10 min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-                {/* QR Modal */}
                 {isQRModalOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 px-4 backdrop-blur-sm">
                         <div className="bg-white p-6 rounded-3xl shadow-xl shadow-purple-100 relative w-full max-w-md animate-fade-in-up transition-all duration-300">
 
-                            {/* Close Button */}
                             <button
                                 onClick={() => setIsQRModalOpen(false)}
                                 className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl"
@@ -229,12 +227,10 @@ const CheckoutPage: React.FC = () => {
                                 ×
                             </button>
 
-                            {/* Header */}
                             <h3 className="text-2xl font-semibold mb-4 text-center text-purple-700">
                                 Thanh toán bằng QR Code
                             </h3>
 
-                            {/* QR Section */}
                             <div className="flex flex-col items-center gap-3">
                                 <img src="/images/vpbank.png" alt="VPBank" className="h-10 mb-1" />
                                 <div className="border-2 border-dashed border-purple-200 p-2 rounded-xl">
@@ -245,7 +241,6 @@ const CheckoutPage: React.FC = () => {
                                     <img src="/images/napas247.png" alt="Napas247" className="h-8" />
                                 </div>
 
-                                {/* Payment Info */}
                                 <div className="text-sm text-center text-gray-700 leading-relaxed mt-3 space-y-1">
                                     <p><span className="font-semibold">Người nhận:</span> Nguyễn Minh Trường</p>
                                     <p><span className="font-semibold">Ngân hàng:</span> VP Bank</p>
@@ -264,7 +259,6 @@ const CheckoutPage: React.FC = () => {
                                 </p>
                             </div>
 
-                            {/* Warning */}
                             <div className="mt-5 px-4 text-xs text-center text-gray-600 italic leading-relaxed">
                                 Mã QR do <span className="font-medium text-purple-600">VietQR</span> cung cấp. Sau khi thanh toán, nhấn <span className="font-semibold">"Tôi đã thanh toán thành công"</span> để xác nhận.
                                 <br />
@@ -273,7 +267,6 @@ const CheckoutPage: React.FC = () => {
                                 </span>
                             </div>
 
-                            {/* Confirm Button */}
                             <div className="mt-5 flex justify-center">
                                 <button
                                     onClick={() => {
@@ -291,7 +284,6 @@ const CheckoutPage: React.FC = () => {
                 )}
 
                 <div className="container mx-auto px-4 py-8">
-                    {/* Header */}
                     <div className="mb-8">
                         <div className="flex items-center text-sm text-gray-600 mb-4">
                             <span>Giỏ hàng</span>
@@ -302,9 +294,7 @@ const CheckoutPage: React.FC = () => {
                     </div>
 
                     <div className="grid lg:grid-cols-3 gap-8">
-                        {/* Left Column - Customer Info */}
                         <div className="lg:col-span-2 space-y-6">
-                            {/* Login Prompt */}
                             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-3">
@@ -317,7 +307,6 @@ const CheckoutPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Delivery Address */}
                             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                                 <div className="flex items-center space-x-3 mb-6">
                                     <MapPin className="w-5 h-5 text-gray-600" />
@@ -396,7 +385,6 @@ const CheckoutPage: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {/* Delivery Estimate */}
                                 <div className="mt-6 bg-emerald-50 border border-emerald-200 rounded-lg p-4">
                                     <div className="flex items-center space-x-2">
                                         <Truck className="w-5 h-5 text-emerald-600" />
@@ -407,7 +395,6 @@ const CheckoutPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Payment Methods */}
                             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                                 <div className="flex items-center space-x-3 mb-6">
                                     <CreditCard className="w-5 h-5 text-gray-600" />
@@ -461,9 +448,7 @@ const CheckoutPage: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Right Column - Order Summary */}
                         <div className="space-y-6">
-                            {/* Order Items */}
                             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                                 <div className="flex items-center space-x-3 mb-6">
                                     <ShoppingBag className="w-5 h-5 text-gray-600" />
@@ -493,7 +478,6 @@ const CheckoutPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Discount Code */}
                             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                                 <div className="flex items-center space-x-3 mb-4">
                                     <Gift className="w-5 h-5 text-gray-600" />
@@ -512,7 +496,6 @@ const CheckoutPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Loyalty Program */}
                             <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-6">
                                 <h3 className="font-semibold text-amber-900 mb-3">🎁 Ưu đãi thành viên</h3>
                                 <div className="space-y-2">
@@ -531,7 +514,6 @@ const CheckoutPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Order Total */}
                             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                                 <h3 className="font-semibold text-gray-900 mb-4">Tổng đơn hàng</h3>
                                 <div className="space-y-3">
@@ -545,7 +527,7 @@ const CheckoutPage: React.FC = () => {
                                     </div>
                                     <div className="flex justify-between text-emerald-600">
                                         <span>Giảm giá:</span>
-                                        <span className="font-medium">-{pricing.discount.toLocaleString()} VNĐ</span>
+                                        <span className="font-medium">-{pricing.discount.toLocaleString()} VNĐ - Đã sử dụng {pricing.usedPoints} xu</span>
                                     </div>
                                     <div className="border-t pt-3">
                                         <div className="flex justify-between text-lg font-bold text-gray-900">
@@ -556,7 +538,6 @@ const CheckoutPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Action Buttons */}
                             <div className="space-y-3">
                                 <button
                                     onClick={handlePayment}
