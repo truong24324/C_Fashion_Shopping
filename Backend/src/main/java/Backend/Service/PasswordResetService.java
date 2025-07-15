@@ -184,4 +184,5 @@ public class PasswordResetService {
 		account.setPasswordChangedAt(new Date());
 		accountRepository.save(account);
 	}
+
 }

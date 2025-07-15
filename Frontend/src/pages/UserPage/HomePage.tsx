@@ -8,6 +8,7 @@ import Slider from "../../Layouts/Slider";
 import toast from "react-hot-toast";
 import TopSellingProducts from "../../components/Product/TopSellingProducts";
 import axios from "axios";
+import DailyPointClaim from "../../components/DailyPointClaim";
 
 interface Product {
   productId: number;
@@ -103,6 +104,7 @@ const HomePage: React.FC = () => {
       </header>
       <BrandsIntroduction />
       <TopSellingProducts />
+      <DailyPointClaim />
       <ProductPanel
         products={filteredProducts}
         loading={loading}

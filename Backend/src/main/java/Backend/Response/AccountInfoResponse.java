@@ -6,7 +6,6 @@ import lombok.Data;
 
 @Data
 public class AccountInfoResponse {
-    // Từ bảng ACCOUNTS
     private String userCode;
     private String email;
     private String phone;
