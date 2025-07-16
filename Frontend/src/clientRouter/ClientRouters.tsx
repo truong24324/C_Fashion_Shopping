@@ -33,8 +33,7 @@ import { useAxiosInterceptor } from '../Utils/useAxiosInterceptor';
 import FAQ from 'src/pages/UserPage/FAQ';
 import SupportCenterPage from 'src/pages/UserPage/SupportCenterPage';
 import AshHousePage from 'src/pages/UserPage/AshHousePage';
-import ChangePasswordForm from '../components/Profile/ChangePasswordForm';
-import EditProfileForm from '../components/Profile/EditProfileForm';
+import QRCodeScanner from 'src/AuthForm/QRCodeScanner';
 
 const isTokenValid = (token: string | null): boolean => {
   if (!token) return false;
@@ -117,6 +116,7 @@ const AppRouterWrapper: React.FC = () => {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/auth" element={<AuthenticatePage />} />
+      <Route path="/scan-qr" element={<QRCodeScanner />} />
       <Route path="/cart" element={<CartPage />} />
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/store" element={<StoreListPage />} />

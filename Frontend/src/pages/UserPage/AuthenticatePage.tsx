@@ -8,6 +8,7 @@ import ForgotPassword from '../../AuthForm/ForgotPassword';
 import RegisterForm from '../../AuthForm/RegisterForm';
 import PersonalInfoForm from '../../AuthForm/PersonalInfoForm';
 import axios from 'axios';
+import QRCodeGenerator from 'src/AuthForm/QRCodeGenerator';
 
 const AuthenticatePage: React.FC = () => {
   useEffect(() => {
@@ -195,6 +196,7 @@ const AuthenticatePage: React.FC = () => {
       {step === "forgotpassword" && <ForgotPassword goToLogin={goToLogin} />}
       {step === "register" && <RegisterForm formData={formData} handleChange={handleChange} handleRegister={handleRegister} goToWelcome={goToWelcome} />}
       {step === "personalInfo" && <PersonalInfoForm formData={formData} avatarPreview={avatarPreview} handleChange={handleChange} handleAvatarChange={handleAvatarChange} handleSubmitPersonalInfo={handleSubmitPersonalInfo} goToRegister={goToRegister} />}
+      <QRCodeGenerator />
     </div>
   );
 };

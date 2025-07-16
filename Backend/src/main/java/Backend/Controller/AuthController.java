@@ -1,5 +1,7 @@
 package Backend.Controller;
 
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -185,6 +187,29 @@ public class AuthController {
 		} catch (Exception e) {
 			return ResponseEntity.status(500).body(new AuthResponse("Lỗi hệ thống: " + e.getMessage()));
 		}
+	}
+
+	@PostMapping("/qr-login-info")
+	public ResponseEntity<Map<String, String>> generateQRLoginInfo(@RequestHeader("Authorization") String bearerToken) {
+		if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+			return ResponseEntity.badRequest().body(Map.of("error", "Thiếu access token"));
+		}
+
+		String accessToken = bearerToken.substring(7);
+		String email = jwtService.extractUsername(accessToken);
+		Account account = accountService.findByEmail(email)
+				.orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
+
+		if (!jwtService.isTokenValid(accessToken, account)) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Token không hợp lệ"));
+		}
+
+		String refreshToken = jwtService.generateRefreshToken(account);
+		String newAccessToken = jwtService.generateToken(account);
+
+		return ResponseEntity.ok(Map.of(
+				"accessToken", newAccessToken,
+				"refreshToken", refreshToken));
 	}
 
 	@Operation(summary = "Đăng xuất", description = "Xóa JWT khỏi cookie và đăng xuất người dùng.", responses = {
