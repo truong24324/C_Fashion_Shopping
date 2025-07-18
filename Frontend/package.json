@@ -70,7 +70,7 @@
     "@types/react-qr-reader": "^2.1.7",
     "@types/react-speech-recognition": "^3.9.6",
     "autoprefixer": "^10.4.20",
-    "postcss": "^8.5.4",
+    "postcss": "^8.5.5",
     "tailwindcss": "^3.4.17"
   }
 }
