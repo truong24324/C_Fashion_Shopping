@@ -23,6 +23,7 @@ import {
   FaPhone
 } from "react-icons/fa";
 import { EditProfileFormProps } from "../../components/CreateForm/Product/types";
+import QRCodeGenerator from "src/AuthForm/QRCodeGenerator";
 
 const ProfileInfoForm: React.FC<EditProfileFormProps> = ({ user, setIsEditing, setIsChangePassword }) => {
   const [activeTab, setActiveTab] = useState<'info' | 'account' | 'security'>('info');
@@ -317,6 +318,7 @@ const ProfileInfoForm: React.FC<EditProfileFormProps> = ({ user, setIsEditing, s
                 value={user?.loginTime ? formatDate(user.loginTime) : "N/A"}
                 color="text-purple-400"
               />
+              <QRCodeGenerator/>
             </div>
 
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50">

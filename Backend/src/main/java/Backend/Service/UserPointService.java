@@ -21,7 +21,7 @@ public class UserPointService {
     private final UserPointTransactionRepository userPointTransactionRepository;
     private final AccountRepository accountRepository;
 
-    public ApiResponse<?> claimDailyCheckin(Long accountId) {
+    public ApiResponse<?> claimDailyCheckin(Long accountId, UserPointRequest request) {
         Account account = accountRepository.findByAccountId(accountId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản"));
 
@@ -29,8 +29,7 @@ public class UserPointService {
             return new ApiResponse<>(false, "Bạn đã nhận xu hôm nay rồi!", null);
         }
 
-        int points = 100; //
-
+        int points = request.getPoints() != null ? request.getPoints() : 100; // Mặc định là 10 điểm nếu không có trong request
         UserPoints userPoints = userPointsRepository.findByAccount(account).orElse(new UserPoints());
         userPoints.setAccount(account);
         userPoints.setCurrentPoints(userPoints.getCurrentPoints() + points);
@@ -81,7 +80,7 @@ public class UserPointService {
         return new ApiResponse<>(true, "Lấy thông tin điểm thành công", result);
     }
 
-       public ApiResponse<?> getCurrentPoints(Long accountId) {
+    public ApiResponse<?> getCurrentPoints(Long accountId) {
         Account account = accountRepository.findByAccountId(accountId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản"));
 
@@ -90,7 +89,7 @@ public class UserPointService {
 
         return new ApiResponse<>(true, "", userPoints.getCurrentPoints());
     }
-    
+
     private int calculateStreak(Account account) {
         List<UserPointTransaction> transactions = userPointTransactionRepository
                 .findByAccountAndActionTypeOrderByCreatedAtDesc(account, PointActionType.DAILY_CHECKIN);

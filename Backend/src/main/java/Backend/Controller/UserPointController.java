@@ -2,6 +2,7 @@ package Backend.Controller;
 
 import Backend.Model.Account;
 import Backend.Repository.AccountRepository;
+import Backend.Request.UserPointRequest;
 import Backend.Response.ApiResponse;
 import Backend.Service.UserPointService;
 import org.springframework.web.bind.annotation.*;
@@ -21,11 +22,12 @@ public class UserPointController {
     private final AccountRepository accountRepository;
 
     @PostMapping("/checkin")
-    public ApiResponse<?> claimDailyCheckin(@AuthenticationPrincipal UserDetails userDetails) {
+    public ApiResponse<?> claimDailyCheckin(@AuthenticationPrincipal UserDetails userDetails,
+    UserPointRequest request) {
         String email = userDetails.getUsername();
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản!"));
-        return userPointService.claimDailyCheckin(account.getAccountId());
+        return userPointService.claimDailyCheckin(account.getAccountId(), request);
     }
 
     @GetMapping("/me")
