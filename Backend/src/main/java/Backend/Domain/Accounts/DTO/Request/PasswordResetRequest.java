@@ -20,7 +20,6 @@ public class PasswordResetRequest {
     )
     private String newPassword;
 
-    @NotBlank(message = "Mật khẩu hiện tại không được để trống")
     @Size(min = 6, max = 50, message = "Mật khẩu hiện tại phải từ 6 đến 50 ký tự")
     @Pattern(
         regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+=<>?{}\\[\\]~-]).{8,64}$",
