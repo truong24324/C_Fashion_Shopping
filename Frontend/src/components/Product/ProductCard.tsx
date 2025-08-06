@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { FaCartPlus, FaEye, FaTimes, FaHeart } from "react-icons/fa";
 import { Dialog } from "@headlessui/react";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
 import { Variant, DecodedToken } from "../CreateForm/Product/types";
@@ -198,6 +198,7 @@ const ProductCard: React.FC<{
     };
 
     const handleWishlist = async (productId: number) => {
+        setIsAdding(true);
         const accountId = getAccountIdFromToken();
         if (!accountId) {
             toast.error("Bạn cần đăng nhập để thêm vào danh sách yêu thích.");
@@ -215,7 +216,6 @@ const ProductCard: React.FC<{
                 },
             });
 
-            toast.success(res.data.message);
             setWishlistProducts((prev) => {
                 const updated = prev.includes(productId)
                     ? prev.filter((id) => id !== productId)
@@ -225,8 +225,10 @@ const ProductCard: React.FC<{
                 return updated;
             });
 
-        } catch (err) {
-            toast.error("Thao tác thất bại!");
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || "Thao tác thất bại!");
+        } finally {
+            setIsAdding(false);
         }
     };
 
@@ -250,13 +252,15 @@ const ProductCard: React.FC<{
                 });
 
                 const wishlistProductIds = res.data.data
-                    .filter((item: any) => !item.deleted) // nhớ dùng `deleted` thay vì `isDeleted`
+                    .filter((item: any) => !item.deleted)
                     .map((item: any) => item.productId);
 
                 setWishlistProducts(wishlistProductIds);
                 setCachedWishlist(wishlistProductIds);
-            } catch (err) {
-                console.error("Lỗi khi tải wishlist:", err);
+            } catch (err: any) {
+                toast.error(err.response?.data?.message || "Lỗi khi tải danh sách yêu thích!");
+            } finally {
+                setIsAdding(false);
             }
         };
 
@@ -289,29 +293,41 @@ const ProductCard: React.FC<{
                 onMouseLeave={() => setIsHovered(false)}
             >
                 <div
-                    className="absolute top-0 left-0 w-12 h-12 bg-white rounded-br-xl z-20 flex items-center justify-center cursor-pointer 
-        transition-all duration-300 shadow-md hover:shadow-lg border border-gray-300"
-                    onClick={() => handleWishlist(product.productId)}
+                    className={`absolute top-0 left-0 w-12 h-12 bg-white rounded-br-xl z-20 flex items-center justify-center cursor-pointer
+        transition-all duration-300 shadow-md hover:shadow-lg border border-gray-300`}
+                    onClick={() => !isAdding && handleWishlist(product.productId)}
                     title={wishlistProducts.includes(product.productId) ? "Bỏ yêu thích" : "Yêu thích"}
                 >
-                    <FaHeart className={` ${wishlistProducts.includes(product.productId)
-                        ? "text-red-600 drop-shadow-md scale-110" : "text-gray-400"}
-            transition-all duration-300 text-xl`} />
+                    {isAdding ? (
+                        <svg className="animate-spin h-6 w-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
+                    ) : (
+                        <FaHeart className={` ${wishlistProducts.includes(product.productId)
+                            ? "text-red-600 drop-shadow-md scale-110" : "text-gray-400"}
+                transition-all duration-300 text-xl`} />
+                    )}
                 </div>
 
                 <div className="relative w-full h-60 overflow-hidden bg-gray-100">
-                    <img
-                        src={product.image[0]}
-                        alt={product.productName}
-                        onClick={() => navigate(`/product/${product.productName}`)}
-                        className={`object-cover w-full h-full transition-all duration-500 ${isHovered ? "opacity-0" : "opacity-100"} absolute top-0 left-0`}
-                    />
-                    {product.image[1] && (
+                    {product.image.length > 0 && (
+                        <img
+                            src={product.image[0]}
+                            alt={product.productName}
+                            onClick={() => navigate(`/product/${product.productName}`)}
+                            className={`object-cover w-full h-full transition-all duration-500 ${isHovered && product.image.length > 1 ? "opacity-0" : "opacity-100"
+                                } absolute top-0 left-0`}
+                        />
+                    )}
+
+                    {product.image.length > 1 && (
                         <img
                             src={product.image[1]}
                             alt="Ảnh phụ"
                             onClick={() => navigate(`/product/${product.productName}`)}
-                            className={`object-cover w-full h-full transition-all duration-500 ${isHovered ? "opacity-100" : "opacity-0"} absolute top-0 left-0`}
+                            className={`object-cover w-full h-full transition-all duration-500 ${isHovered ? "opacity-100" : "opacity-0"
+                                } absolute top-0 left-0`}
                         />
                     )}
 

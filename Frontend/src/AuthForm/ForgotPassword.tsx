@@ -98,7 +98,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ goToLogin }) => {
       if (remainingAttempts !== null && remainingAttempts > 0) {
         setRemainingAttempts(remainingAttempts - 1);
       }
-        await decreaseOtpAttempts(email); // ✅ gọi API cập nhật số lần nhập
+      await decreaseOtpAttempts(email); // ✅ gọi API cập nhật số lần nhập
 
     } finally {
       setLoading(false);
@@ -157,37 +157,37 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ goToLogin }) => {
     }
   };
 
- const decreaseOtpAttempts = async (email: string) => {
-  try {
-    const response = await axios.post('/api/password/update-max-attempts',
-      { email },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`
+  const decreaseOtpAttempts = async (email: string) => {
+    try {
+      const response = await axios.post('/api/password/update-max-attempts',
+        { email },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+          }
+        });
+
+      const data = response.data;
+      setRemainingAttempts(data.data); // `data.data` chứa remainingAttempts
+      // toast.error(`❌ OTP không đúng. Số lần nhập OTP còn lại: ${data.data}`);
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const data = error.response?.data;
+
+        if (status === 403) {
+          toast.error("⚠️ Bạn đã nhập sai quá số lần cho phép. Tài khoản đã bị khóa.");
+          setRemainingAttempts(0);
+        } else if (status === 400) {
+          toast.error("⚠️ OTP đã hết hạn hoặc không hợp lệ.");
+        } else {
+          toast.error("⚠️ Lỗi không xác định khi giảm số lần nhập OTP.");
         }
-      });
-
-    const data = response.data;
-    setRemainingAttempts(data.data); // `data.data` chứa remainingAttempts
-    // toast.error(`❌ OTP không đúng. Số lần nhập OTP còn lại: ${data.data}`);
-  } catch (error: any) {
-    if (axios.isAxiosError(error)) {
-      const status = error.response?.status;
-      const data = error.response?.data;
-
-      if (status === 403) {
-        toast.error("⚠️ Bạn đã nhập sai quá số lần cho phép. Tài khoản đã bị khóa.");
-        setRemainingAttempts(0);
-      } else if (status === 400) {
-        toast.error("⚠️ OTP đã hết hạn hoặc không hợp lệ.");
       } else {
-        toast.error("⚠️ Lỗi không xác định khi giảm số lần nhập OTP.");
+        toast.error("⚠️ Lỗi hệ thống.");
       }
-    } else {
-      toast.error("⚠️ Lỗi hệ thống.");
     }
-  }
-};
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -222,7 +222,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ goToLogin }) => {
           <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-red-500/10 rounded-full blur-xl"></div>
 
           {/* Header */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
@@ -238,15 +238,12 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ goToLogin }) => {
           {/* Progress Indicator */}
           <div className="flex items-center justify-center mb-8">
             <div className="flex items-center space-x-4">
-              <div className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                !isOtpSent ? 'bg-orange-500 scale-125' : 'bg-orange-300'
-              }`}></div>
-              <div className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                isOtpSent && !isOtpVerified ? 'bg-orange-500 scale-125' : isOtpSent ? 'bg-orange-300' : 'bg-gray-300'
-              }`}></div>
-              <div className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                isOtpVerified ? 'bg-orange-500 scale-125' : 'bg-gray-300'
-              }`}></div>
+              <div className={`w-3 h-3 rounded-full transition-all duration-300 ${!isOtpSent ? 'bg-orange-500 scale-125' : 'bg-orange-300'
+                }`}></div>
+              <div className={`w-3 h-3 rounded-full transition-all duration-300 ${isOtpSent && !isOtpVerified ? 'bg-orange-500 scale-125' : isOtpSent ? 'bg-orange-300' : 'bg-gray-300'
+                }`}></div>
+              <div className={`w-3 h-3 rounded-full transition-all duration-300 ${isOtpVerified ? 'bg-orange-500 scale-125' : 'bg-gray-300'
+                }`}></div>
             </div>
           </div>
 
@@ -267,12 +264,11 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ goToLogin }) => {
                   placeholder="Nhập địa chỉ email của bạn"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`w-full pl-12 pr-4 py-4 bg-gray-50/80 border-2 rounded-xl text-gray-800 placeholder-gray-500 transition-all duration-300 focus:outline-none focus:bg-white focus:border-orange-500 focus:shadow-lg ${
-                    errors.email ? 'border-red-300' : 'border-gray-200'
-                  }`}
+                  className={`w-full pl-12 pr-4 py-4 bg-gray-50/80 border-2 rounded-xl text-gray-800 placeholder-gray-500 transition-all duration-300 focus:outline-none focus:bg-white focus:border-orange-500 focus:shadow-lg ${errors.email ? 'border-red-300' : 'border-gray-200'
+                    }`}
                 />
                 {errors.email && (
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="text-red-500 text-sm mt-1 ml-1"
@@ -287,11 +283,10 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ goToLogin }) => {
                 whileTap={{ scale: 0.98 }}
                 onClick={handleEmailSubmit}
                 disabled={loading}
-                className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg ${
-                  loading 
-                    ? 'bg-gray-400 cursor-not-allowed' 
+                className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg ${loading
+                    ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white hover:shadow-xl'
-                }`}
+                  }`}
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
@@ -323,27 +318,52 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ goToLogin }) => {
                 </div>
               )}
 
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Nhập mã OTP 6 chữ số"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  className={`w-full px-4 py-4 bg-gray-50/80 border-2 rounded-xl text-gray-800 placeholder-gray-500 text-center text-lg font-mono tracking-widest transition-all duration-300 focus:outline-none focus:bg-white focus:border-orange-500 focus:shadow-lg ${
-                    errors.otp ? 'border-red-300' : 'border-gray-200'
-                  }`}
-                  maxLength={6}
-                />
-                {errors.otp && (
-                  <motion.p 
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-red-500 text-sm mt-1 text-center"
-                  >
-                    {errors.otp}
-                  </motion.p>
-                )}
+              <div className="flex justify-center gap-2">
+                {[...Array(6)].map((_, idx) => (
+                  <input
+                    key={idx}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="\d*"
+                    maxLength={1}
+                    value={otp[idx] || ''}
+                    onChange={e => {
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 1);
+                      let newOtp = otp.split('');
+                      newOtp[idx] = val;
+                      setOtp(newOtp.join(''));
+                      // Auto focus next input
+                      if (val && idx < 5) {
+                        const next = document.getElementById(`otp-input-${idx + 1}`);
+                        if (next) (next as HTMLInputElement).focus();
+                      }
+                      // Auto submit if last digit entered
+                      if (val && idx === 5 && newOtp.join('').length === 6) {
+                        handleOtpSubmit();
+                      }
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === 'Backspace' && !otp[idx] && idx > 0) {
+                        const prev = document.getElementById(`otp-input-${idx - 1}`);
+                        if (prev) (prev as HTMLInputElement).focus();
+                      }
+                    }}
+                    id={`otp-input-${idx}`}
+                    className={`w-12 h-12 text-center text-lg font-mono rounded-xl border-2 bg-gray-50/80 transition-all duration-300 focus:outline-none focus:bg-white focus:border-orange-500 focus:shadow-lg ${errors.otp ? 'border-red-300' : 'border-gray-200'}`}
+                    disabled={loading}
+                    autoFocus={idx === 0}
+                  />
+                ))}
               </div>
+              {errors.otp && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-red-500 text-sm mt-1 text-center"
+                >
+                  {errors.otp}
+                </motion.p>
+              )}
 
               {remainingAttempts !== null && (
                 <div className="text-center text-sm text-amber-600">
@@ -356,11 +376,10 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ goToLogin }) => {
                 whileTap={{ scale: 0.98 }}
                 onClick={handleOtpSubmit}
                 disabled={loading || otp.length !== 6}
-                className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg ${
-                  loading || otp.length !== 6
-                    ? 'bg-gray-400 cursor-not-allowed' 
+                className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg ${loading || otp.length !== 6
+                    ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white hover:shadow-xl'
-                }`}
+                  }`}
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
@@ -411,9 +430,8 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ goToLogin }) => {
                   placeholder="Mật khẩu mới"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className={`w-full pl-12 pr-12 py-4 bg-gray-50/80 border-2 rounded-xl text-gray-800 placeholder-gray-500 transition-all duration-300 focus:outline-none focus:bg-white focus:border-orange-500 focus:shadow-lg ${
-                    errors.newPassword ? 'border-red-300' : 'border-gray-200'
-                  }`}
+                  className={`w-full pl-12 pr-12 py-4 bg-gray-50/80 border-2 rounded-xl text-gray-800 placeholder-gray-500 transition-all duration-300 focus:outline-none focus:bg-white focus:border-orange-500 focus:shadow-lg ${errors.newPassword ? 'border-red-300' : 'border-gray-200'
+                    }`}
                 />
                 <button
                   type="button"
@@ -423,7 +441,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ goToLogin }) => {
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
                 {errors.newPassword && (
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="text-red-500 text-sm mt-1 ml-1"
@@ -443,9 +461,8 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ goToLogin }) => {
                   placeholder="Xác nhận mật khẩu mới"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className={`w-full pl-12 pr-12 py-4 bg-gray-50/80 border-2 rounded-xl text-gray-800 placeholder-gray-500 transition-all duration-300 focus:outline-none focus:bg-white focus:border-orange-500 focus:shadow-lg ${
-                    errors.confirmPassword ? 'border-red-300' : 'border-gray-200'
-                  }`}
+                  className={`w-full pl-12 pr-12 py-4 bg-gray-50/80 border-2 rounded-xl text-gray-800 placeholder-gray-500 transition-all duration-300 focus:outline-none focus:bg-white focus:border-orange-500 focus:shadow-lg ${errors.confirmPassword ? 'border-red-300' : 'border-gray-200'
+                    }`}
                 />
                 <button
                   type="button"
@@ -455,7 +472,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ goToLogin }) => {
                   {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
                 {errors.confirmPassword && (
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="text-red-500 text-sm mt-1 ml-1"
@@ -466,7 +483,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ goToLogin }) => {
               </div>
 
               {errors.general && (
-                <motion.p 
+                <motion.p
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="text-red-500 text-sm text-center"
@@ -480,11 +497,10 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ goToLogin }) => {
                 whileTap={{ scale: 0.98 }}
                 onClick={handlePasswordReset}
                 disabled={loading}
-                className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg ${
-                  loading 
-                    ? 'bg-gray-400 cursor-not-allowed' 
+                className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg ${loading
+                    ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white hover:shadow-xl'
-                }`}
+                  }`}
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
