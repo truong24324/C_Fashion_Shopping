@@ -274,7 +274,7 @@ const ProductCard: React.FC<{
         ];
 
         if (!status || typeof status !== 'string') {
-            return '#6c757d'; // fallback color (gray)
+            return '#6c757d'; 
         }
 
         let hash = 0;
